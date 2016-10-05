@@ -26,6 +26,64 @@ class CypherTranslator {
         if (returnC.getItems() == null)
             throw new Exception("NOTHING SPECIFIED TO RETURN");
 
+        sql = obtainMatchAndReturn(matchC, returnC, sql);
+        sql.append(";");
+        return sql.toString();
+    }
+
+    static String MatchAndReturnAndOrder(StringBuilder sql, ArrayList<String> tokenList) throws Exception {
+        // query has structure MATCH ... RETURN ... ORDER BY [ASC|DESC]
+        // check to perform is returning something mentioned in match clause
+        int posOfMatch = tokenList.indexOf("MATCH");
+        int posOfReturn = tokenList.indexOf("RETURN");
+        int posOfOrder = tokenList.indexOf("ORDER");
+
+        List<String> matchClause = tokenList.subList(posOfMatch + 1, posOfReturn);
+        List<String> returnClause = tokenList.subList(posOfReturn + 1, posOfOrder);
+        List<String> orderClause = tokenList.subList(posOfOrder + 2, tokenList.size());
+
+        MatchClause matchC = matchDecode(matchClause);
+        ReturnClause returnC = returnDecode(returnClause);
+        OrderClause orderC = orderDecode(orderClause);
+
+        sql = obtainMatchAndReturn(matchC, returnC, sql);
+
+        sql = obtainOrderByClause(matchC, orderC, sql);
+
+        sql.append(";");
+        return sql.toString();
+    }
+
+    private static StringBuilder obtainOrderByClause(MatchClause matchC, OrderClause orderC,
+                                                     StringBuilder sql) throws Exception {
+        sql.append(" ");
+        sql.append("ORDER BY ");
+        for (CypOrder cO : orderC.getItems()) {
+            String entity = validateNodeID(cO.getNodeID(), matchC);
+
+            if (entity != null) {
+                sql.append(entity).append(".").append(cO.getField()).append(" ").append(cO.getAscOrDesc());
+                sql.append(", ");
+            } else
+                throw new Exception("ORDER BY CLAUSE INCORRECT");
+        }
+        sql.setLength(sql.length() - 2);
+        return sql;
+    }
+
+    private static String validateNodeID(String nodeID, MatchClause matchC) {
+        for (CypNode cN : matchC.getNodes()) {
+            if (nodeID.equals(cN.getId()))
+                return cN.getAlias()[1];
+        }
+        return null;
+    }
+
+    private static StringBuilder obtainMatchAndReturn(MatchClause matchC, ReturnClause returnC,
+                                                      StringBuilder sql) throws Exception {
+        if (returnC.getItems() == null)
+            throw new Exception("NOTHING SPECIFIED TO RETURN");
+
         if (matchC.getRels().isEmpty()) {
             // no relationships, just return some nodes
             sql = obtainSelectClause(returnC, matchC, sql);
@@ -34,8 +92,7 @@ class CypherTranslator {
 
             sql = obtainWhereClause(matchC, sql, false, returnC);
 
-            sql.append(";");
-            return sql.toString();
+            return sql;
         } else {
             // there are relationships to deal with, so use the WITH structure
             sql = obtainWithClause(sql, matchC);
@@ -46,9 +103,45 @@ class CypherTranslator {
 
             sql = obtainWhereClause(matchC, sql, true, returnC);
 
-            sql.append(";");
-            return sql.toString();
+            return sql;
         }
+    }
+
+    private static OrderClause orderDecode(List<String> orderClause) throws Exception {
+        OrderClause o = new OrderClause();
+
+        List<CypOrder> items = new ArrayList<CypOrder>();
+
+        List<String> currentWorking;
+
+        // find all the separate parts of the return clause
+        while (orderClause.contains(",")) {
+            int posComma = orderClause.indexOf(",");
+            currentWorking = orderClause.subList(0, posComma);
+            orderClause = orderClause.subList(posComma + 1,
+                    orderClause.size());
+
+            items.add(extractOrder(currentWorking));
+        }
+
+        if (!orderClause.isEmpty()) {
+            items.add(extractOrder(orderClause));
+        }
+
+        o.setItems(items);
+
+        for (CypOrder c : o.getItems())
+            System.out.println(c.toString());
+
+        return o;
+    }
+
+    private static CypOrder extractOrder(List<String> clause) throws Exception {
+        if (clause.size() == 4 && clause.contains(".")) {
+            return new CypOrder(clause.get(0), clause.get(2), clause.get(3));
+        } else if (clause.size() == 3 && clause.contains(".")) {
+            return new CypOrder(clause.get(0), clause.get(2), "ASC");
+        } else throw new Exception("RETURN CLAUSE MALFORMED");
     }
 
     private static StringBuilder obtainWithClause(StringBuilder sql, MatchClause matchC) {
@@ -98,7 +191,7 @@ class CypherTranslator {
 
                 String table;
 
-                if(cR.getDirection().equals("left"))
+                if (cR.getDirection().equals("left"))
                     table = tableB[1];
                 else
                     table = tableA[1];
@@ -114,16 +207,17 @@ class CypherTranslator {
             if (rightProps != null) {
                 if (!includesWhere) {
                     sql.append(" WHERE ");
+                    includesWhere = true;
                 }
 
                 String table;
 
-                if(cR.getDirection().equals("left"))
-                    table = tableB[1];
-                else
+                if (cR.getDirection().equals("left"))
                     table = tableA[1];
+                else
+                    table = tableB[1];
 
-                Set<Map.Entry<String, JsonElement>> entrySet = leftProps.entrySet();
+                Set<Map.Entry<String, JsonElement>> entrySet = rightProps.entrySet();
                 for (Map.Entry<String, JsonElement> entry : entrySet) {
                     sql.append(table).append(".").append(entry.getKey());
                     sql.append("='").append(entry.getValue().getAsString());
@@ -187,7 +281,7 @@ class CypherTranslator {
         if (hasRel) {
             sql.append(" WHERE ");
             int numRels = matchC.getRels().size();
-            for (int i = 0; i < numRels-1; i++) {
+            for (int i = 0; i < numRels - 1; i++) {
                 sql.append(alphabet[i]).append(".").append(alphabet[i]).append(2);
                 sql.append(" = ");
                 sql.append(alphabet[i + 1]).append(".").append(alphabet[i + 1]).append(1);
@@ -463,8 +557,6 @@ class CypherTranslator {
 
         while (!clause.isEmpty()) {
             nodeString = null;
-            id = null;
-            type = null;
             propsString = null;
             o = null;
 

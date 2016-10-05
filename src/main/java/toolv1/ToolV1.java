@@ -5,14 +5,18 @@ import java.util.Map;
 
 public class ToolV1 {
     public static void main(String[] args) {
-        //Map<String, String> schemaToBuild =
-        //        ExtractFromFile.readFile("C:/Users/ocraw/Documents/CypherStuff/Database/dump2.txt", true);
+//        Map<String, String> schemaToBuild =
+//               ExtractFromFile.readFile("C:/Users/ocraw/Documents/CypherStuff/Database/dump4.txt", true);
         DbUtil.createConnection("testa");
 
-//        DbUtil.createAndInsert(schemaToBuild);
+        //DbUtil.createAndInsert(schemaToBuild);
+        //DbUtil.closeConnection();
 
         String cypherQuery = "match (n:People)-[:AS_BOND_IN]->(x:Film)<-[:DIRECTOR_OF]-(d:People)-[:DIRECTOR_OF]->" +
                 "(x2:Film)<-[:AS_BOND_IN]-(n) return n";
+
+        String qWithOrder = "match (n:Player)-[:PLAYS_FOR]->(x:Club {name:\"Manchester City\"}) return n order by n.name desc";
+
 //
 //        WITH a AS (
 //                SELECT dB309b356.id AS a1, dB7607059.id AS a2
@@ -46,10 +50,10 @@ public class ToolV1 {
 //        and a.a1 = d.d2
 //        and a.a2 != d.d1;
 
-        CypherDriver.run(cypherQuery);
+        CypherDriver.run(qWithOrder);
 
         try {
-            String sqlFromCypher = CypherTokenizer.decode(cypherQuery);
+            String sqlFromCypher = CypherTokenizer.decode(qWithOrder);
             System.out.println(sqlFromCypher);
             SQLDriver.run(sqlFromCypher);
         } catch (SQLException e) {

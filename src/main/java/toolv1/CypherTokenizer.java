@@ -40,7 +40,9 @@ class CypherTokenizer {
         StringBuilder sql = new StringBuilder();
 
         // find out what the query is (RETURNX is RETURN rule but with alias)
-        if (ruleList.contains("MATCH") && ruleList.contains("RETURNX")) {
+        if (ruleList.contains("MATCH") && ruleList.contains("RETURNX") && ruleList.contains("ORDER")) {
+            return CypherTranslator.MatchAndReturnAndOrder(sql, tokenList);
+        } else if (ruleList.contains("MATCH") && ruleList.contains("RETURNX")) {
             return CypherTranslator.MatchAndReturn(sql, tokenList);
         }
 

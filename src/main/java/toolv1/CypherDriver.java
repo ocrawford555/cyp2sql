@@ -13,7 +13,7 @@ class CypherDriver {
 
         while (result.hasNext()) {
             Record record = result.next();
-            System.out.println("NAME : " + record.get("n").asNode().get("Name").asString());
+            System.out.println("NAME : " + record.get("n").asNode().get("name").asString());
         }
 
         System.out.println(finMillis - startMillis + " ms.");
