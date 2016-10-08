@@ -71,6 +71,66 @@ class CypherTranslator {
         return sql;
     }
 
+    static String MatchAndReturnAndOrderAndSkip(StringBuilder sql, ArrayList<String> tokenList) throws Exception {
+        // query has structure MATCH ... RETURN ... ORDER BY [ASC|DESC]
+        // check to perform is returning something mentioned in match clause
+        int posOfMatch = tokenList.indexOf("MATCH");
+        int posOfReturn = tokenList.indexOf("RETURN");
+        int posOfOrder = tokenList.indexOf("ORDER");
+        int posOfSkip = tokenList.indexOf("SKIP");
+        int posOfLimit = tokenList.indexOf("LIMIT");
+
+        //TODO: fix for skip and limit tokens
+        List<String> matchClause = tokenList.subList(posOfMatch + 1, posOfReturn);
+        List<String> returnClause = tokenList.subList(posOfReturn + 1, posOfOrder);
+        List<String> orderClause;
+        List<String> skipClause = null;
+        List<String> limitClause = null;
+
+        if (posOfSkip == -1 && posOfLimit == -1) {
+            orderClause = tokenList.subList(posOfOrder + 2, tokenList.size());
+        } else if (posOfLimit == -1) {
+            orderClause = tokenList.subList(posOfOrder + 2, posOfSkip);
+            skipClause = tokenList.subList(posOfSkip + 1, tokenList.size());
+        } else if (posOfSkip == -1) {
+            orderClause = tokenList.subList(posOfOrder + 2, posOfLimit);
+            limitClause = tokenList.subList(posOfLimit + 1, tokenList.size());
+        } else {
+            orderClause = tokenList.subList(posOfOrder + 2, posOfSkip);
+            skipClause = tokenList.subList(posOfSkip + 1, posOfLimit);
+            limitClause = tokenList.subList(posOfLimit + 1, tokenList.size());
+        }
+
+        MatchClause matchC = matchDecode(matchClause);
+        ReturnClause returnC = returnDecode(returnClause);
+        OrderClause orderC = orderDecode(orderClause);
+        int skipAmount = (posOfSkip != -1) ? skipDecode(skipClause) : -1;
+        int limitAmount = (posOfLimit != -1) ? limitDecode(limitClause) : -1;
+
+        sql = obtainMatchAndReturn(matchC, returnC, sql);
+
+        sql = obtainOrderByClause(matchC, orderC, sql);
+
+        if (skipAmount != -1) sql.append(" OFFSET ").append(skipAmount);
+
+        if (limitAmount != -1) sql.append(" LIMIT ").append(limitAmount);
+
+        sql.append(";");
+        return sql.toString();
+    }
+
+    private static int limitDecode(List<String> clause) throws Exception {
+        if (clause.size() == 1) {
+            return Integer.parseInt(clause.get(0));
+        } else throw new Exception("RETURN CLAUSE MALFORMED");
+    }
+
+    private static int skipDecode(List<String> clause) throws Exception {
+        if (clause.size() == 1) {
+            return Integer.parseInt(clause.get(0));
+        } else throw new Exception("RETURN CLAUSE MALFORMED");
+    }
+
     private static String validateNodeID(String nodeID, MatchClause matchC) {
         for (CypNode cN : matchC.getNodes()) {
             if (nodeID.equals(cN.getId()))

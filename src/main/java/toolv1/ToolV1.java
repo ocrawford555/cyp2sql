@@ -15,7 +15,8 @@ public class ToolV1 {
         String cypherQuery = "match (n:People)-[:AS_BOND_IN]->(x:Film)<-[:DIRECTOR_OF]-(d:People)-[:DIRECTOR_OF]->" +
                 "(x2:Film)<-[:AS_BOND_IN]-(n) return n";
 
-        String qWithOrder = "match (n:Player)-[:PLAYS_FOR]->(x:Club {name:\"Manchester City\"}) return n order by n.name desc";
+        String qWithOrder = "match (n:Player)-[:PLAYS_FOR]->(x:Club {name:\"Manchester City\"}) " +
+                "return n order by n.name skip 2 limit 1";
 
 //
 //        WITH a AS (
