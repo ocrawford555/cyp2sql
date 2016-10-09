@@ -26,9 +26,11 @@ public class Cypher {
             CypherParser parser = new CypherParser(tokens);
             ParseTree tree = parser.cypher();
             ParseTreeWalker walker = new ParseTreeWalker();
-            walker.walk(new CypherWalker(), tree);
+            CypherWalker cypherQ = new CypherWalker();
+            walker.walk(cypherQ, tree);
+            cypherQ.printInformation();
             //printTree(tree, 0);
-            System.out.println("\n\n------\n\n");
+            System.out.println("\n------\n");
         }
     }
 

@@ -1,5 +1,4 @@
-package testing;// Generated from ..\Cypher.g4 by ANTLR 4.5.3
-
+package testing;// Generated from Cypher.g4 by ANTLR 4.5.3
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.Token;
@@ -620,6 +619,5 @@ public class CypherLexer extends Lexer {
 
     @Override
     public ATN getATN() {
-        return _ATN;
-    }
+        return _ATN; }
 }
