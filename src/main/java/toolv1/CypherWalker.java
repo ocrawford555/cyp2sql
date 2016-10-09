@@ -1,6 +1,9 @@
-package testing;
+package toolv1;
 
-class CypherWalker extends CypherBaseListener {
+import parsing_lexing.CypherBaseListener;
+import parsing_lexing.CypherParser;
+
+public class CypherWalker extends CypherBaseListener {
     private boolean hasOptional = false;
     private boolean hasDistinct = false;
     private String matchClause = null;
@@ -10,13 +13,27 @@ class CypherWalker extends CypherBaseListener {
     private String latestOrderDirection = "";
     private int skipAmount = -1;
     private int limitAmount = -1;
+    private int typeQuery;
 
     public void enterCypher(CypherParser.CypherContext ctx) {
         System.out.println("Entering Cypher : " + ctx.getText());
     }
 
     public void exitCypher(CypherParser.CypherContext ctx) {
-        System.out.println("Exiting Cypher...");
+        System.out.println("Computing query...");
+        computeQuery();
+    }
+
+    private void computeQuery() {
+        // find out what the query is
+        if (matchClause != null && returnClause != null && orderClause != null
+                && (skipAmount != -1 || limitAmount != -1))
+            typeQuery = 3;
+        else if (matchClause != null && returnClause != null && orderClause != null) {
+            typeQuery = 2;
+        } else if (matchClause != null && returnClause != null) {
+            typeQuery = 1;
+        }
     }
 
     public void enterMatch(CypherParser.MatchContext ctx) {
@@ -70,7 +87,7 @@ class CypherWalker extends CypherBaseListener {
         } else latestOrderDirection = "";
     }
 
-    void printInformation() {
+    public void printInformation() {
         System.out.println("\n--- QUERY INFORMATION ---");
         if (matchClause != null) System.out.println("Match Clause: " + matchClause + " -- OPTIONAL = " + hasOptional);
         if (whereClause != null) System.out.println("Where Clause: " + whereClause);
@@ -79,5 +96,10 @@ class CypherWalker extends CypherBaseListener {
         if (orderClause != null) System.out.println("Order Clause: " + orderClause);
         if (skipAmount != -1) System.out.println("Skip Amount: " + skipAmount);
         if (limitAmount != -1) System.out.println("Limit Amount: " + limitAmount);
+        System.out.println("\n");
+    }
+
+    public int getTypeQuery() {
+        return typeQuery;
     }
 }

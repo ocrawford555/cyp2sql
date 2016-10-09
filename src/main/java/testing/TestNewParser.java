@@ -4,12 +4,15 @@ import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
+import parsing_lexing.CypherLexer;
+import parsing_lexing.CypherParser;
+import toolv1.CypherWalker;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.ArrayList;
 
-public class Cypher {
+public class TestNewParser {
     public static void main(String[] args) throws Exception {
         ArrayList<String> queries = new ArrayList<String>();
         try (BufferedReader br = new BufferedReader(new FileReader("C:/Users/ocraw/Documents/" +

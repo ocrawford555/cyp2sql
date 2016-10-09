@@ -168,6 +168,7 @@ class CypherTranslator {
     }
 
     private static OrderClause orderDecode(List<String> orderClause) throws Exception {
+        System.out.println(orderClause);
         OrderClause o = new OrderClause();
 
         List<CypOrder> items = new ArrayList<CypOrder>();
@@ -197,6 +198,7 @@ class CypherTranslator {
     }
 
     private static CypOrder extractOrder(List<String> clause) throws Exception {
+        System.out.println(clause.toString());
         if (clause.size() == 4 && clause.contains(".")) {
             return new CypOrder(clause.get(0), clause.get(2), clause.get(3));
         } else if (clause.size() == 3 && clause.contains(".")) {
