@@ -18,7 +18,6 @@ public class ToolV1 {
         String qWithOrder = "match (n:Player)-[:PLAYS_FOR]->(x:Club {name:\"Manchester City\"}) " +
                 "return n order by n.name skip 2 limit 1";
 
-//
 //        WITH a AS (
 //                SELECT dB309b356.id AS a1, dB7607059.id AS a2
 //                FROM PEOPLE dB309b356
