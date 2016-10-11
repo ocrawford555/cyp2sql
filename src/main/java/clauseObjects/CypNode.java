@@ -29,6 +29,10 @@ public class CypNode {
         return props;
     }
 
+    public void setProps(JsonObject newProps) {
+        this.props = newProps;
+    }
+
     @Override
     public String toString() {
         return "(ID:" + this.id + ",TYPE:" + this.type + ",PROPS:"

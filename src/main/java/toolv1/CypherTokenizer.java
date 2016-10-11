@@ -21,7 +21,7 @@ class CypherTokenizer {
 
         CypherWalker cypherQ = new CypherWalker();
         walker.walk(cypherQ, tree);
-        cypherQ.printInformation();
+        // cypherQ.printInformation();
 
         ArrayList<String> tokenList = new ArrayList<String>();
 
@@ -37,11 +37,11 @@ class CypherTokenizer {
 
         switch (cypherQ.getTypeQuery()) {
             case 1:
-                return CypherTranslator.MatchAndReturn(sql, tokenList);
+                return CypherTranslator.MatchAndReturnAndOrderAndSkip(sql, tokenList, cypherQ);
             case 2:
-                return CypherTranslator.MatchAndReturnAndOrder(sql, tokenList);
+                return CypherTranslator.MatchAndReturnAndOrderAndSkip(sql, tokenList, cypherQ);
             case 3:
-                return CypherTranslator.MatchAndReturnAndOrderAndSkip(sql, tokenList);
+                return CypherTranslator.MatchAndReturnAndOrderAndSkip(sql, tokenList, cypherQ);
         }
 
         return sql.toString();

@@ -102,4 +102,20 @@ public class CypherWalker extends CypherBaseListener {
     public int getTypeQuery() {
         return typeQuery;
     }
+
+    public int getSkipAmount() {
+        return skipAmount;
+    }
+
+    public int getLimitAmount() {
+        return limitAmount;
+    }
+
+    public boolean doesCluaseHaveWhere() {
+        return (whereClause != null);
+    }
+
+    public String getWhereClause() {
+        return whereClause;
+    }
 }
