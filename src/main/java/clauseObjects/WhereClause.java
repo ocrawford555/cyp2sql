@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 public class WhereClause {
     private boolean hasOr = false;
-    private ArrayList<String[]> orClauses = new ArrayList<String[]>();
+    private ArrayList<String[]> orClauses = new ArrayList<>();
     private String clause;
 
     public WhereClause(String c) {

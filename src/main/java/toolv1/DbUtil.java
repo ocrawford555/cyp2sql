@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.Set;
 
 class DbUtil {
-    static Connection c = null;
+    private static Connection c = null;
 
     static void createConnection(String dbName) {
         try {
@@ -50,7 +50,7 @@ class DbUtil {
         System.out.println(finMillis - startMillis + " ms.");
     }
 
-    static void createInsert(String query) throws SQLException {
+    private static void createInsert(String query) throws SQLException {
         Statement stmt = c.createStatement();
         stmt.executeUpdate(query);
         stmt.close();
@@ -75,7 +75,12 @@ class DbUtil {
             JsonObject o = parser.parse(x).getAsJsonObject();
             sb.append("(");
             for (String z : fields) {
-                sb.append("'").append(o.get(z).getAsString().replace("\\\"","")).append("', ");
+                try {
+                    String value = o.get(z).getAsString().replace("\\\"", "");
+                    sb.append("'").append(value).append("', ");
+                } catch (NullPointerException npe) {
+                    sb.append("null, ");
+                }
             }
             sb.setLength(sb.length() - 2);
             sb.append("), ");
@@ -98,14 +103,17 @@ class DbUtil {
                 sb.append(s);
 
                 String[] jsonObjs = schemaToBuild.get(s).split(", ");
-
                 JsonParser parser = new JsonParser();
-                JsonObject o = parser.parse(jsonObjs[0]).getAsJsonObject();
-                Set<Map.Entry<String, JsonElement>> entries = o.entrySet();
-                ArrayList<String> fields = new ArrayList<String>();
+                ArrayList<String> fields = new ArrayList<>();
 
-                for (Map.Entry<String, JsonElement> entry : entries) {
-                    fields.add(entry.getKey());
+                for (String jobj : jsonObjs) {
+                    JsonObject o = parser.parse(jobj).getAsJsonObject();
+                    Set<Map.Entry<String, JsonElement>> entries = o.entrySet();
+
+                    for (Map.Entry<String, JsonElement> entry : entries) {
+                        if (!fields.contains(entry.getKey()))
+                            fields.add(entry.getKey());
+                    }
                 }
 
                 sb.append("(");
