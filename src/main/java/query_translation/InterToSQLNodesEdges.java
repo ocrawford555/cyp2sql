@@ -3,7 +3,6 @@ package query_translation;
 import clauseObjects.*;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import toolv1.GenerateAlias;
 
 import java.util.Map;
 import java.util.Set;
@@ -36,9 +35,7 @@ public class InterToSQLNodesEdges {
 
         if (matchC.getRels().isEmpty()) {
             // no relationships, just return some nodes
-            sql = obtainSelectClause(returnC, matchC, sql);
-
-            sql = obtainFromClause(matchC, returnC, sql);
+            sql = obtainSelectAndFromClause(returnC, matchC, sql);
 
             sql = obtainWhereClause(matchC, sql, false, returnC);
 
@@ -47,9 +44,7 @@ public class InterToSQLNodesEdges {
             // there are relationships to deal with, so use the WITH structure
             sql = obtainWithClause(sql, matchC);
 
-            sql = obtainSelectClause(returnC, matchC, sql);
-
-            sql = obtainFromClause(matchC, returnC, sql);
+            sql = obtainSelectAndFromClause(returnC, matchC, sql);
 
             sql = obtainWhereClause(matchC, sql, true, returnC);
 
@@ -63,55 +58,28 @@ public class InterToSQLNodesEdges {
 
         for (CypRel cR : matchC.getRels()) {
             String withAlias = String.valueOf(alphabet[indexRel]);
-            sql.append(withAlias).append(" AS (SELECT ");
+            sql.append(withAlias).append(" AS ");
+            sql.append("(SELECT n1.id AS ").append(withAlias).append(indexRel + 1);
+            sql.append(" FROM nodes n1 " +
+                    "INNER JOIN edges e1 on n1.id = e1.idl " +
+                    "INNER JOIN nodes n2 on e1.idr = n2.id ");
 
             boolean includesWhere = false;
             int posOfRel = cR.getPosInClause();
-            String relGenID = GenerateAlias.gen();
 
             CypNode leftNode = obtainNode(matchC, posOfRel);
             JsonObject leftProps = leftNode.getProps();
             CypNode rightNode = obtainNode(matchC, posOfRel + 1);
             JsonObject rightProps = rightNode.getProps();
-
-            String[] tableA = leftNode.getAlias();
-            String[] tableB = rightNode.getAlias();
-
-            sql.append(tableA[1]).append(".id AS ").
-                    append(withAlias).append(1).append(", ");
-
-            sql.append(tableB[1]).append(".id AS ").
-                    append(withAlias).append(2).append(" FROM ");
-
-            if (cR.getDirection().equals("left")) {
-                // flip the tables around to suit the direction
-                String tempTable[] = tableB;
-                tableB = tableA;
-                tableA = tempTable;
-            }
-
-            sql.append(tableA[0]).append(" ").append(tableA[1]);
-
-            sql.append(" INNER JOIN ");
-            sql.append(cR.getType()).append(" ").append(relGenID).append(" ON ");
-            sql.append(tableA[1]).append(".id = ").append(relGenID).append(".idl INNER JOIN ");
-            sql.append(tableB[0]).append(" ").append(tableB[1]);
-            sql.append(" ON ").append(relGenID).append(".idr = ").append(tableB[1]).append(".id");
+            String typeRel = cR.getType();
 
             if (leftProps != null) {
                 sql.append(" WHERE ");
                 includesWhere = true;
 
-                String table;
-
-                if (cR.getDirection().equals("left"))
-                    table = tableB[1];
-                else
-                    table = tableA[1];
-
                 Set<Map.Entry<String, JsonElement>> entrySet = leftProps.entrySet();
                 for (Map.Entry<String, JsonElement> entry : entrySet) {
-                    sql.append(table).append(".").append(entry.getKey());
+                    sql.append("n1").append(".").append(entry.getKey());
                     sql.append("='").append(entry.getValue().getAsString());
                     sql.append("' AND ");
                 }
@@ -123,19 +91,22 @@ public class InterToSQLNodesEdges {
                     includesWhere = true;
                 }
 
-                String table;
-
-                if (cR.getDirection().equals("left"))
-                    table = tableA[1];
-                else
-                    table = tableB[1];
-
                 Set<Map.Entry<String, JsonElement>> entrySet = rightProps.entrySet();
                 for (Map.Entry<String, JsonElement> entry : entrySet) {
-                    sql.append(table).append(".").append(entry.getKey());
+                    sql.append("n2").append(".").append(entry.getKey());
                     sql.append("='").append(entry.getValue().getAsString());
                     sql.append("' AND ");
                 }
+            }
+
+            if (typeRel != null) {
+                if (!includesWhere) {
+                    sql.append(" WHERE ");
+                    includesWhere = true;
+                }
+
+                sql.append("e1.type = '").append(typeRel);
+                sql.append("' AND ");
             }
 
             if (includesWhere) sql.setLength(sql.length() - 5);
@@ -148,44 +119,44 @@ public class InterToSQLNodesEdges {
         return sql;
     }
 
-    private static StringBuilder obtainSelectClause(ReturnClause returnC, MatchClause matchC,
-                                                    StringBuilder sql)
+    private static StringBuilder obtainSelectAndFromClause(ReturnClause returnC, MatchClause matchC,
+                                                           StringBuilder sql)
             throws Exception {
         sql.append("SELECT ");
+        boolean usesNodesTable = false;
+        boolean usesRelsTable = false;
         for (CypReturn cR : returnC.getItems()) {
-            String prop = cR.getField();
-            String table[] = obtainTable(cR.getNodeID(), matchC);
-            sql.append(table[1]).append(".");
-            if (prop != null)
-                sql.append(prop);
-            else
-                sql.append("*");
-            sql.append(", ");
+            boolean isNode = false;
+            for (CypNode cN : matchC.getNodes()) {
+                if (cR.getNodeID().equals(cN.getId())) {
+                    String prop = cR.getField();
+                    if (prop != null) {
+                        sql.append("n").append(prop).append(", ");
+                    } else {
+                        sql.append("n.*").append(", ");
+                    }
+                    isNode = true;
+                    usesNodesTable = true;
+                    break;
+                }
+            }
+
+            if (!isNode) {
+                for (CypRel cRel : matchC.getRels()) {
+                    //TODO: sort out returning relationships.
+                }
+            }
         }
 
         sql.setLength(sql.length() - 2);
-        return sql;
-    }
 
-    private static StringBuilder obtainFromClause(MatchClause matchC, ReturnClause returnC,
-                                                  StringBuilder sql)
-            throws Exception {
         sql.append(" FROM ");
-
-        for (CypReturn ret : returnC.getItems()) {
-            String table[] = obtainTable(ret.getNodeID(), matchC);
-            sql.append(table[0]).append(" ").append(table[1]).append(", ");
-        }
-
-        if (!matchC.getRels().isEmpty()) {
-            // deal with any relationships
-            int numRels = matchC.getRels().size();
-            for (int i = 0; i < numRels; i++)
-                sql.append(alphabet[i]).append(", ");
-        }
+        if (usesNodesTable) sql.append("nodes n, ");
+        int numRels = matchC.getRels().size();
+        for (int i = 0; i < numRels; i++)
+            sql.append(alphabet[i]).append(", ");
 
         sql.setLength(sql.length() - 2);
-
         return sql;
     }
 
