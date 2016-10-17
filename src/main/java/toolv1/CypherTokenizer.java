@@ -1,5 +1,6 @@
 package toolv1;
 
+import clauseObjects.DecodedQuery;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -11,7 +12,7 @@ import parsing_lexing.CypherParser;
 import java.util.ArrayList;
 
 class CypherTokenizer {
-    static String decode(String cyp) throws Exception {
+    static DecodedQuery decode(String cyp) throws Exception {
         CypherLexer lexer = new CypherLexer(new ANTLRInputStream(cyp));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         tokens.fill();
@@ -33,17 +34,6 @@ class CypherTokenizer {
                 tokenList.add(s);
         }
 
-        StringBuilder sql = new StringBuilder();
-
-        switch (cypherQ.getTypeQuery()) {
-            case 1:
-                return CypherTranslator.MatchAndReturnAndOrderAndSkip(sql, tokenList, cypherQ);
-            case 2:
-                return CypherTranslator.MatchAndReturnAndOrderAndSkip(sql, tokenList, cypherQ);
-            case 3:
-                return CypherTranslator.MatchAndReturnAndOrderAndSkip(sql, tokenList, cypherQ);
-        }
-
-        return sql.toString();
+        return CypherTranslator.MatchAndReturnAndOrderAndSkip(tokenList, cypherQ);
     }
 }

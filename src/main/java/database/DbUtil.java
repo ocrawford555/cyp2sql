@@ -1,4 +1,4 @@
-package toolv1;
+package database;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -10,10 +10,10 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
 
-class DbUtil {
+public class DbUtil {
     private static Connection c = null;
 
-    static void createConnection(String dbName) {
+    public static void createConnection(String dbName) {
         try {
             Class.forName("org.postgresql.Driver");
             c = DriverManager
@@ -25,7 +25,7 @@ class DbUtil {
         }
     }
 
-    static void closeConnection() {
+    public static void closeConnection() {
         try {
             c.close();
         } catch (SQLException e) {
@@ -33,13 +33,11 @@ class DbUtil {
         }
     }
 
-    static void select(String query) throws SQLException {
+    public static void select(String query) throws SQLException {
         Statement stmt;
         stmt = c.createStatement();
 
-        long startMillis = System.currentTimeMillis();
         ResultSet rs = stmt.executeQuery(query);
-        long finMillis = System.currentTimeMillis();
 
         while (rs.next()) {
             String name = rs.getString("name");
@@ -47,7 +45,6 @@ class DbUtil {
         }
 
         stmt.close();
-        System.out.println(finMillis - startMillis + " ms.");
     }
 
     private static void createInsert(String query) throws SQLException {
@@ -93,7 +90,7 @@ class DbUtil {
     }
 
 
-    static void createAndInsert(Map<String, String> schemaToBuild) {
+    public static void createAndInsert(Map<String, String> schemaToBuild) {
         try {
             // iterate over each table to create
             for (String s : schemaToBuild.keySet()) {

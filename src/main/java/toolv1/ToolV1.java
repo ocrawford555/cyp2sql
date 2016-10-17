@@ -1,41 +1,47 @@
 package toolv1;
 
-import java.util.Map;
+import clauseObjects.DecodedQuery;
+import database.CypherDriver;
+import database.DbUtil;
+import database.SQLDriver;
+import query_translation.InterToSQL;
+import query_translation.InterToSQLNodesEdges;
 
 public class ToolV1 {
     public static void main(String[] args) throws Exception {
-//        try {
-        Map<String, String> schemaToBuild =
-                SchemaTranslate.readFile(
-                        "C:/Users/ocraw/Documents/Year 3 Cambridge/Project/CypherStuff/database/dump4.txt",
-                        true,
-                        2);
-        DbUtil.createConnection("testa");
+        //Map<String, String> schemaToBuild =
+//                SchemaTranslate.readFile(
+//                        "C:/Users/ocraw/Documents/Year 3 Cambridge/Project/CypherStuff/database/dump4.txt",
+//                        true,
+//                        2);
+        try {
+            DbUtil.createConnection("testa");
 
-        DbUtil.createAndInsert(schemaToBuild);
-        DbUtil.closeConnection();
+            String cyherQuery = "match (n:Player)-[:PLAYS_FOR]->(x:Club {name:\"Manchester United\"}) return n limit 20";
 
-//            String cypherQuery = "match (n:People)-[:AS_BOND_IN]->(x:Film)<-[:DIRECTOR_OF]-(d:People)-[:DIRECTOR_OF]->" +
-//                    "(x2:Film)<-[:AS_BOND_IN]-(n) return n";
-//
-//            String qWithOrder = "match (n:Player)-[:PLAYS_FOR]->(x:Club) where x.name = \"Manchester United\" " +
-//                    "return n order by n.name";
-//
-////        String qWithOrder = "match (n:Player)-[:PLAYS_FOR]->(x:Club {name:\"Manchester City\"}) " +
-////                "return n order by n.name skip 2 limit 1";
-//
-//            CypherDriver.run(qWithOrder);
-//
-//            String sqlFromCypher = CypherTokenizer.decode(qWithOrder);
-//            System.out.println(sqlFromCypher);
-//            SQLDriver.run(sqlFromCypher);
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        } finally {
-//            DbUtil.closeConnection();
-//            System.exit(0);
-//        }
+            //select * from nodes n1 inner join edges e1 on n1.id = e1.idl inner join nodes n2 on e1.idr = n2.id
+            // where n2.name = 'Manchester United' and e1.type = 'PLAYS_FOR';
+
+            CypherDriver.run(cyherQuery);
+
+            DecodedQuery decodedQuery = CypherTokenizer.decode(cyherQuery);
+
+            int typeSchemaRunningAgainst = 1;
+            String sqlFromCypher = null;
+            switch (typeSchemaRunningAgainst) {
+                case 1:
+                    sqlFromCypher = InterToSQL.translate(decodedQuery);
+                    break;
+                case 2:
+                    sqlFromCypher = InterToSQLNodesEdges.translate(decodedQuery);
+                    break;
+            }
+            System.out.println(sqlFromCypher);
+            SQLDriver.run(sqlFromCypher);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            DbUtil.closeConnection();
+        }
     }
 }
