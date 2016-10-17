@@ -118,4 +118,8 @@ public class CypherWalker extends CypherBaseListener {
     public String getWhereClause() {
         return whereClause;
     }
+
+    public boolean hasDistinct() {
+        return hasDistinct;
+    }
 }

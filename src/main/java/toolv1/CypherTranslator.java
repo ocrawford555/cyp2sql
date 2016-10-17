@@ -23,6 +23,13 @@ class CypherTranslator {
         int posOfSkip = tokenList.indexOf("SKIP");
         int posOfLimit = tokenList.indexOf("LIMIT");
 
+//        System.out.println(posOfMatch);
+//        System.out.println(posOfWhere);
+//        System.out.println(posOfReturn);
+//        System.out.println(posOfOrder);
+//        System.out.println(posOfSkip);
+//        System.out.println(posOfLimit);
+
         List<String> matchClause;
         List<String> returnClause;
         List<String> orderClause = null;
@@ -34,13 +41,13 @@ class CypherTranslator {
 
         if (posOfOrder == -1) {
             if (posOfSkip == -1 && posOfLimit == -1) {
-                returnClause = tokenList.subList(posOfReturn + 1, tokenList.size());
+                returnClause = tokenList.subList(posOfReturn + 1 + ((cypherQ.hasDistinct()) ? 1 : 0), tokenList.size());
             } else if (posOfLimit == -1) {
-                returnClause = tokenList.subList(posOfReturn + 1, posOfSkip);
+                returnClause = tokenList.subList(posOfReturn + 1 + ((cypherQ.hasDistinct()) ? 1 : 0), posOfSkip);
             } else if (posOfSkip == -1) {
-                returnClause = tokenList.subList(posOfReturn + 1, posOfLimit);
+                returnClause = tokenList.subList(posOfReturn + 1 + ((cypherQ.hasDistinct()) ? 1 : 0), posOfLimit);
             } else {
-                returnClause = tokenList.subList(posOfReturn + 1, posOfSkip);
+                returnClause = tokenList.subList(posOfReturn + 1 + ((cypherQ.hasDistinct()) ? 1 : 0), posOfSkip);
             }
         } else {
             returnClause = tokenList.subList(posOfReturn + 1, posOfOrder);
@@ -55,10 +62,9 @@ class CypherTranslator {
             }
         }
 
+        System.out.println(matchClause);
         MatchClause matchC = matchDecode(matchClause);
-        System.out.println(returnClause);
-        System.out.println(cypherQ.getLimitAmount());
-        ReturnClause returnC = returnDecode(returnClause);
+        ReturnClause returnC = returnDecode(returnClause, matchC);
         OrderClause orderC = null;
         if (orderClause != null)
             orderC = orderDecode(orderClause);
@@ -268,23 +274,35 @@ class CypherTranslator {
                 }
             } else {
                 // may be a relationship still there
-                if (clause.contains("<")) {
-                    int posArrow = clause.indexOf("<");
-                    direction = "left";
-                    clause = clause.subList(posArrow + 3, clause.size());
-                } else if (clause.contains(">")) {
-                    int posArrow = clause.indexOf(">");
-                    direction = "right";
-                    clause = clause.subList(posArrow + 1, clause.size());
-                } else if (clause.contains("-")) {
-                    int posDash = clause.indexOf("-");
-                    if (clause.get(posDash + 1).equals("-")) {
-                        direction = "none";
-                        clause = clause.subList(posDash + 2, clause.size());
+                if (clause.contains("<") || clause.contains(">")) {
+                    int posLeftArrow = clause.indexOf("<");
+                    int posRightArrow = clause.indexOf(">");
+
+                    if (posLeftArrow != -1 && posRightArrow != -1) {
+                        if (posLeftArrow < posRightArrow) {
+                            direction = "left";
+                            clause = clause.subList(posLeftArrow + 3, clause.size());
+                        } else {
+                            direction = "right";
+                            clause = clause.subList(posRightArrow + 1, clause.size());
+                        }
+                    } else if (posLeftArrow != -1) {
+                        direction = "left";
+                        clause = clause.subList(posLeftArrow + 3, clause.size());
+                    } else if (posRightArrow != -1) {
+                        direction = "right";
+                        clause = clause.subList(posRightArrow + 1, clause.size());
+                    } else if (clause.contains("-")) {
+                        int posDash = clause.indexOf("-");
+                        if (clause.get(posDash + 1).equals("-")) {
+                            direction = "none";
+                            clause = clause.subList(posDash + 2, clause.size());
+                        }
                     }
                 } else
                     break;
             }
+
             rels.add(new CypRel(m.getInternalID(), id, type, o, direction));
         }
         return rels;
@@ -312,7 +330,7 @@ class CypherTranslator {
         return parser.parse(temp.toString()).getAsJsonObject();
     }
 
-    private static ReturnClause returnDecode(List<String> returnClause) throws Exception {
+    private static ReturnClause returnDecode(List<String> returnClause, MatchClause matchC) throws Exception {
         ReturnClause r = new ReturnClause();
 
         List<CypReturn> items = new ArrayList<CypReturn>();
@@ -326,11 +344,11 @@ class CypherTranslator {
             returnClause = returnClause.subList(posComma + 1,
                     returnClause.size());
 
-            items.add(extractReturn(currentWorking));
+            items.add(extractReturn(currentWorking, matchC));
         }
 
         if (!returnClause.isEmpty()) {
-            items.add(extractReturn(returnClause));
+            items.add(extractReturn(returnClause, matchC));
         }
 
         r.setItems(items);
@@ -341,11 +359,11 @@ class CypherTranslator {
         return r;
     }
 
-    private static CypReturn extractReturn(List<String> clause) throws Exception {
+    private static CypReturn extractReturn(List<String> clause, MatchClause matchC) throws Exception {
         if (clause.size() == 3 && clause.contains(".")) {
-            return new CypReturn(clause.get(0), clause.get(2));
+            return new CypReturn(clause.get(0), clause.get(2), matchC);
         } else if (clause.size() == 1) {
-            return new CypReturn(clause.get(0), null);
+            return new CypReturn(clause.get(0), null, matchC);
         } else throw new Exception("RETURN CLAUSE MALFORMED");
     }
 

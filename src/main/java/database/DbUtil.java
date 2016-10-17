@@ -41,6 +41,7 @@ public class DbUtil {
 
         while (rs.next()) {
             String name = rs.getString("name");
+            System.out.println("ID : " + rs.getString("id"));
             System.out.println("NAME : " + WordUtils.capitalizeFully(name));
         }
 

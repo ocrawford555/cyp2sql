@@ -30,7 +30,7 @@ class CypherTokenizer {
             CommonToken tok = (CommonToken) t;
             String s = tok.getText().toUpperCase();
 
-            if (!" ".equals(s) && !"<EOF>".equals(s))
+            if (!" ".equals(s) && !"<EOF>".equals(s) && !";".equals(s))
                 tokenList.add(s);
         }
 

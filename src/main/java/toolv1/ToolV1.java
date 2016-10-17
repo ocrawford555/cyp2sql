@@ -19,14 +19,34 @@ public class ToolV1 {
 
             String cyherQuery = "match (n:Player)-[:PLAYS_FOR]->(x:Club {name:\"Manchester United\"}) return n limit 20";
 
+            String rooneyQuery = "match (n:Player {name:\"Wayne Rooney\"})-->(x) return x;";
+
+            String twoDirQuery = "match (n:Player {name:\"Wayne Rooney\"})-->(x)<--(p:Player) return p";
+
+            String threeDirWithDistinct = "match (n:Player {name:\"Wayne Rooney\"})-->(x)<--(p:Player)-->(a:Club) " +
+                    "return distinct a;";
+
+            String otherQuery = "match (n:Player {name:\"Wayne Rooney\"})-->(x)<--(b)-->(c:NationalTeam) " +
+                    "return c;";
+
+//            WITH a AS (SELECT n1.id AS a1, n2.id AS a2 FROM nodes n1
+//                    INNER JOIN edges e1 on n1.id = e1.idl
+//                    INNER JOIN nodes n2 on e1.idr = n2.id
+//                    WHERE n1.NAME='Wayne Rooney'),
+//                    b AS (SELECT n1.id AS b1, n2.id AS b2 FROM nodes n1
+//                    INNER JOIN edges e1 on n1.id = e1.idr
+//                    INNER JOIN nodes n2 on e1.idl = n2.id)
+//
+//            SELECT n.* from nodes n, b,a where a.a2 = b.b1 and n.id = b.b2 and n.id != a.a1;
+
             //select * from nodes n1 inner join edges e1 on n1.id = e1.idl inner join nodes n2 on e1.idr = n2.id
             // where n2.name = 'Manchester United' and e1.type = 'PLAYS_FOR';
 
-            CypherDriver.run(cyherQuery);
+            CypherDriver.run(otherQuery);
 
-            DecodedQuery decodedQuery = CypherTokenizer.decode(cyherQuery);
+            DecodedQuery decodedQuery = CypherTokenizer.decode(otherQuery);
 
-            int typeSchemaRunningAgainst = 1;
+            int typeSchemaRunningAgainst = 2;
             String sqlFromCypher = null;
             switch (typeSchemaRunningAgainst) {
                 case 1:
@@ -36,6 +56,7 @@ public class ToolV1 {
                     sqlFromCypher = InterToSQLNodesEdges.translate(decodedQuery);
                     break;
             }
+            sqlFromCypher = sqlFromCypher.replace("Nationalteam", "NationalTeam");
             System.out.println(sqlFromCypher);
             SQLDriver.run(sqlFromCypher);
         } catch (Exception e) {

@@ -3,6 +3,7 @@ package query_translation;
 import clauseObjects.*;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import org.apache.commons.lang3.text.WordUtils;
 
 import java.util.Map;
 import java.util.Set;
@@ -13,9 +14,11 @@ public class InterToSQLNodesEdges {
     public static String translate(DecodedQuery decodedQuery) throws Exception {
         StringBuilder sql = new StringBuilder();
 
-        sql = obtainMatchAndReturn(decodedQuery.getMc(), decodedQuery.getRc(), sql);
+        sql = obtainMatchAndReturn(decodedQuery.getMc(), decodedQuery.getRc(), sql,
+                decodedQuery.getCypherAdditionalInfo().hasDistinct());
 
-        sql = obtainOrderByClause(decodedQuery.getMc(), decodedQuery.getOc(), sql);
+        if (decodedQuery.getOc() != null)
+            sql = obtainOrderByClause(decodedQuery.getMc(), decodedQuery.getOc(), sql);
 
         int skipAmount = decodedQuery.getSkipAmount();
         int limitAmount = decodedQuery.getLimitAmount();
@@ -29,24 +32,24 @@ public class InterToSQLNodesEdges {
     }
 
     private static StringBuilder obtainMatchAndReturn(MatchClause matchC, ReturnClause returnC,
-                                                      StringBuilder sql) throws Exception {
+                                                      StringBuilder sql, boolean hasDistinct) throws Exception {
         if (returnC.getItems() == null)
             throw new Exception("NOTHING SPECIFIED TO RETURN");
 
         if (matchC.getRels().isEmpty()) {
             // no relationships, just return some nodes
-            sql = obtainSelectAndFromClause(returnC, matchC, sql);
+            sql = obtainSelectAndFromClause(returnC, matchC, sql, hasDistinct);
 
-            sql = obtainWhereClause(matchC, sql, false, returnC);
+            sql = obtainWhereClause(sql, returnC, matchC);
 
             return sql;
         } else {
             // there are relationships to deal with, so use the WITH structure
             sql = obtainWithClause(sql, matchC);
 
-            sql = obtainSelectAndFromClause(returnC, matchC, sql);
+            sql = obtainSelectAndFromClause(returnC, matchC, sql, hasDistinct);
 
-            sql = obtainWhereClause(matchC, sql, true, returnC);
+            sql = obtainWhereClause(sql, returnC, matchC);
 
             return sql;
         }
@@ -59,10 +62,25 @@ public class InterToSQLNodesEdges {
         for (CypRel cR : matchC.getRels()) {
             String withAlias = String.valueOf(alphabet[indexRel]);
             sql.append(withAlias).append(" AS ");
-            sql.append("(SELECT n1.id AS ").append(withAlias).append(indexRel + 1);
-            sql.append(" FROM nodes n1 " +
-                    "INNER JOIN edges e1 on n1.id = e1.idl " +
-                    "INNER JOIN nodes n2 on e1.idr = n2.id ");
+            sql.append("(SELECT n1.id AS ").append(withAlias).append(1).append(", ");
+            sql.append("n2.id AS ").append(withAlias).append(2);
+
+            switch (cR.getDirection()) {
+                case "right":
+                    sql.append(" FROM nodes n1 " +
+                            "INNER JOIN edges e1 on n1.id = e1.idl " +
+                            "INNER JOIN nodes n2 on e1.idr = n2.id");
+                    break;
+                case "left":
+                    sql.append(" FROM nodes n1 " +
+                            "INNER JOIN edges e1 on n1.id = e1.idr " +
+                            "INNER JOIN nodes n2 on e1.idl = n2.id");
+                    break;
+                case "none":
+                    //TODO: complete thinking for this section
+                    //i.e. actually do something with logic.
+            }
+
 
             boolean includesWhere = false;
             int posOfRel = cR.getPosInClause();
@@ -80,7 +98,7 @@ public class InterToSQLNodesEdges {
                 Set<Map.Entry<String, JsonElement>> entrySet = leftProps.entrySet();
                 for (Map.Entry<String, JsonElement> entry : entrySet) {
                     sql.append("n1").append(".").append(entry.getKey());
-                    sql.append("='").append(entry.getValue().getAsString());
+                    sql.append("='").append(WordUtils.capitalizeFully(entry.getValue().getAsString()));
                     sql.append("' AND ");
                 }
             }
@@ -94,9 +112,27 @@ public class InterToSQLNodesEdges {
                 Set<Map.Entry<String, JsonElement>> entrySet = rightProps.entrySet();
                 for (Map.Entry<String, JsonElement> entry : entrySet) {
                     sql.append("n2").append(".").append(entry.getKey());
-                    sql.append("='").append(entry.getValue().getAsString());
+                    sql.append("='").append(WordUtils.capitalizeFully(entry.getValue().getAsString()));
                     sql.append("' AND ");
                 }
+            }
+
+            if (leftNode.getType() != null) {
+                if (!includesWhere) {
+                    sql.append(" WHERE ");
+                    includesWhere = true;
+                }
+                sql.append("n1.label = '");
+                sql.append(WordUtils.capitalizeFully(leftNode.getType())).append("' AND ");
+            }
+
+            if (rightNode.getType() != null) {
+                if (!includesWhere) {
+                    sql.append(" WHERE ");
+                    includesWhere = true;
+                }
+                sql.append("n2.label = '");
+                sql.append(WordUtils.capitalizeFully(rightNode.getType())).append("' AND ");
             }
 
             if (typeRel != null) {
@@ -120,9 +156,10 @@ public class InterToSQLNodesEdges {
     }
 
     private static StringBuilder obtainSelectAndFromClause(ReturnClause returnC, MatchClause matchC,
-                                                           StringBuilder sql)
+                                                           StringBuilder sql, boolean hasDistinct)
             throws Exception {
         sql.append("SELECT ");
+        if (hasDistinct) sql.append("DISTINCT ");
         boolean usesNodesTable = false;
         boolean usesRelsTable = false;
         for (CypReturn cR : returnC.getItems()) {
@@ -160,60 +197,53 @@ public class InterToSQLNodesEdges {
         return sql;
     }
 
-    private static StringBuilder obtainWhereClause(MatchClause matchC, StringBuilder sql, boolean hasRel,
-                                                   ReturnClause returnC) throws Exception {
-        if (hasRel) {
+    private static StringBuilder obtainWhereClause(StringBuilder sql, ReturnClause returnC, MatchClause matchC) throws Exception {
+        boolean hasWhereKeyword = false;
+
+        int numRels = matchC.getRels().size();
+        if (numRels > 0) {
             sql.append(" WHERE ");
-            int numRels = matchC.getRels().size();
+            hasWhereKeyword = true;
             for (int i = 0; i < numRels - 1; i++) {
                 sql.append(alphabet[i]).append(".").append(alphabet[i]).append(2);
                 sql.append(" = ");
                 sql.append(alphabet[i + 1]).append(".").append(alphabet[i + 1]).append(1);
                 sql.append(" AND ");
             }
+        }
 
-            for (CypReturn cR : returnC.getItems()) {
-                String table[] = obtainTable(cR.getNodeID(), matchC);
-                int posInRel = obtainPos(matchC, cR.getNodeID());
-                if (posInRel != -1) {
-                    sql.append(table[1]).append(".id = ");
-                    if (posInRel == 1) {
-                        sql.append("a.a1 AND ");
-                    } else {
-                        posInRel -= 2;
-                        sql.append(alphabet[posInRel]).append(".").append(alphabet[posInRel]).append(2);
+        for (CypReturn cR : returnC.getItems()) {
+            switch (cR.getType()) {
+                case "node":
+                    if (!hasWhereKeyword) {
+                        sql.append(" WHERE ");
+                        hasWhereKeyword = true;
+                    }
+
+                    sql.append("n.id = ");
+                    int posInClause = cR.getPosInClause();
+                    if (posInClause == 1) {
+                        sql.append("a.a1");
+                        sql.append(" AND ");
+                    } else if (posInClause == 2) {
+                        sql.append("b.b1");
+                        sql.append(" AND ");
+                    } else if (posInClause == 3) {
+                        sql.append("b.b2");
+                        sql.append(" AND ");
+                    } else if (posInClause == 4) {
+                        sql.append("c.c2");
                         sql.append(" AND ");
                     }
-                }
             }
-
-            sql.setLength(sql.length() - 5);
-
-        } else {
-            boolean whereClause = false;
-
-            for (CypNode cN : matchC.getNodes()) {
-                if (cN.getProps() != null) {
-                    if (!whereClause) {
-                        sql.append(" WHERE ");
-                        whereClause = true;
-                    }
-
-                    JsonObject p = cN.getProps();
-                    String table = cN.getAlias()[1];
-
-                    Set<Map.Entry<String, JsonElement>> entrySet = p.entrySet();
-                    for (Map.Entry<String, JsonElement> entry : entrySet) {
-                        sql.append(table).append(".").append(entry.getKey());
-                        sql.append("='").append(entry.getValue().getAsString());
-                        sql.append("' AND ");
-                    }
-                }
-            }
-
-
-            if (whereClause) sql.setLength(sql.length() - 5);
         }
+
+//        if (numRels > 1) {
+//            sql.append("n.id != a.a1");
+//            sql.append(" AND ");
+//        }
+
+        if (hasWhereKeyword) sql.setLength(sql.length() - 5);
 
         return sql;
     }
