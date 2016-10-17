@@ -29,6 +29,9 @@ public class ToolV1 {
             String otherQuery = "match (n:Player {name:\"Wayne Rooney\"})-->(x)<--(b)-->(c:NationalTeam) " +
                     "return c;";
 
+            String moreTesting = "match (n:Club)<--(x)-->(b:NationalTeam)<--(a:Player {name:\"Gareth Bale\"}) " +
+                    "return distinct n order by n.name asc skip 2 limit 3;";
+
 //            WITH a AS (SELECT n1.id AS a1, n2.id AS a2 FROM nodes n1
 //                    INNER JOIN edges e1 on n1.id = e1.idl
 //                    INNER JOIN nodes n2 on e1.idr = n2.id
@@ -42,9 +45,9 @@ public class ToolV1 {
             //select * from nodes n1 inner join edges e1 on n1.id = e1.idl inner join nodes n2 on e1.idr = n2.id
             // where n2.name = 'Manchester United' and e1.type = 'PLAYS_FOR';
 
-            CypherDriver.run(otherQuery);
+            CypherDriver.run(moreTesting);
 
-            DecodedQuery decodedQuery = CypherTokenizer.decode(otherQuery);
+            DecodedQuery decodedQuery = CypherTokenizer.decode(moreTesting);
 
             int typeSchemaRunningAgainst = 2;
             String sqlFromCypher = null;

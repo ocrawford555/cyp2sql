@@ -18,7 +18,7 @@ public class InterToSQLNodesEdges {
                 decodedQuery.getCypherAdditionalInfo().hasDistinct());
 
         if (decodedQuery.getOc() != null)
-            sql = obtainOrderByClause(decodedQuery.getMc(), decodedQuery.getOc(), sql);
+            sql = obtainOrderByClause(decodedQuery.getOc(), sql);
 
         int skipAmount = decodedQuery.getSkipAmount();
         int limitAmount = decodedQuery.getLimitAmount();
@@ -238,28 +238,30 @@ public class InterToSQLNodesEdges {
             }
         }
 
-//        if (numRels > 1) {
-//            sql.append("n.id != a.a1");
-//            sql.append(" AND ");
-//        }
+        if (numRels > 1) {
+            for (int i = 0; i < numRels - 1; i++) {
+                if (i == 0) {
+                    sql.append("a.a1 != b.b2");
+                } else {
+                    sql.append(alphabet[i - 1]).append(".").append(alphabet[i - 1]).append(2);
+                    sql.append(" != ");
+                    sql.append(alphabet[i + 1]).append(".").append(alphabet[i + 1]).append(2);
+                }
+                sql.append(" AND ");
+            }
+        }
 
         if (hasWhereKeyword) sql.setLength(sql.length() - 5);
 
         return sql;
     }
 
-    private static StringBuilder obtainOrderByClause(MatchClause matchC, OrderClause orderC,
-                                                     StringBuilder sql) throws Exception {
+    private static StringBuilder obtainOrderByClause(OrderClause orderC, StringBuilder sql) {
         sql.append(" ");
         sql.append("ORDER BY ");
         for (CypOrder cO : orderC.getItems()) {
-            String entity = validateNodeID(cO.getNodeID(), matchC);
-
-            if (entity != null) {
-                sql.append(entity).append(".").append(cO.getField()).append(" ").append(cO.getAscOrDesc());
-                sql.append(", ");
-            } else
-                throw new Exception("ORDER BY CLAUSE INCORRECT");
+            sql.append("n").append(".").append(cO.getField()).append(" ").append(cO.getAscOrDesc());
+            sql.append(", ");
         }
         sql.setLength(sql.length() - 2);
         return sql;

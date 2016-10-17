@@ -23,13 +23,6 @@ class CypherTranslator {
         int posOfSkip = tokenList.indexOf("SKIP");
         int posOfLimit = tokenList.indexOf("LIMIT");
 
-//        System.out.println(posOfMatch);
-//        System.out.println(posOfWhere);
-//        System.out.println(posOfReturn);
-//        System.out.println(posOfOrder);
-//        System.out.println(posOfSkip);
-//        System.out.println(posOfLimit);
-
         List<String> matchClause;
         List<String> returnClause;
         List<String> orderClause = null;
@@ -50,7 +43,7 @@ class CypherTranslator {
                 returnClause = tokenList.subList(posOfReturn + 1 + ((cypherQ.hasDistinct()) ? 1 : 0), posOfSkip);
             }
         } else {
-            returnClause = tokenList.subList(posOfReturn + 1, posOfOrder);
+            returnClause = tokenList.subList(posOfReturn + 1 + ((cypherQ.hasDistinct()) ? 1 : 0), posOfOrder);
             if (posOfSkip == -1 && posOfLimit == -1) {
                 orderClause = tokenList.subList(posOfOrder + 2, tokenList.size());
             } else if (posOfLimit == -1) {
@@ -62,7 +55,7 @@ class CypherTranslator {
             }
         }
 
-        System.out.println(matchClause);
+        System.out.println(returnClause);
         MatchClause matchC = matchDecode(matchClause);
         ReturnClause returnC = returnDecode(returnClause, matchC);
         OrderClause orderC = null;

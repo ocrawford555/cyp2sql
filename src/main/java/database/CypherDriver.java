@@ -11,7 +11,7 @@ public class CypherDriver {
 
         while (result.hasNext()) {
             Record record = result.next();
-            System.out.println("NAME : " + record.get("c").asNode().get("name").asString());
+            System.out.println("NAME : " + record.get("n").asNode().get("name").asString());
         }
 
         session.close();
