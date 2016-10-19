@@ -70,88 +70,107 @@ public class InterToSQLNodesEdges {
                     sql.append(" FROM nodes n1 " +
                             "INNER JOIN edges e1 on n1.id = e1.idl " +
                             "INNER JOIN nodes n2 on e1.idr = n2.id");
+                    sql = obtainWhereInWithClause(cR, matchC, sql, false);
                     break;
                 case "left":
                     sql.append(" FROM nodes n1 " +
                             "INNER JOIN edges e1 on n1.id = e1.idr " +
                             "INNER JOIN nodes n2 on e1.idl = n2.id");
+                    sql = obtainWhereInWithClause(cR, matchC, sql, false);
                     break;
                 case "none":
-                    //TODO: complete thinking for this section
-                    //i.e. actually do something with logic.
+                    sql.append(" FROM nodes n1 " +
+                            "INNER JOIN edges e1 on n1.id = e1.idl " +
+                            "INNER JOIN nodes n2 on e1.idr = n2.id");
+                    sql = obtainWhereInWithClause(cR, matchC, sql, true);
+                    sql.append("SELECT n1.id AS ").append(withAlias).append(1).append(", ");
+                    sql.append("n2.id AS ").append(withAlias).append(2);
+                    sql.append(" FROM nodes n1 " +
+                            "INNER JOIN edges e1 on n1.id = e1.idr " +
+                            "INNER JOIN nodes n2 on e1.idl = n2.id");
+                    sql = obtainWhereInWithClause(cR, matchC, sql, false);
+                    break;
             }
 
-
-            boolean includesWhere = false;
-            int posOfRel = cR.getPosInClause();
-
-            CypNode leftNode = obtainNode(matchC, posOfRel);
-            JsonObject leftProps = leftNode.getProps();
-            CypNode rightNode = obtainNode(matchC, posOfRel + 1);
-            JsonObject rightProps = rightNode.getProps();
-            String typeRel = cR.getType();
-
-            if (leftProps != null) {
-                sql.append(" WHERE ");
-                includesWhere = true;
-
-                Set<Map.Entry<String, JsonElement>> entrySet = leftProps.entrySet();
-                for (Map.Entry<String, JsonElement> entry : entrySet) {
-                    sql.append("n1").append(".").append(entry.getKey());
-                    sql.append("='").append(WordUtils.capitalizeFully(entry.getValue().getAsString()));
-                    sql.append("' AND ");
-                }
-            }
-
-            if (rightProps != null) {
-                if (!includesWhere) {
-                    sql.append(" WHERE ");
-                    includesWhere = true;
-                }
-
-                Set<Map.Entry<String, JsonElement>> entrySet = rightProps.entrySet();
-                for (Map.Entry<String, JsonElement> entry : entrySet) {
-                    sql.append("n2").append(".").append(entry.getKey());
-                    sql.append("='").append(WordUtils.capitalizeFully(entry.getValue().getAsString()));
-                    sql.append("' AND ");
-                }
-            }
-
-            if (leftNode.getType() != null) {
-                if (!includesWhere) {
-                    sql.append(" WHERE ");
-                    includesWhere = true;
-                }
-                sql.append("n1.label = '");
-                sql.append(WordUtils.capitalizeFully(leftNode.getType())).append("' AND ");
-            }
-
-            if (rightNode.getType() != null) {
-                if (!includesWhere) {
-                    sql.append(" WHERE ");
-                    includesWhere = true;
-                }
-                sql.append("n2.label = '");
-                sql.append(WordUtils.capitalizeFully(rightNode.getType())).append("' AND ");
-            }
-
-            if (typeRel != null) {
-                if (!includesWhere) {
-                    sql.append(" WHERE ");
-                    includesWhere = true;
-                }
-
-                sql.append("e1.type = '").append(typeRel);
-                sql.append("' AND ");
-            }
-
-            if (includesWhere) sql.setLength(sql.length() - 5);
-            sql.append("), ");
             indexRel++;
         }
 
         sql.setLength(sql.length() - 2);
         sql.append(" ");
+        return sql;
+    }
+
+    private static StringBuilder obtainWhereInWithClause(CypRel cR, MatchClause matchC, StringBuilder sql,
+                                                         boolean isBiDirectional) {
+        boolean includesWhere = false;
+        int posOfRel = cR.getPosInClause();
+
+        CypNode leftNode = obtainNode(matchC, posOfRel);
+        JsonObject leftProps = leftNode.getProps();
+        CypNode rightNode = obtainNode(matchC, posOfRel + 1);
+        JsonObject rightProps = rightNode.getProps();
+        String typeRel = cR.getType();
+
+        if (leftProps != null) {
+            sql.append(" WHERE ");
+            includesWhere = true;
+
+            Set<Map.Entry<String, JsonElement>> entrySet = leftProps.entrySet();
+            for (Map.Entry<String, JsonElement> entry : entrySet) {
+                sql.append("n1").append(".").append(entry.getKey());
+                sql.append("='").append(WordUtils.capitalizeFully(entry.getValue().getAsString()));
+                sql.append("' AND ");
+            }
+        }
+
+        if (rightProps != null) {
+            if (!includesWhere) {
+                sql.append(" WHERE ");
+                includesWhere = true;
+            }
+
+            Set<Map.Entry<String, JsonElement>> entrySet = rightProps.entrySet();
+            for (Map.Entry<String, JsonElement> entry : entrySet) {
+                sql.append("n2").append(".").append(entry.getKey());
+                sql.append("='").append(WordUtils.capitalizeFully(entry.getValue().getAsString()));
+                sql.append("' AND ");
+            }
+        }
+
+        if (leftNode.getType() != null) {
+            if (!includesWhere) {
+                sql.append(" WHERE ");
+                includesWhere = true;
+            }
+            sql.append("n1.label = '");
+            sql.append(WordUtils.capitalizeFully(leftNode.getType())).append("' AND ");
+        }
+
+        if (rightNode.getType() != null) {
+            if (!includesWhere) {
+                sql.append(" WHERE ");
+                includesWhere = true;
+            }
+            sql.append("n2.label = '");
+            sql.append(WordUtils.capitalizeFully(rightNode.getType())).append("' AND ");
+        }
+
+        if (typeRel != null) {
+            if (!includesWhere) {
+                sql.append(" WHERE ");
+                includesWhere = true;
+            }
+
+            sql.append("e1.type = '").append(typeRel);
+            sql.append("' AND ");
+        }
+
+        if (includesWhere) sql.setLength(sql.length() - 5);
+        if (isBiDirectional) {
+            sql.append(" UNION ALL ");
+        } else {
+            sql.append("), ");
+        }
         return sql;
     }
 

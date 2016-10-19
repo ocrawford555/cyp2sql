@@ -55,7 +55,6 @@ class CypherTranslator {
             }
         }
 
-        System.out.println(returnClause);
         MatchClause matchC = matchDecode(matchClause);
         ReturnClause returnC = returnDecode(returnClause, matchC);
         OrderClause orderC = null;
@@ -70,7 +69,6 @@ class CypherTranslator {
         if (cypherQ.doesCluaseHaveWhere()) {
             whereDecode(matchC, cypherQ);
         }
-
 
         return dq;
     }
@@ -206,7 +204,7 @@ class CypherTranslator {
 
     private static ArrayList<CypRel> extractRels(List<String> clause,
                                                  MatchClause m) {
-        ArrayList<CypRel> rels = new ArrayList<CypRel>();
+        ArrayList<CypRel> rels = new ArrayList<>();
 
         JsonObject o;
         String direction;
@@ -267,29 +265,29 @@ class CypherTranslator {
                 }
             } else {
                 // may be a relationship still there
-                if (clause.contains("<") || clause.contains(">")) {
-                    int posLeftArrow = clause.indexOf("<");
-                    int posRightArrow = clause.indexOf(">");
+                if (clause.contains("-")) {
+                    int posDash = clause.indexOf("-");
+                    if (clause.get(posDash + 1).equals("-") && !clause.get(posDash + 2).equals(">")) {
+                        direction = "none";
+                        clause = clause.subList(posDash + 2, clause.size());
+                    } else if (clause.contains("<") || clause.contains(">")) {
+                        int posLeftArrow = clause.indexOf("<");
+                        int posRightArrow = clause.indexOf(">");
 
-                    if (posLeftArrow != -1 && posRightArrow != -1) {
-                        if (posLeftArrow < posRightArrow) {
+                        if (posLeftArrow != -1 && posRightArrow != -1) {
+                            if (posLeftArrow < posRightArrow) {
+                                direction = "left";
+                                clause = clause.subList(posLeftArrow + 3, clause.size());
+                            } else {
+                                direction = "right";
+                                clause = clause.subList(posRightArrow + 1, clause.size());
+                            }
+                        } else if (posLeftArrow != -1) {
                             direction = "left";
                             clause = clause.subList(posLeftArrow + 3, clause.size());
-                        } else {
+                        } else if (posRightArrow != -1) {
                             direction = "right";
                             clause = clause.subList(posRightArrow + 1, clause.size());
-                        }
-                    } else if (posLeftArrow != -1) {
-                        direction = "left";
-                        clause = clause.subList(posLeftArrow + 3, clause.size());
-                    } else if (posRightArrow != -1) {
-                        direction = "right";
-                        clause = clause.subList(posRightArrow + 1, clause.size());
-                    } else if (clause.contains("-")) {
-                        int posDash = clause.indexOf("-");
-                        if (clause.get(posDash + 1).equals("-")) {
-                            direction = "none";
-                            clause = clause.subList(posDash + 2, clause.size());
                         }
                     }
                 } else

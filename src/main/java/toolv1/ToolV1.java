@@ -17,7 +17,9 @@ public class ToolV1 {
         try {
             DbUtil.createConnection("testa");
 
-            String cyherQuery = "match (n:Player)-[:PLAYS_FOR]->(x:Club {name:\"Manchester United\"}) return n limit 20";
+            String cyherQuery = "match(a:Club)--(x)--(n:NationalTeam) return distinct n;";
+
+            String plsWork = "match (a:NationalTeam)--(b)--(n:Club) return distinct n order by n.name asc;";
 
             String rooneyQuery = "match (n:Player {name:\"Wayne Rooney\"})-->(x) return x;";
 
@@ -32,6 +34,8 @@ public class ToolV1 {
             String moreTesting = "match (n:Club)<--(x)-->(b:NationalTeam)<--(a:Player {name:\"Gareth Bale\"}) " +
                     "return distinct n order by n.name asc skip 2 limit 3;";
 
+            String biDir = "match(n:Club)--(x:Player) return n";
+
 //            WITH a AS (SELECT n1.id AS a1, n2.id AS a2 FROM nodes n1
 //                    INNER JOIN edges e1 on n1.id = e1.idl
 //                    INNER JOIN nodes n2 on e1.idr = n2.id
@@ -45,12 +49,13 @@ public class ToolV1 {
             //select * from nodes n1 inner join edges e1 on n1.id = e1.idl inner join nodes n2 on e1.idr = n2.id
             // where n2.name = 'Manchester United' and e1.type = 'PLAYS_FOR';
 
-            CypherDriver.run(moreTesting);
+            CypherDriver.run(plsWork);
 
-            DecodedQuery decodedQuery = CypherTokenizer.decode(moreTesting);
+            DecodedQuery decodedQuery = CypherTokenizer.decode(plsWork);
 
             int typeSchemaRunningAgainst = 2;
             String sqlFromCypher = null;
+
             switch (typeSchemaRunningAgainst) {
                 case 1:
                     sqlFromCypher = InterToSQL.translate(decodedQuery);
@@ -59,6 +64,7 @@ public class ToolV1 {
                     sqlFromCypher = InterToSQLNodesEdges.translate(decodedQuery);
                     break;
             }
+
             sqlFromCypher = sqlFromCypher.replace("Nationalteam", "NationalTeam");
             System.out.println(sqlFromCypher);
             SQLDriver.run(sqlFromCypher);
