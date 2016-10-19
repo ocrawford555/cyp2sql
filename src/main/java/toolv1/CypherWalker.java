@@ -6,6 +6,7 @@ import parsing_lexing.CypherParser;
 public class CypherWalker extends CypherBaseListener {
     private boolean hasOptional = false;
     private boolean hasDistinct = false;
+    private boolean hasCount = false;
     private String matchClause = null;
     private String whereClause = null;
     private String returnClause = null;
@@ -72,6 +73,9 @@ public class CypherWalker extends CypherBaseListener {
         //distinct keyword attached or not
         if (ctx.getText().toUpperCase().contains(" DISTINCT "))
             hasDistinct = true;
+        // is the return query looking at a count
+        if (ctx.getText().toUpperCase().contains("COUNT"))
+            hasCount = true;
     }
 
     public void enterReturnItems(CypherParser.ReturnItemsContext ctx) {
@@ -121,5 +125,9 @@ public class CypherWalker extends CypherBaseListener {
 
     public boolean hasDistinct() {
         return hasDistinct;
+    }
+
+    public boolean hasCount() {
+        return hasCount;
     }
 }

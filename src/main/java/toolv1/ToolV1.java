@@ -17,7 +17,7 @@ public class ToolV1 {
         try {
             DbUtil.createConnection("testa");
 
-            String cyherQuery = "match(a:Club)--(x)--(n:NationalTeam) return distinct n;";
+            String cyherQuery = "match (n)-[]-(a:Player) where a.name = \"Wayne Rooney\" return count(*)";
 
             String plsWork = "match (a:NationalTeam)--(b)--(n:Club) return distinct n order by n.name asc;";
 
@@ -49,9 +49,9 @@ public class ToolV1 {
             //select * from nodes n1 inner join edges e1 on n1.id = e1.idl inner join nodes n2 on e1.idr = n2.id
             // where n2.name = 'Manchester United' and e1.type = 'PLAYS_FOR';
 
-            CypherDriver.run(plsWork);
+            //CypherDriver.run(cyherQuery);
 
-            DecodedQuery decodedQuery = CypherTokenizer.decode(plsWork);
+            DecodedQuery decodedQuery = CypherTokenizer.decode(cyherQuery);
 
             int typeSchemaRunningAgainst = 2;
             String sqlFromCypher = null;
@@ -67,7 +67,7 @@ public class ToolV1 {
 
             sqlFromCypher = sqlFromCypher.replace("Nationalteam", "NationalTeam");
             System.out.println(sqlFromCypher);
-            SQLDriver.run(sqlFromCypher);
+            //SQLDriver.run(sqlFromCypher);
         } catch (Exception e) {
             e.printStackTrace();
         } finally {

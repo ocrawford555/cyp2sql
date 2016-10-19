@@ -179,9 +179,17 @@ public class InterToSQLNodesEdges {
             throws Exception {
         sql.append("SELECT ");
         if (hasDistinct) sql.append("DISTINCT ");
+        boolean returnAll = false;
         boolean usesNodesTable = false;
         boolean usesRelsTable = false;
+
         for (CypReturn cR : returnC.getItems()) {
+            if (cR.getNodeID() == null) {
+                sql.append(cR.getField()).append(" ");
+                sql.append("FROM nodes n,   ");
+                returnAll = true;
+                break;
+            }
             boolean isNode = false;
             for (CypNode cN : matchC.getNodes()) {
                 if (cR.getNodeID().equals(cN.getId())) {
@@ -206,7 +214,7 @@ public class InterToSQLNodesEdges {
 
         sql.setLength(sql.length() - 2);
 
-        sql.append(" FROM ");
+        if (!returnAll) sql.append(" FROM ");
         if (usesNodesTable) sql.append("nodes n, ");
         int numRels = matchC.getRels().size();
         for (int i = 0; i < numRels; i++)
@@ -231,31 +239,34 @@ public class InterToSQLNodesEdges {
             }
         }
 
-        for (CypReturn cR : returnC.getItems()) {
-            switch (cR.getType()) {
-                case "node":
-                    if (!hasWhereKeyword) {
-                        sql.append(" WHERE ");
-                        hasWhereKeyword = true;
-                    }
+        for (CypReturn cR : returnC.getItems())
+            if (cR.getType() != null)
+                switch (cR.getType()) {
+                    case "node":
+                        if (!hasWhereKeyword) {
+                            sql.append(" WHERE ");
+                            hasWhereKeyword = true;
+                        }
 
-                    sql.append("n.id = ");
-                    int posInClause = cR.getPosInClause();
-                    if (posInClause == 1) {
-                        sql.append("a.a1");
-                        sql.append(" AND ");
-                    } else if (posInClause == 2) {
-                        sql.append("b.b1");
-                        sql.append(" AND ");
-                    } else if (posInClause == 3) {
-                        sql.append("b.b2");
-                        sql.append(" AND ");
-                    } else if (posInClause == 4) {
-                        sql.append("c.c2");
-                        sql.append(" AND ");
-                    }
-            }
-        }
+                        sql.append("n.id = ");
+                        int posInClause = cR.getPosInClause();
+                        if (posInClause == 1) {
+                            sql.append("a.a1");
+                            sql.append(" AND ");
+                        } else if (posInClause == 2) {
+                            sql.append("b.b1");
+                            sql.append(" AND ");
+                        } else if (posInClause == 3) {
+                            sql.append("b.b2");
+                            sql.append(" AND ");
+                        } else if (posInClause == 4) {
+                            sql.append("c.c2");
+                            sql.append(" AND ");
+                        }
+                        break;
+                    default:
+                        break;
+                }
 
         if (numRels > 1) {
             for (int i = 0; i < numRels - 1; i++) {

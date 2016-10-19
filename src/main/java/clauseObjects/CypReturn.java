@@ -9,7 +9,12 @@ public class CypReturn {
     public CypReturn(String id, String f, MatchClause matchC) {
         this.nodeID = id;
         this.field = f;
-        this.type = discoverType(this.nodeID, matchC);
+        if (this.nodeID != null) {
+            this.type = discoverType(this.nodeID, matchC);
+        } else {
+            this.type = "node";
+            this.posInClause = 1;
+        }
     }
 
     private String discoverType(String nodeID, MatchClause matchC) {
@@ -40,7 +45,7 @@ public class CypReturn {
     }
 
     @Override
-    public String toString(){
+    public String toString() {
         return "(ID:" + this.nodeID + ",FIELD:" + this.field + ")";
     }
 

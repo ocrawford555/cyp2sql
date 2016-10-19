@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="6c07d57f-61cf-46bd-a98b-dbc0449cd683" name="Default" comment="Finished second translator unit. Looking swag. Next step use relational algebra.">
+    <list default="true" id="6c07d57f-61cf-46bd-a98b-dbc0449cd683" name="Default" comment="Added translation feature for bidirectional query structures. Bug fix in parsing of rels.">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/database/CypherDriver.java" afterPath="$PROJECT_DIR$/src/main/java/database/CypherDriver.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/database/DbUtil.java" afterPath="$PROJECT_DIR$/src/main/java/database/DbUtil.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/clauseObjects/CypReturn.java" afterPath="$PROJECT_DIR$/src/main/java/clauseObjects/CypReturn.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/query_translation/InterToSQLNodesEdges.java" afterPath="$PROJECT_DIR$/src/main/java/query_translation/InterToSQLNodesEdges.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/toolv1/CypherTranslator.java" afterPath="$PROJECT_DIR$/src/main/java/toolv1/CypherTranslator.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/toolv1/CypherWalker.java" afterPath="$PROJECT_DIR$/src/main/java/toolv1/CypherWalker.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/toolv1/ToolV1.java" afterPath="$PROJECT_DIR$/src/main/java/toolv1/ToolV1.java" />
     </list>
     <ignored path="testANTLR.iws" />
@@ -30,13 +30,42 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="ToolV1.java" pinned="false" current-in-tab="true">
+      <file leaf-file-name="ToolV1.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/toolv1/ToolV1.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="136">
-              <caret line="8" column="0" selection-start-line="8" selection-start-column="0" selection-end-line="8" selection-end-column="0" />
+            <state relative-caret-position="352">
+              <caret line="53" column="0" selection-start-line="53" selection-start-column="0" selection-end-line="53" selection-end-column="0" />
               <folding>
                 <element signature="imports" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="CypherWalker.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/toolv1/CypherWalker.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="368">
+              <caret line="128" column="0" selection-start-line="128" selection-start-column="0" selection-end-line="128" selection-end-column="0" />
+              <folding>
+                <element signature="e#2813#2814#0" expanded="true" />
+                <element signature="e#2857#2858#0" expanded="true" />
+                <element signature="e#4414#4415#0" expanded="true" />
+                <element signature="e#4448#4449#0" expanded="true" />
+                <element signature="e#4481#4482#0" expanded="true" />
+                <element signature="e#4512#4513#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="CypReturn.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/clauseObjects/CypReturn.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="154">
+              <caret line="10" column="23" selection-start-line="10" selection-start-column="23" selection-end-line="10" selection-end-column="23" />
+              <folding>
+                <element signature="e#1208#1209#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -45,22 +74,9 @@
       <file leaf-file-name="DecodedQuery.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/clauseObjects/DecodedQuery.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="289">
+            <state relative-caret-position="38">
               <caret line="17" column="20" selection-start-line="17" selection-start-column="20" selection-end-line="17" selection-end-column="20" />
-              <folding>
-                <element signature="e#691#692#0" expanded="false" />
-                <element signature="e#716#717#0" expanded="false" />
-                <element signature="e#751#752#0" expanded="false" />
-                <element signature="e#776#777#0" expanded="false" />
-                <element signature="e#810#811#0" expanded="false" />
-                <element signature="e#835#836#0" expanded="false" />
-                <element signature="e#869#870#0" expanded="false" />
-                <element signature="e#902#903#0" expanded="false" />
-                <element signature="e#937#938#0" expanded="false" />
-                <element signature="e#971#972#0" expanded="false" />
-                <element signature="e#1024#1025#0" expanded="false" />
-                <element signature="e#1067#1068#0" expanded="false" />
-              </folding>
+              <folding />
             </state>
           </provider>
         </entry>
@@ -68,10 +84,11 @@
       <file leaf-file-name="InterToSQLNodesEdges.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/query_translation/InterToSQLNodesEdges.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="510">
-              <caret line="87" column="46" selection-start-line="87" selection-start-column="46" selection-end-line="87" selection-end-column="46" />
+            <state relative-caret-position="-852">
+              <caret line="187" column="44" selection-start-line="187" selection-start-column="44" selection-end-line="187" selection-end-column="44" />
               <folding>
                 <element signature="imports" expanded="true" />
+                <element signature="method#obtainWhereInWithClause#0;class#InterToSQLNodesEdges#0" expanded="false" />
                 <element signature="method#validateNodeID#0;class#InterToSQLNodesEdges#0" expanded="false" />
                 <element signature="method#obtainPos#0;class#InterToSQLNodesEdges#0" expanded="false" />
                 <element signature="method#obtainNode#0;class#InterToSQLNodesEdges#0" expanded="false" />
@@ -84,8 +101,8 @@
       <file leaf-file-name="CypherDriver.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/database/CypherDriver.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="272">
-              <caret line="22" column="62" selection-start-line="22" selection-start-column="7" selection-end-line="22" selection-end-column="62" />
+            <state relative-caret-position="208">
+              <caret line="18" column="76" selection-start-line="18" selection-start-column="76" selection-end-line="18" selection-end-column="76" />
               <folding />
             </state>
           </provider>
@@ -104,24 +121,21 @@
       <file leaf-file-name="CypherTokenizer.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/toolv1/CypherTokenizer.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="459">
-              <caret line="36" column="82" selection-start-line="36" selection-start-column="82" selection-end-line="36" selection-end-column="82" />
+            <state relative-caret-position="357">
+              <caret line="30" column="32" selection-start-line="30" selection-start-column="32" selection-end-line="30" selection-end-column="32" />
               <folding>
-                <element signature="imports" expanded="false" />
+                <element signature="e#960#968#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="CypherTranslator.java" pinned="false" current-in-tab="false">
+      <file leaf-file-name="CypherTranslator.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/java/toolv1/CypherTranslator.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2854">
-              <caret line="268" column="54" selection-start-line="268" selection-start-column="54" selection-end-line="268" selection-end-column="54" />
+            <state relative-caret-position="305">
+              <caret line="364" column="20" selection-start-line="364" selection-start-column="20" selection-end-line="364" selection-end-column="20" />
               <folding>
-                <element signature="method#whereDecode#0;class#CypherTranslator#0" expanded="false" />
-                <element signature="method#extractWhere#0;class#CypherTranslator#0" expanded="false" />
-                <element signature="method#addCondition#0;class#CypherTranslator#0" expanded="false" />
                 <element signature="method#getJSONProps#0;class#CypherTranslator#0" expanded="false" />
                 <element signature="method#extractIdAndType#0;class#CypherTranslator#0" expanded="false" />
                 <element signature="method#extractOrder#0;class#CypherTranslator#0" expanded="false" />
@@ -191,14 +205,14 @@
         <option value="$PROJECT_DIR$/src/main/java/database/SQLDriver.java" />
         <option value="$PROJECT_DIR$/src/main/java/clauseObjects/DecodedQuery.java" />
         <option value="$PROJECT_DIR$/src/main/java/query_translation/InterToSQL.java" />
-        <option value="$PROJECT_DIR$/src/main/java/clauseObjects/CypReturn.java" />
         <option value="$PROJECT_DIR$/src/main/java/toolv1/CypherTokenizer.java" />
-        <option value="$PROJECT_DIR$/src/main/java/toolv1/CypherWalker.java" />
-        <option value="$PROJECT_DIR$/src/main/java/query_translation/InterToSQLNodesEdges.java" />
-        <option value="$PROJECT_DIR$/src/main/java/toolv1/CypherTranslator.java" />
-        <option value="$PROJECT_DIR$/src/main/java/toolv1/ToolV1.java" />
         <option value="$PROJECT_DIR$/src/main/java/database/CypherDriver.java" />
         <option value="$PROJECT_DIR$/src/main/java/database/DbUtil.java" />
+        <option value="$PROJECT_DIR$/src/main/java/clauseObjects/CypReturn.java" />
+        <option value="$PROJECT_DIR$/src/main/java/toolv1/CypherWalker.java" />
+        <option value="$PROJECT_DIR$/src/main/java/query_translation/InterToSQLNodesEdges.java" />
+        <option value="$PROJECT_DIR$/src/main/java/toolv1/ToolV1.java" />
+        <option value="$PROJECT_DIR$/src/main/java/toolv1/CypherTranslator.java" />
       </list>
     </option>
   </component>
@@ -1073,7 +1087,7 @@
       <workItem from="1476745674500" duration="8000" />
       <workItem from="1476792599663" duration="959000" />
       <workItem from="1476801587911" duration="15000" />
-      <workItem from="1476873625721" duration="4002000" />
+      <workItem from="1476873625721" duration="9153000" />
     </task>
     <task id="LOCAL-00001" summary="Added 'Order By' functionality. Fixed bug with direction of relationship. Refactored Translator code.">
       <created>1475693730437</created>
@@ -1145,11 +1159,18 @@
       <option name="project" value="LOCAL" />
       <updated>1476741481629</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL-00011" summary="Added translation feature for bidirectional query structures. Bug fix in parsing of rels.">
+      <created>1476889301266</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1476889301266</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="188774000" />
+    <option name="totallyTimeSpent" value="193925000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="1358" y="-8" width="1696" height="1026" extended-state="6" />
@@ -1162,7 +1183,7 @@
       <window_info id="Capture Analysis" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.5032751" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.43558952" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3286026" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -1209,13 +1230,17 @@
     <MESSAGE value="Started new translation to SQL unit." />
     <MESSAGE value="Added more functionality to new translator. Still needs bug fixing." />
     <MESSAGE value="Finished second translator unit. Looking swag. Next step use relational algebra." />
-    <option name="LAST_COMMIT_MESSAGE" value="Finished second translator unit. Looking swag. Next step use relational algebra." />
+    <MESSAGE value="Added translation feature for bidirectional query structures. Bug fix in parsing of rels." />
+    <option name="LAST_COMMIT_MESSAGE" value="Added translation feature for bidirectional query structures. Bug fix in parsing of rels." />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REARRANGE_BEFORE_PROJECT_COMMIT" value="true" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="22" />
+      <breakpoints-dialog>
+        <breakpoints-dialog />
+      </breakpoints-dialog>
+      <option name="time" value="27" />
     </breakpoint-manager>
     <watches-manager />
   </component>
@@ -1455,27 +1480,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/clauseObjects/CypReturn.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="95">
-          <caret line="6" column="18" selection-start-line="6" selection-start-column="18" selection-end-line="6" selection-end-column="18" />
-          <folding>
-            <element signature="e#1180#1181#0" expanded="false" />
-            <element signature="e#1207#1208#0" expanded="false" />
-            <element signature="e#1242#1243#0" expanded="false" />
-            <element signature="e#1276#1277#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/toolv1/CypherWalker.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1802">
-          <caret line="123" column="5" selection-start-line="123" selection-start-column="5" selection-end-line="123" selection-end-column="5" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/testing/TestAntlr.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="731">
@@ -1489,37 +1493,6 @@
         <state relative-caret-position="68">
           <caret line="4" column="13" selection-start-line="4" selection-start-column="13" selection-end-line="4" selection-end-column="13" />
           <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/clauseObjects/DecodedQuery.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="289">
-          <caret line="17" column="20" selection-start-line="17" selection-start-column="20" selection-end-line="17" selection-end-column="20" />
-          <folding>
-            <element signature="e#691#692#0" expanded="false" />
-            <element signature="e#716#717#0" expanded="false" />
-            <element signature="e#751#752#0" expanded="false" />
-            <element signature="e#776#777#0" expanded="false" />
-            <element signature="e#810#811#0" expanded="false" />
-            <element signature="e#835#836#0" expanded="false" />
-            <element signature="e#869#870#0" expanded="false" />
-            <element signature="e#902#903#0" expanded="false" />
-            <element signature="e#937#938#0" expanded="false" />
-            <element signature="e#971#972#0" expanded="false" />
-            <element signature="e#1024#1025#0" expanded="false" />
-            <element signature="e#1067#1068#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/toolv1/CypherTokenizer.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="459">
-          <caret line="36" column="82" selection-start-line="36" selection-start-column="82" selection-end-line="36" selection-end-column="82" />
-          <folding>
-            <element signature="imports" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1540,43 +1513,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/query_translation/InterToSQLNodesEdges.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="510">
-          <caret line="87" column="46" selection-start-line="87" selection-start-column="46" selection-end-line="87" selection-end-column="46" />
-          <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="method#validateNodeID#0;class#InterToSQLNodesEdges#0" expanded="false" />
-            <element signature="method#obtainPos#0;class#InterToSQLNodesEdges#0" expanded="false" />
-            <element signature="method#obtainNode#0;class#InterToSQLNodesEdges#0" expanded="false" />
-            <element signature="method#obtainTable#0;class#InterToSQLNodesEdges#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/toolv1/CypherTranslator.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2854">
-          <caret line="268" column="54" selection-start-line="268" selection-start-column="54" selection-end-line="268" selection-end-column="54" />
-          <folding>
-            <element signature="method#whereDecode#0;class#CypherTranslator#0" expanded="false" />
-            <element signature="method#extractWhere#0;class#CypherTranslator#0" expanded="false" />
-            <element signature="method#addCondition#0;class#CypherTranslator#0" expanded="false" />
-            <element signature="method#getJSONProps#0;class#CypherTranslator#0" expanded="false" />
-            <element signature="method#extractIdAndType#0;class#CypherTranslator#0" expanded="false" />
-            <element signature="method#extractOrder#0;class#CypherTranslator#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/database/CypherDriver.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="272">
-          <caret line="22" column="62" selection-start-line="22" selection-start-column="7" selection-end-line="22" selection-end-column="62" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/database/DbUtil.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="153">
@@ -1585,12 +1521,90 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/toolv1/ToolV1.java">
+    <entry file="file://$PROJECT_DIR$/src/main/java/database/CypherDriver.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="136">
-          <caret line="8" column="0" selection-start-line="8" selection-start-column="0" selection-end-line="8" selection-end-column="0" />
+        <state relative-caret-position="208">
+          <caret line="18" column="76" selection-start-line="18" selection-start-column="76" selection-end-line="18" selection-end-column="76" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/clauseObjects/DecodedQuery.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="38">
+          <caret line="17" column="20" selection-start-line="17" selection-start-column="20" selection-end-line="17" selection-end-column="20" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/clauseObjects/CypReturn.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="154">
+          <caret line="10" column="23" selection-start-line="10" selection-start-column="23" selection-end-line="10" selection-end-column="23" />
+          <folding>
+            <element signature="e#1208#1209#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/toolv1/CypherTokenizer.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="357">
+          <caret line="30" column="32" selection-start-line="30" selection-start-column="32" selection-end-line="30" selection-end-column="32" />
+          <folding>
+            <element signature="e#960#968#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/toolv1/CypherWalker.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="368">
+          <caret line="128" column="0" selection-start-line="128" selection-start-column="0" selection-end-line="128" selection-end-column="0" />
+          <folding>
+            <element signature="e#2813#2814#0" expanded="true" />
+            <element signature="e#2857#2858#0" expanded="true" />
+            <element signature="e#4414#4415#0" expanded="true" />
+            <element signature="e#4448#4449#0" expanded="true" />
+            <element signature="e#4481#4482#0" expanded="true" />
+            <element signature="e#4512#4513#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/query_translation/InterToSQLNodesEdges.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-852">
+          <caret line="187" column="44" selection-start-line="187" selection-start-column="44" selection-end-line="187" selection-end-column="44" />
           <folding>
             <element signature="imports" expanded="true" />
+            <element signature="method#obtainWhereInWithClause#0;class#InterToSQLNodesEdges#0" expanded="false" />
+            <element signature="method#validateNodeID#0;class#InterToSQLNodesEdges#0" expanded="false" />
+            <element signature="method#obtainPos#0;class#InterToSQLNodesEdges#0" expanded="false" />
+            <element signature="method#obtainNode#0;class#InterToSQLNodesEdges#0" expanded="false" />
+            <element signature="method#obtainTable#0;class#InterToSQLNodesEdges#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/toolv1/ToolV1.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="352">
+          <caret line="53" column="0" selection-start-line="53" selection-start-column="0" selection-end-line="53" selection-end-column="0" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/toolv1/CypherTranslator.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="305">
+          <caret line="364" column="20" selection-start-line="364" selection-start-column="20" selection-end-line="364" selection-end-column="20" />
+          <folding>
+            <element signature="method#getJSONProps#0;class#CypherTranslator#0" expanded="false" />
+            <element signature="method#extractIdAndType#0;class#CypherTranslator#0" expanded="false" />
+            <element signature="method#extractOrder#0;class#CypherTranslator#0" expanded="false" />
           </folding>
         </state>
       </provider>

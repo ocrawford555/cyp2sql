@@ -56,8 +56,9 @@ class CypherTranslator {
         }
 
         MatchClause matchC = matchDecode(matchClause);
-        ReturnClause returnC = returnDecode(returnClause, matchC);
+        ReturnClause returnC = returnDecode(returnClause, matchC, cypherQ);
         OrderClause orderC = null;
+
         if (orderClause != null)
             orderC = orderDecode(orderClause);
 
@@ -321,7 +322,7 @@ class CypherTranslator {
         return parser.parse(temp.toString()).getAsJsonObject();
     }
 
-    private static ReturnClause returnDecode(List<String> returnClause, MatchClause matchC) throws Exception {
+    private static ReturnClause returnDecode(List<String> returnClause, MatchClause matchC, CypherWalker cypherQ) throws Exception {
         ReturnClause r = new ReturnClause();
 
         List<CypReturn> items = new ArrayList<CypReturn>();
@@ -335,11 +336,11 @@ class CypherTranslator {
             returnClause = returnClause.subList(posComma + 1,
                     returnClause.size());
 
-            items.add(extractReturn(currentWorking, matchC));
+            items.add(extractReturn(currentWorking, matchC, cypherQ));
         }
 
         if (!returnClause.isEmpty()) {
-            items.add(extractReturn(returnClause, matchC));
+            items.add(extractReturn(returnClause, matchC, cypherQ));
         }
 
         r.setItems(items);
@@ -350,12 +351,22 @@ class CypherTranslator {
         return r;
     }
 
-    private static CypReturn extractReturn(List<String> clause, MatchClause matchC) throws Exception {
+    private static CypReturn extractReturn(List<String> clause, MatchClause matchC, CypherWalker cypherQ)
+            throws Exception {
         if (clause.size() == 3 && clause.contains(".")) {
             return new CypReturn(clause.get(0), clause.get(2), matchC);
-        } else if (clause.size() == 1) {
-            return new CypReturn(clause.get(0), null, matchC);
-        } else throw new Exception("RETURN CLAUSE MALFORMED");
+        } else
+            // TODO: something OOP style for types of return objects, such as normal and '*'
+            // for now do a nice hack (RETURN * returns the value of all variables.
+
+            if (clause.size() == 1)
+                if (clause.get(0).equals("*"))
+                    return new CypReturn(null, "*", null);
+                else
+                    return new CypReturn(clause.get(0), null, matchC);
+            else if (cypherQ.hasCount())
+                return new CypReturn(null, "COUNT(*)", null);
+            else throw new Exception("RETURN CLAUSE MALFORMED");
     }
 
     private static String[] extractIdAndType(List<String> tokens) {
