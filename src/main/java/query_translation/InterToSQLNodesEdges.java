@@ -17,6 +17,9 @@ public class InterToSQLNodesEdges {
         sql = obtainMatchAndReturn(decodedQuery.getMc(), decodedQuery.getRc(), sql,
                 decodedQuery.getCypherAdditionalInfo().hasDistinct());
 
+        if (decodedQuery.getCypherAdditionalInfo().hasCount())
+            sql = obtainGroupByClause(decodedQuery.getRc(), sql);
+
         if (decodedQuery.getOc() != null)
             sql = obtainOrderByClause(decodedQuery.getOc(), sql);
 
@@ -29,6 +32,14 @@ public class InterToSQLNodesEdges {
         sql.append(";");
 
         return sql.toString();
+    }
+
+    private static StringBuilder obtainGroupByClause(ReturnClause rc, StringBuilder sql) {
+        sql.append(" GROUP BY ");
+        sql.append("n").append(".").append("id, ");
+        sql.append("n").append(".").append("name, ");
+        sql.append("n").append(".").append("label");
+        return sql;
     }
 
     private static StringBuilder obtainMatchAndReturn(MatchClause matchC, ReturnClause returnC,
@@ -185,9 +196,11 @@ public class InterToSQLNodesEdges {
 
         for (CypReturn cR : returnC.getItems()) {
             if (cR.getNodeID() == null) {
-                sql.append(cR.getField()).append(" ");
-                sql.append("FROM nodes n,   ");
-                returnAll = true;
+                sql.append(cR.getField()).append("  ");
+                if (!usesNodesTable) {
+                    sql.append("FROM nodes n,   ");
+                    returnAll = true;
+                }
                 break;
             }
             boolean isNode = false;

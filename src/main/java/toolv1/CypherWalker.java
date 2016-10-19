@@ -11,6 +11,7 @@ public class CypherWalker extends CypherBaseListener {
     private String whereClause = null;
     private String returnClause = null;
     private String orderClause = null;
+    private String withClause = null;
     private String latestOrderDirection = "";
     private int skipAmount = -1;
     private int limitAmount = -1;
@@ -79,6 +80,7 @@ public class CypherWalker extends CypherBaseListener {
     }
 
     public void enterReturnItems(CypherParser.ReturnItemsContext ctx) {
+        System.out.println(ctx.getParent().getRuleIndex());
         returnClause = ctx.getText();
     }
 
@@ -95,6 +97,7 @@ public class CypherWalker extends CypherBaseListener {
         System.out.println("\n--- QUERY INFORMATION ---");
         if (matchClause != null) System.out.println("Match Clause: " + matchClause + " -- OPTIONAL = " + hasOptional);
         if (whereClause != null) System.out.println("Where Clause: " + whereClause);
+        if (withClause != null) System.out.println("With Clause: " + withClause);
         if (returnClause != null)
             System.out.println("Return Clause: " + returnClause + " -- DISTINCT = " + hasDistinct);
         if (orderClause != null) System.out.println("Order Clause: " + orderClause);
@@ -129,5 +132,9 @@ public class CypherWalker extends CypherBaseListener {
 
     public boolean hasCount() {
         return hasCount;
+    }
+
+    public String getWithClause() {
+        return withClause;
     }
 }

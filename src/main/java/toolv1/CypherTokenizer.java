@@ -22,7 +22,7 @@ class CypherTokenizer {
 
         CypherWalker cypherQ = new CypherWalker();
         walker.walk(cypherQ, tree);
-        // cypherQ.printInformation();
+        cypherQ.printInformation();
 
         ArrayList<String> tokenList = new ArrayList<String>();
 

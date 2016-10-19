@@ -1,9 +1,7 @@
 package toolv1;
 
 import clauseObjects.DecodedQuery;
-import database.CypherDriver;
 import database.DbUtil;
-import database.SQLDriver;
 import query_translation.InterToSQL;
 import query_translation.InterToSQLNodesEdges;
 
@@ -18,6 +16,8 @@ public class ToolV1 {
             DbUtil.createConnection("testa");
 
             String cyherQuery = "match (n)-[]-(a:Player) where a.name = \"Wayne Rooney\" return count(*)";
+
+            String withQuery = "Match (x:Club)<-[:PLAYS_FOR]-(a:Player) return x, count(a);";
 
             String plsWork = "match (a:NationalTeam)--(b)--(n:Club) return distinct n order by n.name asc;";
 
@@ -51,7 +51,7 @@ public class ToolV1 {
 
             //CypherDriver.run(cyherQuery);
 
-            DecodedQuery decodedQuery = CypherTokenizer.decode(cyherQuery);
+            DecodedQuery decodedQuery = CypherTokenizer.decode(withQuery);
 
             int typeSchemaRunningAgainst = 2;
             String sqlFromCypher = null;

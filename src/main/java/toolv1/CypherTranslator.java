@@ -18,6 +18,7 @@ class CypherTranslator {
 
         int posOfMatch = tokenList.indexOf("MATCH");
         int posOfWhere = tokenList.indexOf("WHERE");
+        int posOfWith = tokenList.indexOf("WITH");
         int posOfReturn = tokenList.indexOf("RETURN");
         int posOfOrder = tokenList.indexOf("ORDER");
         int posOfSkip = tokenList.indexOf("SKIP");
@@ -25,6 +26,7 @@ class CypherTranslator {
 
         List<String> matchClause;
         List<String> returnClause;
+        List<String> withClause = null;
         List<String> orderClause = null;
 
         if (cypherQ.doesCluaseHaveWhere())
@@ -365,7 +367,7 @@ class CypherTranslator {
                 else
                     return new CypReturn(clause.get(0), null, matchC);
             else if (cypherQ.hasCount())
-                return new CypReturn(null, "COUNT(*)", null);
+                return new CypReturn(null, clause.get(0) + "(" + clause.get(2) + ")", null);
             else throw new Exception("RETURN CLAUSE MALFORMED");
     }
 
