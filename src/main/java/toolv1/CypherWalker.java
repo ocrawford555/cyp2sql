@@ -106,6 +106,10 @@ public class CypherWalker extends CypherBaseListener {
         System.out.println("\n");
     }
 
+    public String getReturnClause() {
+        return returnClause;
+    }
+
     public int getTypeQuery() {
         return typeQuery;
     }

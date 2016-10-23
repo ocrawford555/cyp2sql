@@ -11,8 +11,8 @@ import parsing_lexing.CypherParser;
 
 import java.util.ArrayList;
 
-class CypherTokenizer {
-    static DecodedQuery decode(String cyp) throws Exception {
+public class CypherTokenizer {
+    public static DecodedQuery decode(String cyp) throws Exception {
         CypherLexer lexer = new CypherLexer(new ANTLRInputStream(cyp));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         tokens.fill();

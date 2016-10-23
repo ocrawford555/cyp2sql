@@ -41,7 +41,7 @@ public class DbUtil {
         int countRecords = 0;
         while (rs.next()) {
             String name = rs.getString("name");
-            //System.out.println("ID : " + rs.getString("id"));
+            System.out.println("ID : " + rs.getString("idA"));
             System.out.println("NAME : " + WordUtils.capitalizeFully(name));
             countRecords++;
         }

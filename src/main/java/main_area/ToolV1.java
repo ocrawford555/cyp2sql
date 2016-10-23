@@ -1,9 +1,10 @@
-package toolv1;
+package main_area;
 
 import clauseObjects.DecodedQuery;
 import database.DbUtil;
 import query_translation.InterToSQL;
 import query_translation.InterToSQLNodesEdges;
+import toolv1.CypherTokenizer;
 
 public class ToolV1 {
     public static void main(String[] args) throws Exception {
@@ -15,11 +16,9 @@ public class ToolV1 {
         try {
             DbUtil.createConnection("testa");
 
-            String cyherQuery = "match (n)-[]-(a:Player) where a.name = \"Wayne Rooney\" return count(*)";
+            String cyherQuery = "Match (x:Club)<-[:PLAYS_FOR]-(a:Player) return x, count(a);";
 
-            String withQuery = "Match (x:Club)<-[:PLAYS_FOR]-(a:Player) return x, count(a);";
-
-            String plsWork = "match (a:NationalTeam)--(b)--(n:Club) return distinct n order by n.name asc;";
+            //cyherQuery = "match (a:NationalTeam)--(b)--(n:Club) return distinct n order by n.name asc;";
 
             String rooneyQuery = "match (n:Player {name:\"Wayne Rooney\"})-->(x) return x;";
 
@@ -36,6 +35,9 @@ public class ToolV1 {
 
             String biDir = "match(n:Club)--(x:Player) return n";
 
+            if (args.length != 0)
+                cyherQuery = args[0];
+
 //            WITH a AS (SELECT n1.id AS a1, n2.id AS a2 FROM nodes n1
 //                    INNER JOIN edges e1 on n1.id = e1.idl
 //                    INNER JOIN nodes n2 on e1.idr = n2.id
@@ -51,7 +53,7 @@ public class ToolV1 {
 
             //CypherDriver.run(cyherQuery);
 
-            DecodedQuery decodedQuery = CypherTokenizer.decode(withQuery);
+            DecodedQuery decodedQuery = CypherTokenizer.decode(cyherQuery);
 
             int typeSchemaRunningAgainst = 2;
             String sqlFromCypher = null;
