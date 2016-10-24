@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="6c07d57f-61cf-46bd-a98b-dbc0449cd683" name="Default" comment="Rudimentary testing framework added - next commit with implementation included.">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/toolv1/Metadata_Schema.java" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/database/SQLDriver.java" afterPath="" />
+    <list default="true" id="6c07d57f-61cf-46bd-a98b-dbc0449cd683" name="Default" comment="Initial implementation of testing module. JUnit running on Cypher and PG output.">
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/compiler.xml" afterPath="$PROJECT_DIR$/.idea/compiler.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pom.xml" afterPath="$PROJECT_DIR$/pom.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/database/CypherDriver.java" afterPath="$PROJECT_DIR$/src/main/java/database/CypherDriver.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/database/DbUtil.java" afterPath="$PROJECT_DIR$/src/main/java/database/DbUtil.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/main_area/Cyp2SQL.java" afterPath="$PROJECT_DIR$/src/main/java/main_area/Cyp2SQL.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/main_area/ToolV1.java" afterPath="$PROJECT_DIR$/src/main/java/main_area/ToolV1.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/toolv1/SchemaTranslate.java" afterPath="$PROJECT_DIR$/src/main/java/toolv1/SchemaTranslate.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/testing/TestArea.java" afterPath="$PROJECT_DIR$/src/main/java/testing/TestArea.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/test/java/main_area/Cyp2SQLTest.java" afterPath="$PROJECT_DIR$/src/test/java/main_area/Cyp2SQLTest.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/testANTLR.iml" afterPath="$PROJECT_DIR$/testANTLR.iml" />
     </list>
     <ignored path="testANTLR.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -40,21 +40,21 @@
       <file leaf-file-name="ToolV1.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/main_area/ToolV1.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="179">
-              <caret line="53" column="37" selection-start-line="53" selection-start-column="37" selection-end-line="53" selection-end-column="37" />
-              <folding />
+            <state relative-caret-position="-8">
+              <caret line="42" column="33" selection-start-line="42" selection-start-column="33" selection-end-line="42" selection-end-column="33" />
+              <folding>
+                <element signature="imports" expanded="false" />
+              </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="CypherDriver.java" pinned="false" current-in-tab="true">
+      <file leaf-file-name="CypherDriver.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/database/CypherDriver.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="12">
-              <caret line="27" column="29" selection-start-line="27" selection-start-column="29" selection-end-line="27" selection-end-column="29" />
-              <folding>
-                <element signature="imports" expanded="true" />
-              </folding>
+            <state relative-caret-position="267">
+              <caret line="42" column="32" selection-start-line="42" selection-start-column="32" selection-end-line="42" selection-end-column="32" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -62,18 +62,8 @@
       <file leaf-file-name="Cyp2SQLTest.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/test/java/main_area/Cyp2SQLTest.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="272">
-              <caret line="19" column="35" selection-start-line="19" selection-start-column="35" selection-end-line="19" selection-end-column="35" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Cyp2SQL.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/main_area/Cyp2SQL.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="24">
-              <caret line="27" column="0" selection-start-line="27" selection-start-column="0" selection-end-line="27" selection-end-column="0" />
+            <state relative-caret-position="79">
+              <caret line="28" column="22" selection-start-line="28" selection-start-column="22" selection-end-line="28" selection-end-column="22" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -81,11 +71,33 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="DbUtil.java" pinned="false" current-in-tab="false">
+      <file leaf-file-name="TestArea.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/testing/TestArea.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="170">
+              <caret line="10" column="65" selection-start-line="10" selection-start-column="65" selection-end-line="10" selection-end-column="65" />
+              <folding>
+                <element signature="imports" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Cyp2SQL.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/main_area/Cyp2SQL.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="351">
+              <caret line="42" column="0" selection-start-line="42" selection-start-column="0" selection-end-line="42" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="DbUtil.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/java/database/DbUtil.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="340">
-              <caret line="60" column="32" selection-start-line="60" selection-start-column="32" selection-end-line="60" selection-end-column="32" />
+            <state relative-caret-position="292">
+              <caret line="87" column="27" selection-start-line="87" selection-start-column="27" selection-end-line="87" selection-end-column="27" />
               <folding />
             </state>
           </provider>
@@ -97,8 +109,10 @@
             <state relative-caret-position="17">
               <caret line="60" column="21" selection-start-line="60" selection-start-column="21" selection-end-line="60" selection-end-column="21" />
               <folding>
+                <element signature="imports" expanded="false" />
                 <element signature="method#addToMetaData#0;class#SchemaTranslate#0" expanded="false" />
                 <element signature="method#methodOneSchema#0;class#SchemaTranslate#0" expanded="false" />
+                <element signature="e#7263#7279#0" expanded="false" />
                 <element signature="method#addToExisitingJSON#0;class#SchemaTranslate#0" expanded="false" />
               </folding>
             </state>
@@ -108,12 +122,11 @@
       <file leaf-file-name="Metadata_Schema.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/toolv1/Metadata_Schema.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-189">
-              <caret line="24" column="25" selection-start-line="24" selection-start-column="25" selection-end-line="24" selection-end-column="25" />
+            <state relative-caret-position="321">
+              <caret line="54" column="9" selection-start-line="42" selection-start-column="8" selection-end-line="54" selection-end-column="9" />
               <folding>
-                <element signature="imports" expanded="true" />
-                <element signature="e#1093#1094#0" expanded="true" />
-                <element signature="e#1143#1144#0" expanded="true" />
+                <element signature="e#264#265#0" expanded="false" />
+                <element signature="e#306#307#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -154,7 +167,9 @@
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="34">
               <caret line="11" column="27" selection-start-line="11" selection-start-column="27" selection-end-line="11" selection-end-column="27" />
-              <folding />
+              <folding>
+                <element signature="imports" expanded="false" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -208,7 +223,6 @@
         <option value="$PROJECT_DIR$/src/main/java/testing/TestNewParser.java" />
         <option value="$PROJECT_DIR$/src/main/java/clauseObjects/CypNode.java" />
         <option value="$PROJECT_DIR$/src/main/java/clauseObjects/WhereClause.java" />
-        <option value="$PROJECT_DIR$/src/main/java/testing/TestArea.java" />
         <option value="$PROJECT_DIR$/src/main/java/testing/TestTimingNeo4J.java" />
         <option value="$PROJECT_DIR$/src/main/java/toolv1/CypherDriver.java" />
         <option value="$PROJECT_DIR$/src/main/java/toolv1/DbUtil.java" />
@@ -218,7 +232,6 @@
         <option value="$PROJECT_DIR$/src/main/java/toolv1/ToolV1.java" />
         <option value="$PROJECT_DIR$/src/main/java/toolv1/CypherTranslator.java" />
         <option value="$PROJECT_DIR$/src/main/java/query_translation/InterToSQLNodesEdges.java" />
-        <option value="$PROJECT_DIR$/pom.xml" />
         <option value="$PROJECT_DIR$/src/main/java/testing/testRunCommand.java" />
         <option value="$PROJECT_DIR$/src/test/java/main_area/Cyp2SQLTest.groovy" />
         <option value="$PROJECT_DIR$/src/main/java/toolv1/CypherWalker.java" />
@@ -228,8 +241,10 @@
         <option value="$PROJECT_DIR$/src/main/java/database/SQLDriver.java" />
         <option value="$PROJECT_DIR$/src/main/java/main_area/ToolV1.java" />
         <option value="$PROJECT_DIR$/src/main/java/main_area/Cyp2SQL.java" />
-        <option value="$PROJECT_DIR$/src/main/java/database/CypherDriver.java" />
         <option value="$PROJECT_DIR$/src/main/java/database/DbUtil.java" />
+        <option value="$PROJECT_DIR$/pom.xml" />
+        <option value="$PROJECT_DIR$/src/main/java/testing/TestArea.java" />
+        <option value="$PROJECT_DIR$/src/main/java/database/CypherDriver.java" />
         <option value="$PROJECT_DIR$/src/test/java/main_area/Cyp2SQLTest.java" />
       </list>
     </option>
@@ -572,20 +587,20 @@
     <key name="CreateTestDialog.RecentsKey">
       <recent name="main_area" />
     </key>
-    <key name="CreateClassDialog.RecentsKey">
-      <recent name="clauseObjects" />
-      <recent name="toolv1" />
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\ocraw\Documents\cyp2sql\src\main\java\testing" />
+      <recent name="C:\Users\ocraw\IdeaProjects\testANTLR\src\main\java" />
     </key>
     <key name="CreateTestDialog.Recents.Supers">
       <recent name="junit.framework.TestCase" />
       <recent name="groovy.util.GroovyTestCase" />
     </key>
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="C:\Users\ocraw\Documents\cyp2sql\src\main\java\testing" />
-      <recent name="C:\Users\ocraw\IdeaProjects\testANTLR\src\main\java" />
+    <key name="CreateClassDialog.RecentsKey">
+      <recent name="clauseObjects" />
+      <recent name="toolv1" />
     </key>
   </component>
-  <component name="RunManager" selected="JUnit.Cyp2SQLTest.testDatabaseOutput">
+  <component name="RunManager" selected="JUnit.Cyp2SQLTest.testUnitAll">
     <configuration default="false" name="ToolV1" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea">
         <pattern>
@@ -604,32 +619,6 @@
       <option name="PASS_PARENT_ENVS" value="true" />
       <module name="testANTLR" />
       <envs />
-      <method />
-    </configuration>
-    <configuration default="false" name="Cyp2SQLTest.testMain" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
-      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea">
-        <pattern>
-          <option name="PATTERN" value="main_area.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <module name="testANTLR" />
-      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
-      <option name="ALTERNATIVE_JRE_PATH" />
-      <option name="PACKAGE_NAME" value="main_area" />
-      <option name="MAIN_CLASS_NAME" value="main_area.Cyp2SQLTest" />
-      <option name="METHOD_NAME" value="testMain" />
-      <option name="TEST_OBJECT" value="method" />
-      <option name="VM_PARAMETERS" value="-ea" />
-      <option name="PARAMETERS" />
-      <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
-      <option name="ENV_VARIABLES" />
-      <option name="PASS_PARENT_ENVS" value="true" />
-      <option name="TEST_SEARCH_SCOPE">
-        <value defaultName="singleModule" />
-      </option>
-      <envs />
-      <patterns />
       <method />
     </configuration>
     <configuration default="false" name="Cyp2SQLTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
@@ -708,6 +697,26 @@
       </option>
       <envs />
       <patterns />
+      <method />
+    </configuration>
+    <configuration default="false" name="TestArea" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea">
+        <pattern>
+          <option name="PATTERN" value="testing.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="MAIN_CLASS_NAME" value="testing.TestArea" />
+      <option name="VM_PARAMETERS" />
+      <option name="PROGRAM_PARAMETERS" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="ENABLE_SWING_INSPECTOR" value="false" />
+      <option name="ENV_VARIABLES" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <module name="testANTLR" />
+      <envs />
       <method />
     </configuration>
     <configuration default="true" type="#org.jetbrains.idea.devkit.run.PluginConfigurationType" factoryName="Plugin">
@@ -1126,18 +1135,18 @@
     </configuration>
     <list size="5">
       <item index="0" class="java.lang.String" itemvalue="Application.ToolV1" />
-      <item index="1" class="java.lang.String" itemvalue="JUnit.Cyp2SQLTest.testMain" />
-      <item index="2" class="java.lang.String" itemvalue="JUnit.Cyp2SQLTest" />
-      <item index="3" class="java.lang.String" itemvalue="JUnit.Cyp2SQLTest.testUnitAll" />
-      <item index="4" class="java.lang.String" itemvalue="JUnit.Cyp2SQLTest.testDatabaseOutput" />
+      <item index="1" class="java.lang.String" itemvalue="JUnit.Cyp2SQLTest" />
+      <item index="2" class="java.lang.String" itemvalue="JUnit.Cyp2SQLTest.testUnitAll" />
+      <item index="3" class="java.lang.String" itemvalue="JUnit.Cyp2SQLTest.testDatabaseOutput" />
+      <item index="4" class="java.lang.String" itemvalue="Application.TestArea" />
     </list>
     <recent_temporary>
       <list size="5">
-        <item index="0" class="java.lang.String" itemvalue="JUnit.Cyp2SQLTest.testDatabaseOutput" />
-        <item index="1" class="java.lang.String" itemvalue="Application.ToolV1" />
-        <item index="2" class="java.lang.String" itemvalue="JUnit.Cyp2SQLTest.testUnitAll" />
-        <item index="3" class="java.lang.String" itemvalue="JUnit.Cyp2SQLTest.testMain" />
-        <item index="4" class="java.lang.String" itemvalue="JUnit.Cyp2SQLTest" />
+        <item index="0" class="java.lang.String" itemvalue="JUnit.Cyp2SQLTest.testUnitAll" />
+        <item index="1" class="java.lang.String" itemvalue="Application.TestArea" />
+        <item index="2" class="java.lang.String" itemvalue="JUnit.Cyp2SQLTest" />
+        <item index="3" class="java.lang.String" itemvalue="JUnit.Cyp2SQLTest.testDatabaseOutput" />
+        <item index="4" class="java.lang.String" itemvalue="Application.ToolV1" />
       </list>
     </recent_temporary>
   </component>
@@ -1186,7 +1195,7 @@
       <workItem from="1476920226584" duration="1010000" />
       <workItem from="1477251716922" duration="8573000" />
       <workItem from="1477303525681" duration="2702000" />
-      <workItem from="1477312410157" duration="3606000" />
+      <workItem from="1477312410157" duration="7062000" />
     </task>
     <task id="LOCAL-00001" summary="Added 'Order By' functionality. Fixed bug with direction of relationship. Refactored Translator code.">
       <created>1475693730437</created>
@@ -1286,43 +1295,50 @@
       <option name="project" value="LOCAL" />
       <updated>1477262628992</updated>
     </task>
-    <option name="localTasksCounter" value="15" />
+    <task id="LOCAL-00015" summary="Initial implementation of testing module. JUnit running on Cypher and PG output.">
+      <created>1477316055685</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1477316055685</updated>
+    </task>
+    <option name="localTasksCounter" value="16" />
     <servers />
   </component>
   <component name="TestHistory">
-    <history-entry file="Cyp2SQLTest_testDatabaseOutput - 2016.10.24 at 14h 24m 43s.xml">
+    <history-entry file="Cyp2SQLTest - 2016.10.24 at 15h 12m 33s.xml">
+      <configuration name="Cyp2SQLTest" configurationId="JUnit" />
+    </history-entry>
+    <history-entry file="Cyp2SQLTest_testDatabaseOutput - 2016.10.24 at 14h 47m 40s.xml">
       <configuration name="Cyp2SQLTest.testDatabaseOutput" configurationId="JUnit" />
     </history-entry>
-    <history-entry file="Cyp2SQLTest_testDatabaseOutput - 2016.10.24 at 14h 26m 04s.xml">
+    <history-entry file="Cyp2SQLTest_testDatabaseOutput - 2016.10.24 at 14h 59m 52s.xml">
       <configuration name="Cyp2SQLTest.testDatabaseOutput" configurationId="JUnit" />
     </history-entry>
-    <history-entry file="Cyp2SQLTest_testDatabaseOutput - 2016.10.24 at 14h 27m 28s.xml">
+    <history-entry file="Cyp2SQLTest_testDatabaseOutput - 2016.10.24 at 15h 03m 52s.xml">
       <configuration name="Cyp2SQLTest.testDatabaseOutput" configurationId="JUnit" />
     </history-entry>
-    <history-entry file="Cyp2SQLTest_testDatabaseOutput - 2016.10.24 at 14h 27m 42s.xml">
+    <history-entry file="Cyp2SQLTest_testDatabaseOutput - 2016.10.24 at 15h 04m 17s.xml">
       <configuration name="Cyp2SQLTest.testDatabaseOutput" configurationId="JUnit" />
     </history-entry>
-    <history-entry file="Cyp2SQLTest_testDatabaseOutput - 2016.10.24 at 14h 31m 02s.xml">
-      <configuration name="Cyp2SQLTest.testDatabaseOutput" configurationId="JUnit" />
+    <history-entry file="Cyp2SQLTest_testUnitAll - 2016.10.24 at 15h 22m 05s.xml">
+      <configuration name="Cyp2SQLTest.testUnitAll" configurationId="JUnit" />
     </history-entry>
-    <history-entry file="Cyp2SQLTest_testDatabaseOutput - 2016.10.24 at 14h 31m 13s.xml">
-      <configuration name="Cyp2SQLTest.testDatabaseOutput" configurationId="JUnit" />
+    <history-entry file="Cyp2SQLTest_testUnitAll - 2016.10.24 at 15h 26m 20s.xml">
+      <configuration name="Cyp2SQLTest.testUnitAll" configurationId="JUnit" />
     </history-entry>
-    <history-entry file="Cyp2SQLTest_testDatabaseOutput - 2016.10.24 at 14h 31m 27s.xml">
-      <configuration name="Cyp2SQLTest.testDatabaseOutput" configurationId="JUnit" />
+    <history-entry file="Cyp2SQLTest_testUnitAll - 2016.10.24 at 15h 28m 46s.xml">
+      <configuration name="Cyp2SQLTest.testUnitAll" configurationId="JUnit" />
     </history-entry>
-    <history-entry file="Cyp2SQLTest_testDatabaseOutput - 2016.10.24 at 14h 32m 00s.xml">
-      <configuration name="Cyp2SQLTest.testDatabaseOutput" configurationId="JUnit" />
+    <history-entry file="Cyp2SQLTest_testUnitAll - 2016.10.24 at 15h 29m 42s.xml">
+      <configuration name="Cyp2SQLTest.testUnitAll" configurationId="JUnit" />
     </history-entry>
-    <history-entry file="Cyp2SQLTest_testDatabaseOutput - 2016.10.24 at 14h 32m 33s.xml">
-      <configuration name="Cyp2SQLTest.testDatabaseOutput" configurationId="JUnit" />
-    </history-entry>
-    <history-entry file="Cyp2SQLTest_testDatabaseOutput - 2016.10.24 at 14h 33m 02s.xml">
-      <configuration name="Cyp2SQLTest.testDatabaseOutput" configurationId="JUnit" />
+    <history-entry file="Cyp2SQLTest_testUnitAll - 2016.10.24 at 15h 30m 30s.xml">
+      <configuration name="Cyp2SQLTest.testUnitAll" configurationId="JUnit" />
     </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="217629000" />
+    <option name="totallyTimeSpent" value="221085000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="1358" y="-8" width="1696" height="1026" extended-state="6" />
@@ -1336,7 +1352,7 @@
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3286026" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.5251092" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.37227073" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
@@ -1387,7 +1403,8 @@
     <MESSAGE value="Testing around with RETURN clause. Definitely need to fix..." />
     <MESSAGE value="Added some more parsing features, bugs will be present - to be removed soon." />
     <MESSAGE value="Rudimentary testing framework added - next commit with implementation included." />
-    <option name="LAST_COMMIT_MESSAGE" value="Rudimentary testing framework added - next commit with implementation included." />
+    <MESSAGE value="Initial implementation of testing module. JUnit running on Cypher and PG output." />
+    <option name="LAST_COMMIT_MESSAGE" value="Initial implementation of testing module. JUnit running on Cypher and PG output." />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REARRANGE_BEFORE_PROJECT_COMMIT" value="true" />
   </component>
@@ -1405,7 +1422,6 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/main/java/TestCypherDriver.java" />
     <entry file="file://$PROJECT_DIR$/src/main/java/testing/TestAntlr.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
@@ -1546,14 +1562,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/testing/TestArea.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="119">
-          <caret line="7" column="23" selection-start-line="7" selection-start-column="23" selection-end-line="7" selection-end-column="23" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/testing/TestTimingNeo4J.java" />
     <entry file="file://$PROJECT_DIR$/src/main/java/clauseObjects/WhereClause.java">
       <provider selected="true" editor-type-id="text-editor">
@@ -1660,14 +1668,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/pom.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="102">
-          <caret line="6" column="23" selection-start-line="6" selection-start-column="23" selection-end-line="6" selection-end-column="23" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/test/java/main_area/Cyp2SQLTest.groovy" />
     <entry file="file://$PROJECT_DIR$/src/main/java/query_translation/InterToSQLNodesEdges.java">
       <provider selected="true" editor-type-id="text-editor">
@@ -1700,7 +1700,9 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="34">
           <caret line="11" column="27" selection-start-line="11" selection-start-column="27" selection-end-line="11" selection-end-column="27" />
-          <folding />
+          <folding>
+            <element signature="imports" expanded="false" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -1738,8 +1740,10 @@
         <state relative-caret-position="17">
           <caret line="60" column="21" selection-start-line="60" selection-start-column="21" selection-end-line="60" selection-end-column="21" />
           <folding>
+            <element signature="imports" expanded="false" />
             <element signature="method#addToMetaData#0;class#SchemaTranslate#0" expanded="false" />
             <element signature="method#methodOneSchema#0;class#SchemaTranslate#0" expanded="false" />
+            <element signature="e#7263#7279#0" expanded="false" />
             <element signature="method#addToExisitingJSON#0;class#SchemaTranslate#0" expanded="false" />
           </folding>
         </state>
@@ -1755,44 +1759,45 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/toolv1/Metadata_Schema.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-189">
-          <caret line="24" column="25" selection-start-line="24" selection-start-column="25" selection-end-line="24" selection-end-column="25" />
+        <state relative-caret-position="321">
+          <caret line="54" column="9" selection-start-line="42" selection-start-column="8" selection-end-line="54" selection-end-column="9" />
           <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="e#1093#1094#0" expanded="true" />
-            <element signature="e#1143#1144#0" expanded="true" />
+            <element signature="e#264#265#0" expanded="false" />
+            <element signature="e#306#307#0" expanded="false" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/main_area/ToolV1.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="179">
-          <caret line="53" column="37" selection-start-line="53" selection-start-column="37" selection-end-line="53" selection-end-column="37" />
+        <state relative-caret-position="-8">
+          <caret line="42" column="33" selection-start-line="42" selection-start-column="33" selection-end-line="42" selection-end-column="33" />
+          <folding>
+            <element signature="imports" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/pom.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="388">
+          <caret line="56" column="0" selection-start-line="56" selection-start-column="0" selection-end-line="56" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/database/DbUtil.java">
+    <entry file="jar://C:/Program Files/Java/jdk1.8.0_101/src.zip!/java/util/function/Consumer.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="340">
-          <caret line="60" column="32" selection-start-line="60" selection-start-column="32" selection-end-line="60" selection-end-column="32" />
+        <state relative-caret-position="425">
+          <caret line="48" column="9" selection-start-line="48" selection-start-column="9" selection-end-line="48" selection-end-column="9" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/test/java/main_area/Cyp2SQLTest.java">
+    <entry file="file://$PROJECT_DIR$/src/main/java/testing/TestArea.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="272">
-          <caret line="19" column="35" selection-start-line="19" selection-start-column="35" selection-end-line="19" selection-end-column="35" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/main_area/Cyp2SQL.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="24">
-          <caret line="27" column="0" selection-start-line="27" selection-start-column="0" selection-end-line="27" selection-end-column="0" />
+        <state relative-caret-position="170">
+          <caret line="10" column="65" selection-start-line="10" selection-start-column="65" selection-end-line="10" selection-end-column="65" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
@@ -1801,11 +1806,35 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/database/CypherDriver.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="12">
-          <caret line="27" column="29" selection-start-line="27" selection-start-column="29" selection-end-line="27" selection-end-column="29" />
+        <state relative-caret-position="267">
+          <caret line="42" column="32" selection-start-line="42" selection-start-column="32" selection-end-line="42" selection-end-column="32" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/test/java/main_area/Cyp2SQLTest.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="79">
+          <caret line="28" column="22" selection-start-line="28" selection-start-column="22" selection-end-line="28" selection-end-column="22" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/main_area/Cyp2SQL.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="351">
+          <caret line="42" column="0" selection-start-line="42" selection-start-column="0" selection-end-line="42" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/database/DbUtil.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="292">
+          <caret line="87" column="27" selection-start-line="87" selection-start-column="27" selection-end-line="87" selection-end-column="27" />
+          <folding />
         </state>
       </provider>
     </entry>
