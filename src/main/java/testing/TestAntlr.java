@@ -13,7 +13,7 @@ public class TestAntlr {
     public static void main(String args[]) throws Exception {
         String query = "MATCH (t:Match) RETURN t.h_score LIMIT 10";
         // for ease of working with
-        query = query.toUpperCase();
+        query = query.toLowerCase();
         CypherLexer lexer = new CypherLexer(new ANTLRInputStream(query));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         tokens.fill();

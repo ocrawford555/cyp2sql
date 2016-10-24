@@ -16,13 +16,13 @@ class CypherTranslator {
         // check to perform is returning something mentioned in match clause
         System.out.println(tokenList.toString());
 
-        int posOfMatch = tokenList.indexOf("MATCH");
-        int posOfWhere = tokenList.indexOf("WHERE");
-        int posOfWith = tokenList.indexOf("WITH");
-        int posOfReturn = tokenList.indexOf("RETURN");
-        int posOfOrder = tokenList.indexOf("ORDER");
-        int posOfSkip = tokenList.indexOf("SKIP");
-        int posOfLimit = tokenList.indexOf("LIMIT");
+        int posOfMatch = tokenList.indexOf("match");
+        int posOfWhere = tokenList.indexOf("where");
+        int posOfWith = tokenList.indexOf("with");
+        int posOfReturn = tokenList.indexOf("return");
+        int posOfOrder = tokenList.indexOf("order");
+        int posOfSkip = tokenList.indexOf("skip");
+        int posOfLimit = tokenList.indexOf("limit");
 
         List<String> matchClause;
         List<String> returnClause;
@@ -102,10 +102,10 @@ class CypherTranslator {
     private static void addCondition(String[] idAndCond, MatchClause matchC) throws Exception {
         String[] idAndProp = idAndCond[0].split("\\.");
         for (CypNode cN : matchC.getNodes()) {
-            if (cN.getId().equals(idAndProp[0].toUpperCase())) {
+            if (cN.getId().equals(idAndProp[0].toLowerCase())) {
                 JsonObject obj = cN.getProps();
                 if (obj == null) obj = new JsonObject();
-                obj.addProperty(idAndProp[1], idAndCond[1].replace("\"", "").toUpperCase());
+                obj.addProperty(idAndProp[1], idAndCond[1].replace("\"", "").toLowerCase());
                 cN.setProps(obj);
                 return;
             }
@@ -419,7 +419,7 @@ class CypherTranslator {
         if (clause.size() == 4 && clause.contains(".")) {
             return new CypOrder(clause.get(0), clause.get(2), clause.get(3));
         } else if (clause.size() == 3 && clause.contains(".")) {
-            return new CypOrder(clause.get(0), clause.get(2), "ASC");
+            return new CypOrder(clause.get(0), clause.get(2), "asc");
         } else throw new Exception("RETURN CLAUSE MALFORMED");
     }
 

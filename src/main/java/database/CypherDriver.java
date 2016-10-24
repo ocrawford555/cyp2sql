@@ -24,6 +24,7 @@ public class CypherDriver {
 
         // obtain information about the query from the decoder module
         DecodedQuery dQ = CypherTokenizer.decode(query);
+
         String returnItems[] = dQ.getCypherAdditionalInfo().getReturnClause().replace(" ", "").split(",");
 
         // keep a track of the number of records returned from Neo4J
@@ -39,9 +40,9 @@ public class CypherDriver {
                     try {
                         if (t.contains(".")) {
                             String bits[] = t.split("\\.");
-                            writer.println(bits[1] + " : " + record.get(t).asString());
+                            writer.println(bits[1].toLowerCase() + " : " + record.get(t).asString().toLowerCase());
                         } else {
-                            writer.println("name : " + record.get(t).asNode().get("name").asString());
+                            writer.println("name : " + record.get(t).asNode().get("name").asString().toLowerCase());
                         }
                     } catch (ClientException ce) {
                         System.out.println("Error handled correctly in CypherDriver.");

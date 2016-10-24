@@ -3,7 +3,6 @@ package query_translation;
 import clauseObjects.*;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import org.apache.commons.lang3.text.WordUtils;
 
 import java.util.Map;
 import java.util.Set;
@@ -87,7 +86,7 @@ public class InterToSQLNodesEdges {
                         Set<Map.Entry<String, JsonElement>> entries = obj.entrySet();
                         for (Map.Entry<String, JsonElement> entry : entries) {
                             sql.append("n.").append(entry.getKey()).append(" = '");
-                            sql.append(WordUtils.capitalizeFully(entry.getValue().getAsString())).append("' AND ");
+                            sql.append(entry.getValue().getAsString()).append("' AND ");
                         }
                     }
                 }
@@ -163,7 +162,7 @@ public class InterToSQLNodesEdges {
             Set<Map.Entry<String, JsonElement>> entrySet = leftProps.entrySet();
             for (Map.Entry<String, JsonElement> entry : entrySet) {
                 sql.append("n1").append(".").append(entry.getKey());
-                sql.append("='").append(WordUtils.capitalizeFully(entry.getValue().getAsString()));
+                sql.append("='").append(entry.getValue().getAsString());
                 sql.append("' AND ");
             }
         }
@@ -177,7 +176,7 @@ public class InterToSQLNodesEdges {
             Set<Map.Entry<String, JsonElement>> entrySet = rightProps.entrySet();
             for (Map.Entry<String, JsonElement> entry : entrySet) {
                 sql.append("n2").append(".").append(entry.getKey());
-                sql.append("='").append(WordUtils.capitalizeFully(entry.getValue().getAsString()));
+                sql.append("='").append(entry.getValue().getAsString());
                 sql.append("' AND ");
             }
         }
@@ -188,7 +187,7 @@ public class InterToSQLNodesEdges {
                 includesWhere = true;
             }
             sql.append("n1.label = '");
-            sql.append(WordUtils.capitalizeFully(leftNode.getType())).append("' AND ");
+            sql.append(leftNode.getType()).append("' AND ");
         }
 
         if (rightNode.getType() != null) {
@@ -197,7 +196,7 @@ public class InterToSQLNodesEdges {
                 includesWhere = true;
             }
             sql.append("n2.label = '");
-            sql.append(WordUtils.capitalizeFully(rightNode.getType())).append("' AND ");
+            sql.append(rightNode.getType()).append("' AND ");
         }
 
         if (typeRel != null) {

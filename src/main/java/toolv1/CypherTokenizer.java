@@ -28,9 +28,9 @@ public class CypherTokenizer {
 
         for (Object t : tokens.getTokens()) {
             CommonToken tok = (CommonToken) t;
-            String s = tok.getText().toUpperCase();
+            String s = tok.getText().toLowerCase();
 
-            if (!" ".equals(s) && !"<EOF>".equals(s) && !";".equals(s))
+            if (!" ".equals(s) && !"<eof>".equals(s) && !";".equals(s))
                 tokenList.add(s);
         }
 

@@ -53,7 +53,7 @@ public class SchemaTranslate {
         try {
             for (String line : Files.readAllLines(Paths.get(file))) {
                 // remove CREATE characters
-                line = line.substring(7);
+                line = line.substring(7).toLowerCase();
 
                 //using regex to decide between node create or relationship create
                 m = patternN.matcher(line);

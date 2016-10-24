@@ -40,7 +40,7 @@ public class CypherWalker extends CypherBaseListener {
 
     public void enterMatch(CypherParser.MatchContext ctx) {
         //optional keyword attached or not
-        if (ctx.getText().toUpperCase().startsWith("OPTIONAL "))
+        if (ctx.getText().toLowerCase().startsWith("optional "))
             hasOptional = true;
     }
 
@@ -72,10 +72,10 @@ public class CypherWalker extends CypherBaseListener {
 
     public void enterReturnMain(CypherParser.ReturnMainContext ctx) {
         //distinct keyword attached or not
-        if (ctx.getText().toUpperCase().contains(" DISTINCT "))
+        if (ctx.getText().toLowerCase().contains(" distinct "))
             hasDistinct = true;
         // is the return query looking at a count
-        if (ctx.getText().toUpperCase().contains("COUNT"))
+        if (ctx.getText().toLowerCase().contains("count"))
             hasCount = true;
     }
 
@@ -85,11 +85,11 @@ public class CypherWalker extends CypherBaseListener {
     }
 
     public void enterSortItem(CypherParser.SortItemContext ctx) {
-        String orderByString = ctx.getText().toUpperCase();
-        if (orderByString.endsWith("DESCENDING") || orderByString.endsWith("DESC")) {
-            latestOrderDirection = "DESC";
-        } else if (orderByString.endsWith("ASCENDING") || orderByString.endsWith("ASC")) {
-            latestOrderDirection = "ASC";
+        String orderByString = ctx.getText().toLowerCase();
+        if (orderByString.endsWith("descending") || orderByString.endsWith("desc")) {
+            latestOrderDirection = "desc";
+        } else if (orderByString.endsWith("ascending") || orderByString.endsWith("asc")) {
+            latestOrderDirection = "asc";
         } else latestOrderDirection = "";
     }
 
