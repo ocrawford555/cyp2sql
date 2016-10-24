@@ -16,17 +16,20 @@ import java.util.regex.Pattern;
 
 public class SchemaTranslate {
     public static Map<String, String> readFile(String file, boolean DEBUG_PRINT, int i) throws Exception {
-        if (i == 1) {
-            return methodOneSchema(file, DEBUG_PRINT);
-        } else if (i == 2) {
-            return methodTwoSchema(file, DEBUG_PRINT);
-        } else
-            throw new Exception("3rd parameter incorrect");
+        if (i == 1) return methodOneSchema(file, DEBUG_PRINT);
+        else if (i == 2) return methodTwoSchema(file, DEBUG_PRINT);
+        else throw new Exception("3rd parameter incorrect");
     }
 
     private static Map<String, String> methodTwoSchema(String file, boolean DEBUG_PRINT) {
         // read through all lines in the text file containing the schema of the Cypher DB
         Map<String, String> returnSchema = new HashMap<>();
+
+        // keep track of all the types of nodes seen so far
+        ArrayList<String> nodeLabelList = new ArrayList<>();
+
+        // keep track of all the types of nodes seen so far
+        ArrayList<String> relsLabelList = new ArrayList<>();
 
         // regex for deciding whether a line is a node or a relationship
         String patternForNode = "(_\\d+:.*)";
@@ -43,6 +46,9 @@ public class SchemaTranslate {
 
         boolean firstLineNodes = true;
         boolean firstLineRels = true;
+
+        // create a class for the generation of the additional metadata file
+        Metadata_Schema ms = new Metadata_Schema();
 
         try {
             for (String line : Files.readAllLines(Paths.get(file))) {
@@ -66,6 +72,12 @@ public class SchemaTranslate {
                     String props = firstSplit[1].replace("`", "");
 
                     JsonObject o = parser.parse(props.substring(0, props.length() - 1)).getAsJsonObject();
+
+                    // add to the metadata file
+                    if (!nodeLabelList.contains(nodeLabel)) {
+                        nodeLabelList.add(nodeLabel);
+                        addToMetaData(ms, nodeLabel, o, 1);
+                    }
 
                     if (DEBUG_PRINT)
                         System.out.println("NODE::  ID: " + id + "\tLABEL: " + nodeLabel + "\tPROPS: " + o.toString());
@@ -114,6 +126,12 @@ public class SchemaTranslate {
 
                     o.addProperty("type", relationship);
 
+                    // add to the metadata file
+                    if (!relsLabelList.contains(relationship)) {
+                        relsLabelList.add(relationship);
+                        addToMetaData(ms, relationship, o, 2);
+                    }
+
                     if (DEBUG_PRINT)
                         System.out.println("RELATIONSHIP::  ID(LEFT): " + idL + "\tREL: " +
                                 relationship + "\tID(RIGHT): " + idR + "\tAdd Props: " + jsonProps);
@@ -136,8 +154,25 @@ public class SchemaTranslate {
             System.out.println("EDGES : " + returnSchema.get("edges"));
         }
 
+        ms.createFile();
         return returnSchema;
+    }
 
+    private static void addToMetaData(Metadata_Schema ms, String nodeLabel, JsonObject o, int typeAdd) {
+        Set<Map.Entry<String, JsonElement>> entries = o.entrySet();
+
+        // all nodes have an internal id
+        String metaEntry = "";
+        if (typeAdd == 1)
+            metaEntry = "id, ";
+
+        for (Map.Entry<String, JsonElement> entry : entries) {
+            String keyName = entry.getKey();
+            metaEntry += keyName + ", ";
+        }
+
+        metaEntry = metaEntry.substring(0, metaEntry.length() - 2);
+        ms.addLabelProps(nodeLabel, metaEntry);
     }
 
     private static Map<String, String> methodOneSchema(String file, boolean DEBUG_PRINT) {

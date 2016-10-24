@@ -1,6 +1,5 @@
 package main_area;
 
-import database.DbUtil;
 import junit.framework.TestCase;
 
 public class Cyp2SQLTest extends TestCase {
@@ -13,13 +12,11 @@ public class Cyp2SQLTest extends TestCase {
     }
 
     public void testDatabaseOutput() throws Exception {
-        String query = "match (n:Player)--(y:Club) return n limit 20;";
+        String query = "match (n:Player)--(y:Club {name:\"Real Madrid\"}) return n order by n.name asc limit 20;";
         Cyp2SQL.cypherOutputToTextFile(query);
         String sql = Cyp2SQL.convertQuery(query);
         System.out.println(sql);
-        DbUtil.createConnection("testa");
-        DbUtil.select(sql);
-        DbUtil.closeConnection();
+        Cyp2SQL.printPostgresToTextFile(sql);
         // compare the outputs here
     }
 }

@@ -5,16 +5,21 @@ import database.DbUtil;
 import query_translation.InterToSQL;
 import query_translation.InterToSQLNodesEdges;
 import toolv1.CypherTokenizer;
+import toolv1.SchemaTranslate;
+
+import java.util.Map;
 
 public class ToolV1 {
     public static void main(String[] args) throws Exception {
-        //Map<String, String> schemaToBuild =
-//                SchemaTranslate.readFile(
-//                        "C:/Users/ocraw/Documents/Year 3 Cambridge/Project/CypherStuff/database/dump4.txt",
-//                        true,
-//                        2);
+        Map<String, String> schemaToBuild =
+                SchemaTranslate.readFile(
+                        "C:/Users/ocraw/Documents/Year 3 Cambridge/Project/CypherStuff/database/dump3.txt",
+                        true,
+                        2);
         try {
             DbUtil.createConnection("testa");
+
+            //DbUtil.createAndInsert(schemaToBuild);
 
             String cyherQuery = "Match (x:Club)<-[:PLAYS_FOR]-(a:Player) return x, count(a);";
 
@@ -53,7 +58,7 @@ public class ToolV1 {
 
             //CypherDriver.run(cyherQuery);
 
-            DecodedQuery decodedQuery = CypherTokenizer.decode(cyherQuery);
+            DecodedQuery decodedQuery = CypherTokenizer.decode(rooneyQuery);
 
             int typeSchemaRunningAgainst = 2;
             String sqlFromCypher = null;
@@ -69,7 +74,7 @@ public class ToolV1 {
 
             sqlFromCypher = sqlFromCypher.replace("Nationalteam", "NationalTeam");
             System.out.println(sqlFromCypher);
-            //SQLDriver.run(sqlFromCypher);
+            DbUtil.select(sqlFromCypher);
         } catch (Exception e) {
             e.printStackTrace();
         } finally {

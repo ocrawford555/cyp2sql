@@ -7,6 +7,8 @@ import query_translation.InterToSQL;
 import query_translation.InterToSQLNodesEdges;
 import toolv1.CypherTokenizer;
 
+import java.sql.SQLException;
+
 class Cyp2SQL {
     static String convertQuery(String q) {
         try {
@@ -36,7 +38,9 @@ class Cyp2SQL {
         CypherDriver.run(cypherQuery);
     }
 
-    static void runSQL(String sql) throws Exception {
+    public static void printPostgresToTextFile(String sql) throws SQLException {
+        DbUtil.createConnection("testa");
         DbUtil.select(sql);
+        DbUtil.closeConnection();
     }
 }

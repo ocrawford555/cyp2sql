@@ -3,7 +3,6 @@ package database;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import org.apache.commons.lang3.text.WordUtils;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -12,6 +11,7 @@ import java.util.Set;
 
 public class DbUtil {
     private static Connection c = null;
+    private static int numRecords = 0;
 
     public static void createConnection(String dbName) {
         try {
@@ -37,17 +37,67 @@ public class DbUtil {
         Statement stmt;
         stmt = c.createStatement();
 
-        ResultSet rs = stmt.executeQuery(query);
-        int countRecords = 0;
-        while (rs.next()) {
-            String name = rs.getString("name");
-            System.out.println("ID : " + rs.getString("idA"));
-            System.out.println("NAME : " + WordUtils.capitalizeFully(name));
-            countRecords++;
+        //ResultSet rs = stmt.executeQuery((String) query[0]);
+        //int countRecords = 0;
+
+        ArrayList<ArrayList<String>> results = getQueryResult(query, stmt);
+
+        ArrayList<String> colNames = results.get(0);
+        results.remove(0);
+        for (ArrayList<String> as : results) {
+            int i = 0;
+            for (String column : colNames) {
+                if (!column.equals("id")) System.out.println(column + " : " + as.get(i));
+                i++;
+            }
         }
 
-        System.out.println("\nNUM RECORDS : " + countRecords);
-        stmt.close();
+        System.out.println("\nNUM RECORDS : " + numRecords);
+//        while (rs.next()) {
+//
+//             //do something with the meta class here
+//            Metadata_Schema.getAllFieldsByType("type");
+//            String name = rs.getString("name");
+//            System.out.println("ID : " + rs.getString("idA"));
+//            System.out.println("NAME : " + WordUtils.capitalizeFully(name));
+//            countRecords++;
+//        }
+
+        //System.out.println("\nNUM RECORDS : " + countRecords);
+        //stmt.close();
+    }
+
+    private static ArrayList<ArrayList<String>> getQueryResult(String query, Statement stm) {
+        ArrayList<ArrayList<String>> feedback = new ArrayList<>();
+        ArrayList<String> feed;
+
+        try {
+            ResultSet rs = stm.executeQuery(query);
+
+            ResultSetMetaData rsm = rs.getMetaData();
+
+            feed = new ArrayList<>();
+            for (int y = 1; y < rsm.getColumnCount(); y++) {
+                feed.add(rsm.getColumnName(y));
+            }
+            feedback.add(feed);
+
+            numRecords = 0;
+
+            while (rs.next()) {
+                feed = new ArrayList<>();
+                for (int i = 1; i <= rsm.getColumnCount(); i++) {
+                    feed.add(rs.getString(i));
+                }
+                feedback.add(feed);
+                numRecords++;
+            }
+
+            stm.close();
+        } catch (SQLException e) {
+            //handler
+        }
+        return feedback;
     }
 
     private static void createInsert(String query) throws SQLException {
