@@ -27,6 +27,7 @@ class Cyp2SQL {
             }
 
             sqlFromCypher = sqlFromCypher.replace("Nationalteam", "NationalTeam");
+            System.out.println(sqlFromCypher);
             return sqlFromCypher;
         } catch (Exception e) {
             e.printStackTrace();

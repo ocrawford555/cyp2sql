@@ -270,7 +270,8 @@ class CypherTranslator {
                 // may be a relationship still there
                 if (clause.contains("-")) {
                     int posDash = clause.indexOf("-");
-                    if (clause.get(posDash + 1).equals("-") && !clause.get(posDash + 2).equals(">")) {
+                    if (clause.get(posDash + 1).equals("-") && !clause.get(posDash + 2).equals(">")
+                            && !clause.get(posDash - 1).equals("<")) {
                         direction = "none";
                         clause = clause.subList(posDash + 2, clause.size());
                     } else if (clause.contains("<") || clause.contains(">")) {
