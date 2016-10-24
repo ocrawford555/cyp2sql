@@ -57,9 +57,8 @@ public class TestAntlr {
     }
 
     private static void doMatch(ArrayList<String> toks, int startIndex) {
-        int x = startIndex;
-        if (!toks.get(x).equals("("))
-            return;
+        if (!toks.get(startIndex).equals("(")) {
+        }
 
 //        x++;
 //        String s = toks.get(x);

@@ -114,7 +114,7 @@ class CypherTranslator {
     }
 
     // current status: unsure, test
-    private static MatchClause matchDecode(List<String> matchClause) {
+    private static MatchClause matchDecode(List<String> matchClause) throws Exception {
         MatchClause m = new MatchClause();
 
         // extract the nodes from the match clause
@@ -206,8 +206,27 @@ class CypherTranslator {
     }
 
     private static ArrayList<CypRel> extractRels(List<String> clause,
-                                                 MatchClause m) {
+                                                 MatchClause m) throws Exception {
         ArrayList<CypRel> rels = new ArrayList<>();
+
+        /*
+          types of relationships
+          -- & -[]-        (id: null     type: null      props: null     direction : none)
+          <-- & <-[]-      (id: null     type: null      props: null     direction : left)
+          --> & -[]->      (id: null     type: null      props: null     direction : right)
+          -[:a]-           (id: null     type: a         props: null     direction : none)
+          -[b:a]-          (id: b        type: a         props: null     direction : none)
+          <-[:a]-          (id: null     type: a         props: null     direction : left)
+          <-[b:a]-         (id: b        type: a         props: null     direction : left)
+          -[:a]->          (id: null     type: a         props: null     direction : right)
+          -[b:a]->         (id: b        type: a         props: null     direction : right)
+          -[:a {c}]-       (id: null     type: a         props: c        direction : none)
+          -[b:a {c}]-      (id: b        type: a         props: c        direction : none)
+          <-[:a {c}]-      (id: null     type: a         props: c        direction : left)
+          <-[b:a {c}]-     (id: b        type: a         props: c        direction : left)
+          -[:a {c}]->      (id: null     type: a         props: c        direction : right)
+          -[b:a {c}]->     (id: b        type: a         props: c        direction : right)
+         */
 
         JsonObject o;
         String direction;
@@ -223,82 +242,86 @@ class CypherTranslator {
             o = null;
             direction = null;
 
-            int lSq = clause.indexOf("[");
-            int rSq = clause.indexOf("]");
-
-            if (lSq != -1 && rSq != -1) {
-                String tokBeforeLSQ1 = clause.get(lSq - 1);
-                String tokAfterRSQ1 = clause.get(rSq + 1);
-                String tokBeforeLSQ2 = clause.get(lSq - 2);
-                String tokAfterRSQ2 = clause.get(rSq + 2);
-
-                if (tokBeforeLSQ1.equals("-") &&
-                        tokAfterRSQ1.equals("-")) {
-                    // is a valid relationship structure
-                    relString = clause.subList(lSq + 1, rSq);
-                    if (tokAfterRSQ2.equals(">")) {
-                        direction = "right";
-                        clause = clause.subList(rSq + 3, clause.size());
-                    } else {
-                        clause = clause.subList(rSq + 2, clause.size());
-                        if (tokBeforeLSQ2.equals("<")) {
-                            direction = "left";
-                        } else {
-                            direction = "none";
-                        }
-                    }
-
-                    if (relString.contains("{")) {
-                        int lCurly = relString.indexOf("{");
-                        int rCurly = relString.indexOf("}");
-
-                        if (lCurly != -1 && rCurly != -1) {
-                            propsString = relString.subList(lCurly + 1, rCurly);
-                            relString = relString.subList(0, lCurly);
-                        }
-                    }
-
-                    String[] temp = extractIdAndType(relString);
-                    id = temp[0];
-                    type = temp[1];
-
-                    if (propsString != null) {
-                        o = getJSONProps(propsString);
-                    }
-                }
+            if (!clause.contains("-")) {
+                break;
             } else {
-                // may be a relationship still there
-                if (clause.contains("-")) {
-                    int posDash = clause.indexOf("-");
-                    if (clause.get(posDash + 1).equals("-") && !clause.get(posDash + 2).equals(">")
-                            && !clause.get(posDash - 1).equals("<")) {
-                        direction = "none";
-                        clause = clause.subList(posDash + 2, clause.size());
-                    } else if (clause.contains("<") || clause.contains(">")) {
-                        int posLeftArrow = clause.indexOf("<");
-                        int posRightArrow = clause.indexOf(">");
+                int posOfHyphen = clause.indexOf("-");
 
-                        if (posLeftArrow != -1 && posRightArrow != -1) {
-                            if (posLeftArrow < posRightArrow) {
-                                direction = "left";
-                                clause = clause.subList(posLeftArrow + 3, clause.size());
-                            } else {
-                                direction = "right";
-                                clause = clause.subList(posRightArrow + 1, clause.size());
+                if (clause.get(posOfHyphen - 1).equals("<")) {
+                    direction = "left";
+
+                    int lSq = clause.indexOf("[");
+                    int rSq = clause.indexOf("]");
+
+                    if (lSq != -1 && rSq != -1) {
+                        relString = clause.subList(lSq + 1, rSq);
+
+                        if (relString.contains("{")) {
+                            int lCurly = relString.indexOf("{");
+                            int rCurly = relString.indexOf("}");
+
+                            if (lCurly != -1 && rCurly != -1) {
+                                propsString = relString.subList(lCurly + 1, rCurly);
+                                relString = relString.subList(0, lCurly);
                             }
-                        } else if (posLeftArrow != -1) {
-                            direction = "left";
-                            clause = clause.subList(posLeftArrow + 3, clause.size());
-                        } else if (posRightArrow != -1) {
+                        }
+
+                        String[] temp = extractIdAndType(relString);
+                        id = temp[0];
+                        type = temp[1];
+
+                        if (propsString != null) {
+                            o = getJSONProps(propsString);
+                        }
+                        clause = clause.subList(rSq + 2, clause.size());
+                    } else {
+                        clause = clause.subList(posOfHyphen + 2, clause.size());
+                    }
+                } else if (clause.get(posOfHyphen + 1).equals("-") &&
+                        clause.get(posOfHyphen + 2).equals("(")) {
+                    direction = "none";
+                    clause = clause.subList(posOfHyphen + 2, clause.size());
+                } else if (clause.get(posOfHyphen + 1).equals("-") &&
+                        clause.get(posOfHyphen + 2).equals(">")) {
+                    direction = "right";
+                    clause = clause.subList(posOfHyphen + 3, clause.size());
+                } else if (clause.get(posOfHyphen + 1).equals("[")) {
+                    int lSq = clause.indexOf("[");
+                    int rSq = clause.indexOf("]");
+
+                    if (lSq != -1 && rSq != -1) {
+                        relString = clause.subList(lSq + 1, rSq);
+
+                        if (relString.contains("{")) {
+                            int lCurly = relString.indexOf("{");
+                            int rCurly = relString.indexOf("}");
+
+                            if (lCurly != -1 && rCurly != -1) {
+                                propsString = relString.subList(lCurly + 1, rCurly);
+                                relString = relString.subList(0, lCurly);
+                            }
+                        }
+
+                        String[] temp = extractIdAndType(relString);
+                        id = temp[0];
+                        type = temp[1];
+
+                        if (propsString != null) {
+                            o = getJSONProps(propsString);
+                        }
+
+                        if (clause.get(rSq + 1).equals("-") && clause.get(rSq + 2).equals(">")) {
                             direction = "right";
-                            clause = clause.subList(posRightArrow + 1, clause.size());
+                            clause = clause.subList(rSq + 3, clause.size());
+                        } else if (clause.get(rSq + 1).equals("-")) {
+                            direction = "none";
+                            clause = clause.subList(rSq + 2, clause.size());
                         }
                     }
                 } else
-                    break;
+                    throw new Exception("RELATIONSHIP STRUCTURE IS INVALID");
+                rels.add(new CypRel(m.getInternalID(), id, type, o, direction));
             }
-
-            rels.add(new CypRel(m.getInternalID(), id, type, o, direction));
         }
         return rels;
     }

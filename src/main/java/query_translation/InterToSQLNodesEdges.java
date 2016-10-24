@@ -17,7 +17,7 @@ public class InterToSQLNodesEdges {
                 decodedQuery.getCypherAdditionalInfo().hasDistinct());
 
         if (decodedQuery.getCypherAdditionalInfo().hasCount())
-            sql = obtainGroupByClause(decodedQuery.getRc(), sql);
+            sql = obtainGroupByClause(sql);
 
         if (decodedQuery.getOc() != null)
             sql = obtainOrderByClause(decodedQuery.getOc(), sql);
@@ -33,7 +33,7 @@ public class InterToSQLNodesEdges {
         return sql.toString().replace("NATIONALTEAM", "NationalTeam");
     }
 
-    private static StringBuilder obtainGroupByClause(ReturnClause rc, StringBuilder sql) {
+    private static StringBuilder obtainGroupByClause(StringBuilder sql) {
         sql.append(" GROUP BY ");
         sql.append("n").append(".").append("id, ");
         sql.append("n").append(".").append("name, ");
@@ -300,7 +300,7 @@ public class InterToSQLNodesEdges {
                             sql.append("a.a1");
                             sql.append(" AND ");
                         } else if (posInClause == 2) {
-                            sql.append("b.b1");
+                            sql.append("a.a2");
                             sql.append(" AND ");
                         } else if (posInClause == 3) {
                             sql.append("b.b2");

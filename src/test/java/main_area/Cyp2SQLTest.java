@@ -8,7 +8,7 @@ import java.util.ArrayList;
 
 public class Cyp2SQLTest extends TestCase {
     public void testOne() throws Exception {
-        testDatabaseOutput("match (n:Player)--(y:Club {name:\"Leicester City\"}) return n order by n.name asc limit 20;");
+        testDatabaseOutput("match (n)-->(b:NationalTeam {name:\"France\"})<--(c)-->(e) return distinct e order by e.name limit 10;");
     }
 
     public void testUnitAll() throws Exception {

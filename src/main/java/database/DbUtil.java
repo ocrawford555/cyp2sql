@@ -15,7 +15,6 @@ import java.util.Set;
 public class DbUtil {
     private static Connection c = null;
     private static int numRecords = 0;
-    private static String file_location_results = "C:/Users/ocraw/Desktop/pg_results.txt";
 
     public static void createConnection(String dbName) {
         try {
@@ -51,6 +50,7 @@ public class DbUtil {
 
         PrintWriter writer;
         try {
+            String file_location_results = "C:/Users/ocraw/Desktop/pg_results.txt";
             writer = new PrintWriter(file_location_results, "UTF-8");
             for (ArrayList<String> as : results) {
                 int i = 0;
