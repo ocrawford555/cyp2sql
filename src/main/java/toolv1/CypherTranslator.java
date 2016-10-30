@@ -226,6 +226,11 @@ class CypherTranslator {
           <-[b:a {c}]-     (id: b        type: a         props: c        direction : left)
           -[:a {c}]->      (id: null     type: a         props: c        direction : right)
           -[b:a {c}]->     (id: b        type: a         props: c        direction : right)
+
+          -[*1..2]-        (id: null     type: null      props: null     direction : var1-2)
+          -[*]-            (id: null     type: null      props: null     direction : var)
+          -[*1..4]-        (id: null     type: null      props: null     direction : var1-4)
+          -[*3..4]-        (id: null     type: null      props: null     direction : var3-4)
          */
 
         JsonObject o;
@@ -244,6 +249,13 @@ class CypherTranslator {
 
             if (!clause.contains("-")) {
                 break;
+            } else if (clause.contains("*")) {
+                m.setVarRel(true);
+                int posOfLHypher = clause.indexOf("-");
+                int posOfRSq = clause.indexOf("]");
+                List<String> varRel = clause.subList(posOfLHypher + 2, posOfRSq);
+                clause = clause.subList(posOfRSq + 2, clause.size());
+                rels.add(extractVarRel(varRel, m));
             } else {
                 int posOfHyphen = clause.indexOf("-");
 
@@ -318,12 +330,27 @@ class CypherTranslator {
                             clause = clause.subList(rSq + 2, clause.size());
                         }
                     }
-                } else
+                } else {
                     throw new Exception("RELATIONSHIP STRUCTURE IS INVALID");
+                }
+
                 rels.add(new CypRel(m.getInternalID(), id, type, o, direction));
             }
+
         }
         return rels;
+    }
+
+    private static CypRel extractVarRel(List<String> varRel, MatchClause m) throws Exception {
+        varRel = varRel.subList(1, varRel.size());
+        String direction;
+        if (varRel.size() == 1) {
+            direction = "var" + varRel.get(0);
+        } else {
+            direction = "var" + varRel.get(0) + "-" + varRel.get(2);
+        }
+        return new CypRel(m.getInternalID(), null, null, null, direction);
+
     }
 
     private static JsonObject getJSONProps(List<String> propsString) {

@@ -1,13 +1,16 @@
 package database;
 
+import clauseObjects.CypNode;
 import clauseObjects.DecodedQuery;
 import org.neo4j.driver.v1.*;
 import org.neo4j.driver.v1.exceptions.ClientException;
 import toolv1.CypherTokenizer;
+import toolv1.Metadata_Schema;
 
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 
 public class CypherDriver {
     private static final String databaseName = "neo4j";
@@ -37,16 +40,25 @@ public class CypherDriver {
             while (result.hasNext()) {
                 Record record = result.next();
                 for (String t : returnItems) {
+                    if (t.equals("*")) {
+                        doAllReturn(dQ, record, writer);
+                        break;
+                    }
                     try {
                         if (t.contains(".")) {
                             String bits[] = t.split("\\.");
                             writer.println(bits[1].toLowerCase() + " : " + record.get(t).asString().toLowerCase());
                         } else {
-                            writer.println("name : " + record.get(t).asNode().get("name").asString().toLowerCase());
+                            // currently only deals with returning nodes
+                            ArrayList<String> fields = Metadata_Schema.getAllFields();
+                            if (fields != null) {
+                                for (String s : fields) {
+                                    writer.println(s + " : " + record.get(t).asNode().get(s).asString().toLowerCase());
+                                }
+                            }
                         }
                     } catch (ClientException ce) {
                         System.out.println("Error handled correctly in CypherDriver.");
-                        ce.printStackTrace();
                     }
                 }
                 countRecords++;
@@ -61,5 +73,11 @@ public class CypherDriver {
 
         session.close();
         driver.close();
+    }
+
+    private static void doAllReturn(DecodedQuery dQ, Record record, PrintWriter writer) {
+        for (CypNode cN : dQ.getMc().getNodes()) {
+            writer.println("name : " + record.get(cN.getId()).asNode().get("name").asString().toLowerCase());
+        }
     }
 }

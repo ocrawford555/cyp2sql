@@ -26,8 +26,6 @@ class Cyp2SQL {
                     break;
             }
 
-            sqlFromCypher = sqlFromCypher.replace("Nationalteam", "NationalTeam");
-            System.out.println(sqlFromCypher);
             return sqlFromCypher;
         } catch (Exception e) {
             e.printStackTrace();
@@ -41,7 +39,15 @@ class Cyp2SQL {
 
     public static void printPostgresToTextFile(String sql) throws SQLException {
         DbUtil.createConnection("testa");
-        DbUtil.select(sql);
+        String seperateQueries[] = sql.split(";");
+        for (String s : seperateQueries) {
+            s = s.trim() + ";";
+            if (s.startsWith("CREATE TEMP VIEW")) {
+                DbUtil.executeCreateView(s);
+            } else {
+                DbUtil.select(s);
+            }
+        }
         DbUtil.closeConnection();
     }
 }

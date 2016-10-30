@@ -2,12 +2,8 @@ package main_area;
 
 import clauseObjects.DecodedQuery;
 import database.DbUtil;
-import query_translation.InterToSQL;
 import query_translation.InterToSQLNodesEdges;
 import toolv1.CypherTokenizer;
-import toolv1.SchemaTranslate;
-
-import java.util.Map;
 
 public class ToolV1 {
     public static void main(String[] args) throws Exception {
@@ -17,7 +13,26 @@ public class ToolV1 {
 //                        true,
 //                        2);
 
-        Cyp2SQL.convertQuery(null);
+        String cQuery = "match (n:Club {name:\"Sunderland AFC\"})-[*1..2]-(x) return x order by x.name asc";
+        DecodedQuery dQ = CypherTokenizer.decode(cQuery);
+        String sqlFromCypher = InterToSQLNodesEdges.translate(dQ);
+        System.out.println(sqlFromCypher);
+
+        DbUtil.createConnection("testa");
+        String seperateQueries[] = sqlFromCypher.split(";");
+        for (String s : seperateQueries) {
+            s = s.trim() + ";";
+            if (s.startsWith("CREATE TEMP VIEW")) {
+                DbUtil.executeCreateView(s);
+            } else {
+                DbUtil.select(s);
+            }
+        }
+        DbUtil.closeConnection();
+//
+//        DbUtil.createConnection("testa");
+//        DbUtil.select(sqlFromCypher);
+//        DbUtil.closeConnection();
 
 //        try {
 //            DbUtil.createConnection("testa");

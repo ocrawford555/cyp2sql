@@ -36,6 +36,12 @@ public class DbUtil {
         }
     }
 
+    public static void executeCreateView(String query) throws SQLException {
+        Statement stmt = c.createStatement();
+        stmt.executeUpdate(query);
+        stmt.close();
+    }
+
     public static void select(String query) throws SQLException {
         Statement stmt;
         stmt = c.createStatement();
@@ -54,9 +60,13 @@ public class DbUtil {
             writer = new PrintWriter(file_location_results, "UTF-8");
             for (ArrayList<String> as : results) {
                 int i = 0;
-                for (String column : colNames) {
-                    if (!column.equals("id")) writer.println(column + " : " + as.get(i));
-                    i++;
+                if (colNames.size() == 0) {
+                    writer.println("name" + " : " + as.get(i));
+                } else {
+                    for (String column : colNames) {
+                        if (!column.equals("id")) writer.println(column + " : " + as.get(i));
+                        i++;
+                    }
                 }
             }
             System.out.println("\nNUM RECORDS : " + numRecords);

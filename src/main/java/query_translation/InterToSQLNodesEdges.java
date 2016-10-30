@@ -30,7 +30,7 @@ public class InterToSQLNodesEdges {
 
         sql.append(";");
 
-        return sql.toString().replace("NATIONALTEAM", "NationalTeam");
+        return sql.toString();
     }
 
     private static StringBuilder obtainGroupByClause(StringBuilder sql) {
@@ -55,6 +55,14 @@ public class InterToSQLNodesEdges {
             return sql;
         } else {
             // there are relationships to deal with, so use the WITH structure
+            // furthermore, if there ae variable path ones, do something clever.
+            if (matchC.isVarRel()) {
+                sql = obtainViews(sql, matchC);
+                sql.append(" WITH a AS (select a2 as l2 from v2 union all select a3 from v3)");
+                sql.append(" SELECT name FROM NODES n INNER JOIN a on a.l2 = n.id");
+                return sql;
+            }
+
             sql = obtainWithClause(sql, matchC);
 
             sql = obtainSelectAndFromClause(returnC, matchC, sql, hasDistinct);
@@ -65,9 +73,92 @@ public class InterToSQLNodesEdges {
         }
     }
 
+    private static StringBuilder obtainViews(StringBuilder sql, MatchClause matchC) {
+        int viewIndex = 1;
+
+        for (CypRel r : matchC.getRels()) {
+            if (r.getDirection().contains("var")) {
+                int lowerPathSearch = -1;
+                int highPathSearch;
+                if (r.getDirection().contains("-")) {
+                    String[] parts = r.getDirection().split("-");
+                    lowerPathSearch = Integer.parseInt(parts[0].substring(3));
+                    highPathSearch = Integer.parseInt(parts[1]);
+                } else {
+                    highPathSearch = Integer.parseInt(r.getDirection().substring(3));
+                }
+
+                int posOfRelInClause = r.getPosInClause();
+                CypNode n1 = matchC.getNodes().get(posOfRelInClause - 1);
+                CypNode n2 = matchC.getNodes().get(posOfRelInClause);
+
+                sql.append("CREATE TEMP VIEW v").append(viewIndex++).append(" AS SELECT id AS a1 FROM NODES n");
+                if (n1.getType() != null) {
+                    sql.append(" WHERE n.label='").append(n1.getType()).append("'");
+                }
+                if (n1.getProps() != null) {
+                    if (n1.getType() != null) sql.append(" AND ");
+                    else sql.append(" WHERE ");
+
+                    JsonObject obj = n1.getProps();
+                    Set<Map.Entry<String, JsonElement>> entries = obj.entrySet();
+                    for (Map.Entry<String, JsonElement> entry : entries) {
+                        sql.append("n.").append(entry.getKey()).append(" = '");
+                        sql.append(entry.getValue().getAsString()).append("' AND ");
+                    }
+
+                    sql.setLength(sql.length() - 5);
+                }
+
+                sql.append(";");
+
+                int j = 0;
+
+                while (j < highPathSearch) {
+                    j++;
+                    sql.append(" CREATE TEMP VIEW v").append(viewIndex).append(" AS SELECT idr AS a").append(viewIndex);
+                    sql.append(" FROM edges e INNER JOIN v").append(j);
+                    sql.append(" ON e.idl = v").append(j).append(".a").append(j);
+                    int k = j;
+                    while (k > 1) {
+                        k--;
+                        sql.append(" INNER JOIN v").append(k).append(" ON e.idr != v").append(k).append(".a").append(k);
+                    }
+                    sql.append(" UNION ALL SELECT idl AS a").append(viewIndex);
+                    sql.append(" FROM edges e INNER JOIN v").append(j);
+                    sql.append(" ON e.idr = v").append(j).append(".a").append(j);
+                    k = j;
+                    while (k > 1) {
+                        k--;
+                        sql.append(" INNER JOIN v").append(k).append(" ON e.idl != v").append(k).append(".a").append(k);
+                    }
+                    sql.append(";");
+                    viewIndex++;
+                }
+            }
+        }
+        sql.append(" ");
+        return sql;
+    }
+
     private static StringBuilder obtainWhereClauseOnlyNodes(StringBuilder sql, ReturnClause returnC, MatchClause matchC) {
         boolean hasWhere = false;
         for (CypReturn cR : returnC.getItems()) {
+            if (cR.getNodeID() == null && cR.getField().equals("*")) {
+                CypNode cN = matchC.getNodes().get(0);
+                hasWhere = true;
+                sql.append(" WHERE n.label = '").append(cN.getType()).append("' AND ");
+                if (cN.getProps() != null) {
+                    JsonObject obj = cN.getProps();
+                    Set<Map.Entry<String, JsonElement>> entries = obj.entrySet();
+                    for (Map.Entry<String, JsonElement> entry : entries) {
+                        sql.append("n.").append(entry.getKey()).append(" = '");
+                        sql.append(entry.getValue().getAsString()).append("' AND ");
+                    }
+                }
+                break;
+            }
+
             CypNode cN = null;
             for (CypNode c : matchC.getNodes()) {
                 if (c.getId().equals(cR.getNodeID()))
@@ -229,6 +320,12 @@ public class InterToSQLNodesEdges {
 
         for (CypReturn cR : returnC.getItems()) {
             boolean isNode = false;
+
+            if (cR.getNodeID() == null && cR.getField().equals("*")) {
+                sql.append(" *  ");
+                usesNodesTable = true;
+                break;
+            }
 
             for (CypNode cN : matchC.getNodes()) {
                 if (cR.getNodeID().equals(cN.getId())) {

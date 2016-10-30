@@ -1,5 +1,6 @@
 package main_area;
 
+import clauseObjects.CypNode;
 import junit.framework.TestCase;
 import org.apache.commons.io.FileUtils;
 
@@ -7,8 +8,17 @@ import java.io.*;
 import java.util.ArrayList;
 
 public class Cyp2SQLTest extends TestCase {
+    public void testOther() throws Exception {
+        System.out.println(Cyp2SQL.convertQuery("match (n:NationalTeam {name:\"Spain\"})-[*1..2]-" +
+                "(m:Club)-[*1..2]-(f:NationalTeam {name:\"France\"}) return distinct m;"));
+    }
+
     public void testOne() throws Exception {
-        testDatabaseOutput("match (n)-->(b:NationalTeam {name:\"France\"})<--(c)-->(e) return distinct e order by e.name limit 10;");
+        testDatabaseOutput("match (n:Club {name:\"Liverpool FC\"})--(r) return distinct *");
+    }
+
+    public void testCypher() throws Exception {
+        Cyp2SQL.cypherOutputToTextFile("match (n:Club {name:\"Sunderland AFC\"})-[*1..2]-(x) return x order by x.name asc");
     }
 
     public void testUnitAll() throws Exception {
@@ -23,6 +33,7 @@ public class Cyp2SQLTest extends TestCase {
 
         try {
             FileInputStream fis = new FileInputStream("C:/Users/ocraw/Desktop/list_of_queries.txt");
+            //FileInputStream fis = new FileInputStream("C:/Users/ocraw/Desktop/list_of_queries_bond.txt");
 
             //Construct BufferedReader from InputStreamReader
             BufferedReader br = new BufferedReader(new InputStreamReader(fis));
