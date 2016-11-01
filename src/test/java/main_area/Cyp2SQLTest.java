@@ -1,6 +1,5 @@
 package main_area;
 
-import clauseObjects.CypNode;
 import junit.framework.TestCase;
 import org.apache.commons.io.FileUtils;
 
@@ -14,7 +13,7 @@ public class Cyp2SQLTest extends TestCase {
     }
 
     public void testOne() throws Exception {
-        testDatabaseOutput("match (n:Club {name:\"Liverpool FC\"})--(r) return distinct *");
+        testDatabaseOutput("match (n:Club {name:\"Burnley FC\"})-[*1..2]-(f) return distinct f order by f.name asc;");
     }
 
     public void testCypher() throws Exception {

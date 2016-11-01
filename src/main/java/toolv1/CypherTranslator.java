@@ -250,12 +250,17 @@ class CypherTranslator {
             if (!clause.contains("-")) {
                 break;
             } else if (clause.contains("*")) {
+                String varD = "none";
                 m.setVarRel(true);
+
                 int posOfLHypher = clause.indexOf("-");
+                if (clause.get(posOfLHypher - 1).equals("<")) varD = "left";
                 int posOfRSq = clause.indexOf("]");
+                if (clause.get(posOfRSq + 2).equals(">")) varD = (varD.equals("left")) ? "none" : "right";
+
                 List<String> varRel = clause.subList(posOfLHypher + 2, posOfRSq);
                 clause = clause.subList(posOfRSq + 2, clause.size());
-                rels.add(extractVarRel(varRel, m));
+                rels.add(extractVarRel(varRel, m, varD));
             } else {
                 int posOfHyphen = clause.indexOf("-");
 
@@ -341,16 +346,15 @@ class CypherTranslator {
         return rels;
     }
 
-    private static CypRel extractVarRel(List<String> varRel, MatchClause m) throws Exception {
+    private static CypRel extractVarRel(List<String> varRel, MatchClause m, String varD) throws Exception {
         varRel = varRel.subList(1, varRel.size());
         String direction;
         if (varRel.size() == 1) {
-            direction = "var" + varRel.get(0);
+            direction = "var" + varRel.get(0) + "#" + varD;
         } else {
-            direction = "var" + varRel.get(0) + "-" + varRel.get(2);
+            direction = "var" + varRel.get(0) + "-" + varRel.get(2) + "#" + varD;
         }
         return new CypRel(m.getInternalID(), null, null, null, direction);
-
     }
 
     private static JsonObject getJSONProps(List<String> propsString) {

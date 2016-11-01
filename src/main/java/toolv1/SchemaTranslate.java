@@ -100,16 +100,18 @@ public class SchemaTranslate {
                     //items[0] is left part of relationship
                     //items[1] is relationship identifier
                     //items[2] is the right part (has direction in example but ignoring currently)
-                    String[] items = line.split("-");
+                    String[] items = line.split("\\)-");
 
-                    String idL = items[0].substring(2, items[0].length() - 1);
-                    String idR = items[2].substring(3, items[2].length() - 1);
+                    String idL = items[0].substring(2, items[0].length());
+
+                    String[] innerItems = items[1].split("->");
+                    String idR = innerItems[1].substring(2, innerItems[1].length() - 1);
 
                     JsonObject o = new JsonObject();
                     o.addProperty("idL", Integer.parseInt(idL));
                     o.addProperty("idR", Integer.parseInt(idR));
 
-                    String relationship = items[1].substring(2, items[1].length() - 1);
+                    String relationship = innerItems[0].substring(2, innerItems[0].length() - 1);
 
                     //using regex to decide between node create or relationship create
                     m = patternR.matcher(line);
