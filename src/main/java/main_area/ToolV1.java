@@ -25,7 +25,7 @@ public class ToolV1 {
             if (s.startsWith("CREATE TEMP VIEW")) {
                 DbUtil.executeCreateView(s);
             } else {
-                DbUtil.select(s);
+                DbUtil.select(s, "testa");
             }
         }
         DbUtil.closeConnection();

@@ -5,7 +5,7 @@ import clauseObjects.DecodedQuery;
 import org.neo4j.driver.v1.*;
 import org.neo4j.driver.v1.exceptions.ClientException;
 import toolv1.CypherTokenizer;
-import toolv1.Metadata_Schema;
+import schemaConversion.Metadata_Schema;
 
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;

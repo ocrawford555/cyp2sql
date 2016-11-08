@@ -9,6 +9,7 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -42,12 +43,10 @@ public class DbUtil {
         stmt.close();
     }
 
-    public static void select(String query) throws SQLException {
+    public static void select(String query, String database) throws SQLException {
+        DbUtil.createConnection(database);
         Statement stmt;
         stmt = c.createStatement();
-
-        //ResultSet rs = stmt.executeQuery((String) query[0]);
-        //int countRecords = 0;
 
         ArrayList<ArrayList<String>> results = getQueryResult(query, stmt);
 
@@ -69,7 +68,6 @@ public class DbUtil {
                     }
                 }
             }
-            System.out.println("\nNUM RECORDS : " + numRecords);
             writer.println();
             writer.println("NUM RECORDS : " + numRecords);
             writer.close();
@@ -118,10 +116,10 @@ public class DbUtil {
     }
 
     private static StringBuilder insertTableData(Map<String, String> schemaToBuild, StringBuilder sb, String tableName,
-                                                 ArrayList<String> fields) {
+                                                 Map<String, String> fields) {
         sb.append("INSERT INTO ");
         sb.append(tableName).append("(");
-        for (String y : fields) {
+        for (String y : fields.keySet()) {
             sb.append(y).append(", ");
         }
         sb.setLength(sb.length() - 2);
@@ -131,14 +129,20 @@ public class DbUtil {
 
         String[] jsonObjs = schemaToBuild.get(tableName).split(", ");
 
-        for (String x : jsonObjs) {
+        for (String obj : jsonObjs) {
             JsonParser parser = new JsonParser();
-            JsonObject o = parser.parse(x).getAsJsonObject();
+            JsonObject o = parser.parse(obj).getAsJsonObject();
             sb.append("(");
-            for (String z : fields) {
+            for (String z : fields.keySet()) {
                 try {
-                    String value = o.get(z).getAsString().replace("\\\"", "");
-                    sb.append("'").append(value).append("', ");
+                    if (fields.get(z).equals("INT")) {
+                        int value = o.get(z).getAsInt();
+                        sb.append(value).append(", ");
+                    } else {
+                        // is text
+                        String value = o.get(z).getAsString();
+                        sb.append("'").append(value).append("', ");
+                    }
                 } catch (NullPointerException npe) {
                     sb.append("null, ");
                 }
@@ -154,51 +158,66 @@ public class DbUtil {
     }
 
 
-    public static void createAndInsert(Map<String, String> schemaToBuild) {
+    public static void insertSchema(Map<String, String> schemaToBuild, String database) {
+        DbUtil.createConnection(database);
         try {
             // iterate over each table to create
             for (String s : schemaToBuild.keySet()) {
-                StringBuilder sb = new StringBuilder();
-
-                sb.append("CREATE TABLE ");
-                sb.append(s);
-
-                String[] jsonObjs = schemaToBuild.get(s).split(", ");
-                JsonParser parser = new JsonParser();
-                ArrayList<String> fields = new ArrayList<>();
-
-                for (String jobj : jsonObjs) {
-                    JsonObject o = parser.parse(jobj).getAsJsonObject();
-                    Set<Map.Entry<String, JsonElement>> entries = o.entrySet();
-
-                    for (Map.Entry<String, JsonElement> entry : entries) {
-                        if (!fields.contains(entry.getKey()))
-                            fields.add(entry.getKey());
-                    }
-                }
-
-                sb.append("(");
-                for (String x : fields) {
-                    sb.append(x);
-                    // default type of each field is TEXT
-                    sb.append(" TEXT, ");
-                }
-                sb.setLength(sb.length() - 2);
-                sb.append("); ");
-
-                // insert the data to the table
-                sb = insertTableData(schemaToBuild, sb, s, fields);
-
-                // turn the stringbuilder into a string
-                String sbString = sb.toString();
-                sbString = sbString.replace("\"", "");
-                // debug output
-                System.out.println(sbString);
-                createInsert(sbString);
+                String sql = obtainSQL(s, schemaToBuild);
+                createInsert(sql);
             }
         } catch (SQLException sqle) {
-            sqle.printStackTrace();
-            System.exit(0);
+            System.err.println("FAILED : could not execute SQL for schema - " +
+                    sqle.getMessage());
+        } finally {
+            DbUtil.closeConnection();
         }
+    }
+
+    private static String obtainSQL(String s, Map<String, String> schemaToBuild) {
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("CREATE TABLE ");
+        sb.append(s);
+
+        JsonParser parser = new JsonParser();
+        Map<String, String> fields = getFieldsForDatabase(s, parser, schemaToBuild);
+
+        sb.append("(");
+        for (String x : fields.keySet()) {
+            sb.append(x).append(" ");
+            sb.append(fields.get(x)).append(", ");
+        }
+        sb.setLength(sb.length() - 2);
+        sb.append("); ");
+
+        // insert the data to the table
+        sb = insertTableData(schemaToBuild, sb, s, fields);
+
+        // turn the stringbuilder into a string
+        return sb.toString();
+    }
+
+    private static Map<String, String> getFieldsForDatabase(String s, JsonParser parser,
+                                                            Map<String, String> schemaToBuild) {
+        String[] jsonObjs = schemaToBuild.get(s).split(", ");
+        Map<String, String> fields = new LinkedHashMap<>();
+
+        for (String jobj : jsonObjs) {
+            JsonObject o = parser.parse(jobj).getAsJsonObject();
+            Set<Map.Entry<String, JsonElement>> entries = o.entrySet();
+
+            for (Map.Entry<String, JsonElement> entry : entries) {
+                if (!fields.containsKey(entry.getKey()))
+                    try {
+                        Integer.parseInt(entry.getValue().getAsString());
+                        fields.put(entry.getKey(), "INT");
+                    } catch (NumberFormatException nfe) {
+                        fields.put(entry.getKey(), "TEXT");
+                    }
+            }
+        }
+
+        return fields;
     }
 }

@@ -34,6 +34,6 @@ public class CypherTokenizer {
                 tokenList.add(s);
         }
 
-        return CypherTranslator.MatchAndReturnAndOrderAndSkip(tokenList, cypherQ);
+        return CypherTranslator.generateDecodedQuery(tokenList, cypherQ);
     }
 }

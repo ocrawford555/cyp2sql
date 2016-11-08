@@ -10,15 +10,9 @@ import java.util.List;
 import java.util.Map;
 
 class CypherTranslator {
-    static DecodedQuery MatchAndReturnAndOrderAndSkip(ArrayList<String> tokenList, CypherWalker cypherQ)
-            throws Exception {
-        // query has structure MATCH ... RETURN ... ORDER BY [ASC|DESC] .. SKIP .. LIMIT
-        // check to perform is returning something mentioned in match clause
-        System.out.println(tokenList.toString());
-
+    static DecodedQuery generateDecodedQuery(ArrayList<String> tokenList, CypherWalker cypherQ) throws Exception {
         int posOfMatch = tokenList.indexOf("match");
         int posOfWhere = tokenList.indexOf("where");
-        int posOfWith = tokenList.indexOf("with");
         int posOfReturn = tokenList.indexOf("return");
         int posOfOrder = tokenList.indexOf("order");
         int posOfSkip = tokenList.indexOf("skip");
@@ -26,7 +20,6 @@ class CypherTranslator {
 
         List<String> matchClause;
         List<String> returnClause;
-        List<String> withClause = null;
         List<String> orderClause = null;
 
         if (cypherQ.doesCluaseHaveWhere())

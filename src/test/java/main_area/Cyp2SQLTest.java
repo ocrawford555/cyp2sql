@@ -52,7 +52,7 @@ public class Cyp2SQLTest extends TestCase {
 
     }
 
-    public void testDatabaseOutput(String query) throws Exception {
+    private void testDatabaseOutput(String query) throws Exception {
         File file1 = new File("C:/Users/ocraw/Desktop/cypher_results.txt");
         File file2 = new File("C:/Users/ocraw/Desktop/pg_results.txt");
         Cyp2SQL.cypherOutputToTextFile(query);
@@ -61,6 +61,7 @@ public class Cyp2SQLTest extends TestCase {
         Cyp2SQL.printPostgresToTextFile(sql);
 
         // compare the outputs here
+        // should change to checking the MD5 hash results of the files (would be quicker)
         assertEquals(true, FileUtils.contentEquals(file1, file2));
     }
 }

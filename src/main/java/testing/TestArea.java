@@ -1,10 +1,8 @@
 package testing;
 
 import database.DbUtil;
-import toolv1.Metadata_Schema;
-import toolv1.SchemaTranslate;
+import schemaConversion.SchemaTranslate;
 
-import java.util.ArrayList;
 import java.util.Map;
 
 public class TestArea {
@@ -16,13 +14,13 @@ public class TestArea {
 //        }
 
         Map<String, String> schemaToBuild =
-                SchemaTranslate.readFile(
-                        "C:/Users/ocraw/Documents/Year 3 Cambridge/Project/CypherStuff/database/dump4.txt",
-                        true,
-                        2);
+                SchemaTranslate.translate(
+                        "C:/Users/ocraw/Documents/Year 3 Cambridge/Project/CypherStuff/database/dump6.txt",
+                        true
+                );
 
         DbUtil.createConnection("testa");
-        DbUtil.createAndInsert(schemaToBuild);
+        DbUtil.insertSchema(schemaToBuild, "testa");
         DbUtil.closeConnection();
     }
 }

@@ -32,6 +32,8 @@ public class InterToSQLNodesEdges {
 
         sql.append(";");
 
+        System.out.println(sql.toString());
+
         return sql.toString();
     }
 
@@ -53,7 +55,6 @@ public class InterToSQLNodesEdges {
             sql = obtainSelectAndFromClause(returnC, matchC, sql, hasDistinct);
 
             sql = obtainWhereClauseOnlyNodes(sql, returnC, matchC);
-
             return sql;
         } else {
             // there are relationships to deal with, so use the WITH structure
@@ -392,7 +393,7 @@ public class InterToSQLNodesEdges {
                 if (cR.getNodeID().equals(cN.getId())) {
                     String prop = cR.getField();
                     if (prop != null) {
-                        sql.append("n").append(prop).append(", ");
+                        sql.append("n").append(".").append(prop).append(", ");
                     } else {
                         sql.append("n.*").append(", ");
                     }

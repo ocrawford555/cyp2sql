@@ -1,4 +1,4 @@
-package toolv1;
+package schemaConversion;
 
 import java.io.*;
 import java.util.ArrayList;
