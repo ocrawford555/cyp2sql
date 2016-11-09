@@ -16,7 +16,8 @@ public class InterToSQLNodesEdges {
         StringBuilder sql = new StringBuilder();
 
         sql = obtainMatchAndReturn(decodedQuery.getMc(), decodedQuery.getRc(), sql,
-                decodedQuery.getCypherAdditionalInfo().hasDistinct());
+                decodedQuery.getCypherAdditionalInfo().hasDistinct(),
+                decodedQuery.getCypherAdditionalInfo().getAliasMap());
 
         if (decodedQuery.getCypherAdditionalInfo().hasCount())
             sql = obtainGroupByClause(sql);
@@ -46,13 +47,14 @@ public class InterToSQLNodesEdges {
     }
 
     private static StringBuilder obtainMatchAndReturn(MatchClause matchC, ReturnClause returnC,
-                                                      StringBuilder sql, boolean hasDistinct) throws Exception {
+                                                      StringBuilder sql, boolean hasDistinct,
+                                                      Map<String, String> alias) throws Exception {
         if (returnC.getItems() == null)
             throw new Exception("NOTHING SPECIFIED TO RETURN");
 
         if (matchC.getRels().isEmpty()) {
             // no relationships, just return some nodes
-            sql = obtainSelectAndFromClause(returnC, matchC, sql, hasDistinct);
+            sql = obtainSelectAndFromClause(returnC, matchC, sql, hasDistinct, alias);
 
             sql = obtainWhereClauseOnlyNodes(sql, returnC, matchC);
             return sql;
@@ -67,7 +69,7 @@ public class InterToSQLNodesEdges {
 
             sql = obtainWithClause(sql, matchC);
 
-            sql = obtainSelectAndFromClause(returnC, matchC, sql, hasDistinct);
+            sql = obtainSelectAndFromClause(returnC, matchC, sql, hasDistinct, alias);
 
             sql = obtainWhereClause(sql, returnC, matchC);
 
@@ -315,8 +317,7 @@ public class InterToSQLNodesEdges {
             Set<Map.Entry<String, JsonElement>> entrySet = leftProps.entrySet();
             for (Map.Entry<String, JsonElement> entry : entrySet) {
                 sql.append("n1").append(".").append(entry.getKey());
-                sql.append("='").append(entry.getValue().getAsString());
-                sql.append("' AND ");
+                sql = addWhereClause(sql, entry);
             }
         }
 
@@ -329,8 +330,7 @@ public class InterToSQLNodesEdges {
             Set<Map.Entry<String, JsonElement>> entrySet = rightProps.entrySet();
             for (Map.Entry<String, JsonElement> entry : entrySet) {
                 sql.append("n2").append(".").append(entry.getKey());
-                sql.append("='").append(entry.getValue().getAsString());
-                sql.append("' AND ");
+                sql = addWhereClause(sql, entry);
             }
         }
 
@@ -371,8 +371,23 @@ public class InterToSQLNodesEdges {
         return sql;
     }
 
+    private static StringBuilder addWhereClause(StringBuilder sql, Map.Entry<String, JsonElement> entry) {
+        String value = entry.getValue().getAsString();
+        if (value.startsWith("<#") && value.endsWith("#>")) {
+            sql.append(" <> ");
+            value = value.substring(2, value.length() - 2);
+            System.out.println(value);
+        } else {
+            sql.append(" = ");
+        }
+        sql.append("'").append(value.replace("'", ""));
+        sql.append("' AND ");
+        return sql;
+    }
+
     private static StringBuilder obtainSelectAndFromClause(ReturnClause returnC, MatchClause matchC,
-                                                           StringBuilder sql, boolean hasDistinct)
+                                                           StringBuilder sql, boolean hasDistinct,
+                                                           Map<String, String> alias)
             throws Exception {
         sql.append("SELECT ");
         if (hasDistinct) sql.append("DISTINCT ");
@@ -384,7 +399,7 @@ public class InterToSQLNodesEdges {
             boolean isNode = false;
 
             if (cR.getNodeID() == null && cR.getField().equals("*")) {
-                sql.append(" *  ");
+                sql.append("*  ");
                 usesNodesTable = true;
                 break;
             }
@@ -393,9 +408,9 @@ public class InterToSQLNodesEdges {
                 if (cR.getNodeID().equals(cN.getId())) {
                     String prop = cR.getField();
                     if (prop != null) {
-                        sql.append("n").append(".").append(prop).append(", ");
+                        sql.append("n").append(".").append(prop).append(useAlias(cR.getNodeID(), alias)).append(", ");
                     } else {
-                        sql.append("n.*").append(", ");
+                        sql.append("n.*").append(useAlias(cR.getNodeID(), alias)).append(", ");
                     }
                     isNode = true;
                     usesNodesTable = true;
@@ -422,7 +437,23 @@ public class InterToSQLNodesEdges {
         return sql;
     }
 
-    private static StringBuilder obtainWhereClause(StringBuilder sql, ReturnClause returnC, MatchClause matchC) throws Exception {
+    private static String useAlias(String nodeID, Map<String, String> alias) {
+        System.out.println("NODE ID IN ALIAS : " + nodeID);
+        if (alias.isEmpty()) {
+            return "";
+        } else {
+            for (String s : alias.keySet()) {
+                String id = s.split("\\.")[0];
+                if (id.equals(nodeID)) {
+                    return (" AS " + alias.get(s));
+                }
+            }
+        }
+        return "";
+    }
+
+    private static StringBuilder obtainWhereClause(StringBuilder sql,
+                                                   ReturnClause returnC, MatchClause matchC) throws Exception {
         boolean hasWhereKeyword = false;
         int numRels = matchC.getRels().size();
 
@@ -502,23 +533,6 @@ public class InterToSQLNodesEdges {
         return sql;
     }
 
-    private static String validateNodeID(String nodeID, MatchClause matchC) {
-        for (CypNode cN : matchC.getNodes()) {
-            if (nodeID.equals(cN.getId()))
-                return cN.getAlias()[1];
-        }
-        return null;
-    }
-
-    private static int obtainPos(MatchClause matchC, String cR) {
-        for (CypNode c : matchC.getNodes()) {
-            if (c.getId().equals(cR)) {
-                return c.getPosInClause();
-            }
-        }
-        return -1;
-    }
-
     private static CypNode obtainNode(MatchClause matchC, int i) {
         for (CypNode c : matchC.getNodes()) {
             if (c.getPosInClause() == i) {
@@ -527,15 +541,4 @@ public class InterToSQLNodesEdges {
         }
         return null;
     }
-
-    private static String[] obtainTable(String nodeID, MatchClause matchC)
-            throws Exception {
-        for (CypNode cN : matchC.getNodes()) {
-            if (nodeID.equals(cN.getId())) {
-                return cN.getAlias();
-            }
-        }
-        throw new Exception("MATCH AND RETURN CLAUSES INCOMPATIBLE");
-    }
-
 }

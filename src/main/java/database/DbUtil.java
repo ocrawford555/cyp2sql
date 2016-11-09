@@ -49,7 +49,6 @@ public class DbUtil {
         stmt = c.createStatement();
 
         ArrayList<ArrayList<String>> results = getQueryResult(query, stmt);
-
         ArrayList<String> colNames = results.get(0);
         results.remove(0);
 
@@ -60,7 +59,7 @@ public class DbUtil {
             for (ArrayList<String> as : results) {
                 int i = 0;
                 if (colNames.size() == 0) {
-                    writer.println("name" + " : " + as.get(i));
+                    writer.println("" + " : " + as.get(i));
                 } else {
                     for (String column : colNames) {
                         if (!column.equals("id")) writer.println(column + " : " + as.get(i));

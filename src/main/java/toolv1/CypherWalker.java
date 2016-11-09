@@ -3,6 +3,10 @@ package toolv1;
 import parsing_lexing.CypherBaseListener;
 import parsing_lexing.CypherParser;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+
 public class CypherWalker extends CypherBaseListener {
     private boolean hasOptional = false;
     private boolean hasDistinct = false;
@@ -10,6 +14,7 @@ public class CypherWalker extends CypherBaseListener {
     private String matchClause = null;
     private String whereClause = null;
     private String returnClause = null;
+    private Map<String, String> returnAlias = new HashMap<>();
     private String orderClause = null;
     private String withClause = null;
     private String latestOrderDirection = "";
@@ -80,8 +85,19 @@ public class CypherWalker extends CypherBaseListener {
     }
 
     public void enterReturnItems(CypherParser.ReturnItemsContext ctx) {
-        System.out.println(ctx.getParent().getRuleIndex());
         returnClause = ctx.getText();
+    }
+
+    public void enterReturnItem(CypherParser.ReturnItemContext ctx) {
+        //System.out.println(ctx.getText());
+    }
+
+    public void enterVariable(CypherParser.VariableContext ctx) {
+        if (ctx.getParent().getRuleIndex() == 21) {
+            String returnC = ctx.getParent().getText();
+            String[] varAndAlias = returnC.split(" as ");
+            returnAlias.put(varAndAlias[0], ctx.getText().toLowerCase());
+        }
     }
 
     public void enterSortItem(CypherParser.SortItemContext ctx) {
@@ -100,6 +116,8 @@ public class CypherWalker extends CypherBaseListener {
         if (withClause != null) System.out.println("With Clause: " + withClause);
         if (returnClause != null)
             System.out.println("Return Clause: " + returnClause + " -- DISTINCT = " + hasDistinct);
+        if (!returnAlias.isEmpty())
+            System.out.println("Return Alias: " + returnAlias);
         if (orderClause != null) System.out.println("Order Clause: " + orderClause);
         if (skipAmount != -1) System.out.println("Skip Amount: " + skipAmount);
         if (limitAmount != -1) System.out.println("Limit Amount: " + limitAmount);
@@ -136,6 +154,14 @@ public class CypherWalker extends CypherBaseListener {
 
     public boolean hasCount() {
         return hasCount;
+    }
+
+    public Map<String, String> getAliasMap() {
+        return returnAlias;
+    }
+
+    public Collection<String> getAlias() {
+        return returnAlias.values();
     }
 
     public String getWithClause() {

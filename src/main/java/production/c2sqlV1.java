@@ -46,10 +46,12 @@ public class c2sqlV1 {
             String line;
             String sql;
             while ((line = br.readLine()) != null) {
-                sql = convertCypherToSQL(line);
-                if (sql != null) {
-                    executeSQL(sql);
-                } else throw new Exception("Conversion of SQL failed");
+                if (!line.startsWith("//")) {
+                    sql = convertCypherToSQL(line);
+                    if (sql != null) {
+                        executeSQL(sql);
+                    } else throw new Exception("Conversion of SQL failed");
+                }
             }
             br.close();
         } catch (Exception e) {
@@ -63,7 +65,7 @@ public class c2sqlV1 {
         try {
             DbUtil.select(sql, dbName);
         } catch (SQLException e) {
-            System.err.println("Failure : \n\t" + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -72,7 +74,7 @@ public class c2sqlV1 {
             DecodedQuery decodedQuery = CypherTokenizer.decode(cypher);
             return InterToSQLNodesEdges.translate(decodedQuery);
         } catch (Exception e) {
-            System.err.println("Failure : \n\t" + e.getMessage());
+            e.printStackTrace();
             return null;
         }
     }

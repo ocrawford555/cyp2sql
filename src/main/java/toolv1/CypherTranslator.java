@@ -78,6 +78,7 @@ class CypherTranslator {
 
     private static WhereClause extractWhere(String clause, MatchClause matchC, WhereClause wc) throws Exception {
         if (clause.contains(" or ")) {
+            System.out.println("hello...");
             String[] items = clause.split(" or ");
             wc.setHasOr(true);
             wc.addToOr(items);
@@ -86,19 +87,26 @@ class CypherTranslator {
             }
         } else {
             wc.setClause(wc.getClause().substring(clause.length()));
-            String[] idAndCond = clause.split(" = ");
-            addCondition(idAndCond, matchC);
+            if (clause.contains(" = ")) {
+                String[] idAndValue = clause.split(" = ");
+                addCondition(idAndValue, matchC, "equals");
+            } else if (clause.contains(" <> ")) {
+                String[] idAndValue = clause.split(" <> ");
+                addCondition(idAndValue, matchC, "nequals");
+            }
         }
         return wc;
     }
 
-    private static void addCondition(String[] idAndCond, MatchClause matchC) throws Exception {
-        String[] idAndProp = idAndCond[0].split("\\.");
+    private static void addCondition(String[] idAndValue, MatchClause matchC, String op) throws Exception {
+        String[] idAndProp = idAndValue[0].split("\\.");
+
         for (CypNode cN : matchC.getNodes()) {
-            if (cN.getId().equals(idAndProp[0].toLowerCase())) {
+            if (cN.getId().equals(idAndProp[0])) {
                 JsonObject obj = cN.getProps();
                 if (obj == null) obj = new JsonObject();
-                obj.addProperty(idAndProp[1], idAndCond[1].replace("\"", "").toLowerCase());
+                if (op.equals("equals")) obj.addProperty(idAndProp[1], idAndValue[1].replace("\"", "").toLowerCase());
+                else obj.addProperty(idAndProp[1], "<#" + idAndValue[1].replace("\"", "").toLowerCase() + "#>");
                 cN.setProps(obj);
                 return;
             }
