@@ -1,4 +1,4 @@
-# Cyp 2 SQL Translator Tool
+# Cyp 2 SQL Translator Tool (v1)
 
 Cyp2SQL v1 is a tool that will perform automatic translation of both graph schemas and graph queries in Neo4J and Cypher respectively, to a relational schema and relational query language (SQL). 
 
