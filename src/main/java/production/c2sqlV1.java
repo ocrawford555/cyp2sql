@@ -3,6 +3,7 @@ package production;
 import clauseObjects.DecodedQuery;
 import database.DbUtil;
 import query_translation.InterToSQLNodesEdges;
+import query_translation.SQLUnion;
 import schemaConversion.SchemaTranslate;
 import toolv1.CypherTokenizer;
 
@@ -10,6 +11,7 @@ import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Map;
 
 /**
@@ -48,6 +50,7 @@ public class c2sqlV1 {
             while ((line = br.readLine()) != null) {
                 if (!line.startsWith("//")) {
                     sql = convertCypherToSQL(line);
+                    System.out.println(sql);
                     if (sql != null) {
                         executeSQL(sql);
                     } else throw new Exception("Conversion of SQL failed");
@@ -71,8 +74,29 @@ public class c2sqlV1 {
 
     private static String convertCypherToSQL(String cypher) {
         try {
-            DecodedQuery decodedQuery = CypherTokenizer.decode(cypher);
-            return InterToSQLNodesEdges.translate(decodedQuery);
+            if (cypher.toLowerCase().contains(" union all ")) {
+                System.out.println("HELLO");
+                String[] queries = cypher.toLowerCase().split(" union all ");
+                ArrayList<String> unionSQL = new ArrayList<>();
+                DecodedQuery dQ;
+                for (String s : queries) {
+                    dQ = CypherTokenizer.decode(s);
+                    unionSQL.add(InterToSQLNodesEdges.translate(dQ));
+                }
+                return SQLUnion.genUnion(unionSQL, "UNION ALL");
+            } else if (cypher.toLowerCase().contains(" union ")) {
+                String[] queries = cypher.toLowerCase().split(" union ");
+                ArrayList<String> unionSQL = new ArrayList<>();
+                DecodedQuery dQ;
+                for (String s : queries) {
+                    dQ = CypherTokenizer.decode(s);
+                    unionSQL.add(InterToSQLNodesEdges.translate(dQ));
+                }
+                return SQLUnion.genUnion(unionSQL, "UNION");
+            } else {
+                DecodedQuery decodedQuery = CypherTokenizer.decode(cypher);
+                return InterToSQLNodesEdges.translate(decodedQuery);
+            }
         } catch (Exception e) {
             e.printStackTrace();
             return null;
