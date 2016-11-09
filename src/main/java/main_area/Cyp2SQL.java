@@ -29,7 +29,7 @@ public class Cyp2SQL {
         for (String s : seperateQueries) {
             s = s.trim() + ";";
             if (s.startsWith("CREATE TEMP VIEW")) {
-                DbUtil.executeCreateView(s);
+                DbUtil.executeCreateView(s, "testa");
             } else {
                 DbUtil.select(s, "testa");
             }

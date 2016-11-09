@@ -23,7 +23,7 @@ public class ToolV1 {
         for (String s : seperateQueries) {
             s = s.trim() + ";";
             if (s.startsWith("CREATE TEMP VIEW")) {
-                DbUtil.executeCreateView(s);
+                DbUtil.executeCreateView(s, "testa");
             } else {
                 DbUtil.select(s, "testa");
             }

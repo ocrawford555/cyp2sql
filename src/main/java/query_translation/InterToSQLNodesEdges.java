@@ -4,13 +4,11 @@ import clauseObjects.*;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
 
 public class InterToSQLNodesEdges {
     private static final char[] alphabet = "abcdefghijklmnopqrstuvwxyz".toCharArray();
-    private static ArrayList<CypNode> varRelNodes = new ArrayList<>();
 
     public static String translate(DecodedQuery decodedQuery) throws Exception {
         StringBuilder sql = new StringBuilder();
@@ -60,10 +58,11 @@ public class InterToSQLNodesEdges {
             return sql;
         } else {
             // there are relationships to deal with, so use the WITH structure
+
             // furthermore, if there ae variable path ones, do something clever.
             if (matchC.isVarRel()) {
-                sql = obtainViews(sql, matchC);
-                sql.append(" SELECT name FROM nodes n inner join x on z = id ");
+                // assuming only one car relation for time being.
+                sql = obtainVarRel(sql, matchC, returnC);
                 return sql;
             }
 
@@ -77,131 +76,37 @@ public class InterToSQLNodesEdges {
         }
     }
 
-    private static StringBuilder obtainViews(StringBuilder sql, MatchClause matchC) {
-        int varRelsIndex = 0;
-
-        for (CypRel r : matchC.getRels()) {
-            if (r.getDirection().contains("var")) {
-                int highPathSearch;
-                String varDirection = "none";
-
-                if (r.getDirection().contains("-")) {
-                    String[] parts = r.getDirection().split("-");
-                    //lowerPathSearch = Integer.parseInt(parts[0].substring(3));
-                    String[] partsB = parts[1].split("#");
-                    highPathSearch = Integer.parseInt(partsB[0]);
-                    varDirection = partsB[1];
-                } else {
-                    String[] parts = r.getDirection().split("#");
-                    highPathSearch = Integer.parseInt(parts[0].substring(3));
-                    varDirection = parts[1];
-                }
-
-                System.out.println(varDirection);
-
-                int posOfRelInClause = r.getPosInClause();
-                CypNode n1 = matchC.getNodes().get(posOfRelInClause - 1);
-                CypNode n2 = matchC.getNodes().get(posOfRelInClause);
-
-                // need to choose the best node to initially expand to make the queries faster and
-                // not destroy my laptop.
-
-                int valueOfNode1 = ((n1.getProps() != null) ? 2 : 0) + ((n1.getType() != null) ? 1 : 0);
-                int valueOfNode2 = ((n2.getProps() != null) ? 2 : 0) + ((n2.getType() != null) ? 1 : 0);
-
-                if (valueOfNode2 > valueOfNode1) {
-                    CypNode nTemp = n2;
-                    int tempValue = valueOfNode2;
-                    valueOfNode2 = valueOfNode1;
-                    valueOfNode1 = tempValue;
-                    n2 = n1;
-                    n1 = nTemp;
-                    if (varDirection.equals("right")) varDirection = "left";
-                    else if (varDirection.equals("left")) varDirection = "right";
-                }
-
-                // add the other node to this global variable so that it can be accessed
-                // later on in the query (if it will be useful, hence the equality check
-                // against 0).
-                if (valueOfNode2 != 0) varRelNodes.add(n2);
-
-                int j = 0;
-
-                sql = getGraphRecursiveQuery(sql);
-                sql = getInitialVarView(j, n1, sql);
-
-                while (j < highPathSearch) {
-                    j++;
-                    sql.append(" CREATE TEMP VIEW v").append(j).append(" AS (WITH a AS (SELECT ");
-
-                    if (varDirection.equals("none") || varDirection.equals("right")) sql.append("idr ");
-                    else sql.append("idl ");
-
-                    sql.append("as z FROM gMain WHERE ");
-
-                    if (varDirection.equals("none") || varDirection.equals("right")) sql.append("idl ");
-                    else sql.append("idr ");
-
-                    sql.append("in (select * from v").append(j - 1).append(") ");
-                    if (j == 1) sql.append("and depth = 1");
-
-                    if (varDirection.equals("none")) {
-                        sql.append(" UNION ALL SELECT idl as z from gMain");
-                        sql.append(" WHERE idr in (select * from v").append(j - 1).append(")");
-                        if (j == 1) sql.append(" AND depth = 1");
-                    }
-
-                    sql.append(") SELECT * from a where z != (select * from v0));");
-                }
-
-                sql.append(" WITH x AS (SELECT z from v1");
-
-                for (int k = 0; k < j - 1; k++) {
-                    sql.append(" UNION SELECT z FROM v").append(k + 2);
-                }
-                sql.append(")");
+    private static StringBuilder obtainVarRel(StringBuilder sql, MatchClause matchC, ReturnClause returnC) {
+        sql.append(getTClosureQuery()).append(" ");
+        String direction = "none";
+        int amount = 0;
+        for (CypRel cR : matchC.getRels()) {
+            if (cR.getDirection().contains("var")) {
+                String dirAndAmount[] = cR.getDirection().split("#");
+                direction = dirAndAmount[1];
+                amount = Integer.parseInt(dirAndAmount[0].split("-")[1]);
             }
         }
-
+        CypNode cN;
+        if (direction.equals("left")) {
+            cN = matchC.getNodes().get(1);
+            sql.append(getZeroStep(cN));
+        }
+        if (direction.equals("right")) {
+            cN = matchC.getNodes().get(0);
+            sql.append(getZeroStep(cN));
+        }
+        sql.append(" ");
+        sql = createStepView(sql, amount);
         return sql;
     }
 
-    private static StringBuilder getGraphRecursiveQuery(StringBuilder sql) {
-        return sql.append("CREATE TEMP VIEW gMain AS (WITH RECURSIVE search_graph(idl, idr, depth, path, cycle) AS (" +
-                " SELECT e.idl, e.idr, 1," +
-                " ARRAY[e.idl]," +
-                " false" +
-                " FROM edges e" +
-                " UNION ALL" +
-                " SELECT e.idl, e.idr, sg.depth + 1," +
-                " path || e.idl," +
-                " e.idl = ANY(path)" +
-                " FROM edges e, search_graph sg" +
-                " WHERE e.idl = sg.idr AND NOT cycle" +
-                ") " +
-                "SELECT * FROM search_graph); ");
-    }
-
-    private static StringBuilder getInitialVarView(int j, CypNode n1, StringBuilder sql) {
-        sql.append("CREATE TEMP VIEW v").append(j).append(" as (SELECT id FROM Nodes n");
-        if (n1.getType() != null) {
-            sql.append(" WHERE n.label='").append(n1.getType()).append("'");
-        }
-        if (n1.getProps() != null) {
-            if (n1.getType() != null) sql.append(" AND ");
-            else sql.append(" WHERE ");
-
-            JsonObject obj = n1.getProps();
-            Set<Map.Entry<String, JsonElement>> entries = obj.entrySet();
-            for (Map.Entry<String, JsonElement> entry : entries) {
-                sql.append("n.").append(entry.getKey()).append(" = '");
-                sql.append(entry.getValue().getAsString()).append("' AND ");
-            }
-
-            sql.setLength(sql.length() - 5);
-        }
-
-        sql.append(");");
+    private static StringBuilder createStepView(StringBuilder sql, int amount) {
+        sql.append("CREATE TEMP VIEW step AS (WITH graphT AS (SELECT idr as x");
+        sql.append(" FROM tClosure JOIN zerostep on idl = zerostep.id");
+        sql.append(" JOIN nodes as n on idr = n.id where depth <=");
+        sql.append(amount).append(") SELECT * from graphT); ");
+        sql.append("SELECT * FROM nodes JOIN step on x = id");
         return sql;
     }
 
@@ -540,5 +445,41 @@ public class InterToSQLNodesEdges {
             }
         }
         return null;
+    }
+
+    private static String getTClosureQuery() {
+        return "CREATE TEMP VIEW tclosure AS(WITH RECURSIVE search_graph(idl, idr, depth, path, cycle) AS (" +
+                "SELECT e.idl, e.idr, 1," +
+                " ARRAY[e.idl]," +
+                " false" +
+                " FROM edges e" +
+                " UNION ALL" +
+                " SELECT sg.idl, e.idr, sg.depth + 1," +
+                " path || e.idl," +
+                " e.idl = ANY(sg.path)" +
+                " FROM edges e, search_graph sg" +
+                " WHERE e.idl = sg.idr AND NOT cycle" +
+                ") " +
+                "SELECT * FROM search_graph);";
+    }
+
+    public static String getZeroStep(CypNode cN) {
+        String getZStep = "CREATE TEMP VIEW zerostep AS" +
+                " (SELECT id from nodes";
+        JsonObject obj = cN.getProps();
+        if (obj != null) {
+            getZStep += " WHERE ";
+            Set<Map.Entry<String, JsonElement>> entries = obj.entrySet();
+            for (Map.Entry<String, JsonElement> entry : entries) {
+                getZStep = getZStep + entry.getKey() + " = ";
+                getZStep = getZStep + "'" + entry.getValue().getAsString() + "'";
+                getZStep = getZStep + " AND ";
+            }
+            getZStep = getZStep.substring(0, getZStep.length() - 5);
+        }
+
+        getZStep = getZStep + ");";
+        System.out.println(getZStep);
+        return getZStep;
     }
 }

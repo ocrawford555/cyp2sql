@@ -16,6 +16,7 @@ import java.util.Set;
 public class DbUtil {
     private static Connection c = null;
     private static int numRecords = 0;
+    private static boolean DB_OPEN = false;
 
     public static void createConnection(String dbName) {
         try {
@@ -23,6 +24,7 @@ public class DbUtil {
             c = DriverManager
                     .getConnection("jdbc:postgresql://localhost:5432/" + dbName,
                             "postgres", "OJC9511abc");
+            DB_OPEN = true;
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(0);
@@ -32,19 +34,21 @@ public class DbUtil {
     public static void closeConnection() {
         try {
             c.close();
+            DB_OPEN = false;
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    public static void executeCreateView(String query) throws SQLException {
+    public static void executeCreateView(String query, String dbName) throws SQLException {
+        if (!DB_OPEN) DbUtil.createConnection(dbName);
         Statement stmt = c.createStatement();
         stmt.executeUpdate(query);
         stmt.close();
     }
 
     public static void select(String query, String database) throws SQLException {
-        DbUtil.createConnection(database);
+        if (!DB_OPEN) DbUtil.createConnection(database);
         Statement stmt;
         stmt = c.createStatement();
 
