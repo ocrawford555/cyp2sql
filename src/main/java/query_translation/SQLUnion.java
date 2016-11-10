@@ -15,7 +15,8 @@ public class SQLUnion {
         for (int j = 1; j < i; j++) {
             unionSQL.append(" SELECT * FROM u").append(j).append(" ").append(unionType);
         }
-        unionSQL.setLength(unionSQL.length() - 6);
+        if (unionType.equals("UNION")) unionSQL.setLength(unionSQL.length() - 6);
+        else if (unionType.equals("UNION ALL")) unionSQL.setLength(unionSQL.length() - 10);
         unionSQL.append(";");
         return unionSQL.toString();
     }

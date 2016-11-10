@@ -12,7 +12,6 @@ import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Map;
 
 /**
@@ -54,7 +53,9 @@ public class c2sqlV1 {
                     System.out.println(sql);
                     if (sql != null) {
                         executeSQL(sql);
+
                     } else throw new Exception("Conversion of SQL failed");
+
                 }
             }
             br.close();
@@ -68,7 +69,6 @@ public class c2sqlV1 {
     private static void executeSQL(String sql) {
         try {
             String indivSQL[] = sql.split(";");
-            System.out.println(Arrays.toString(indivSQL));
             for (String q : indivSQL) {
                 if (q.trim().startsWith("CREATE")) {
                     DbUtil.executeCreateView(q + ";", dbName);

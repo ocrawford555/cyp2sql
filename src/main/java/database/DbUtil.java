@@ -77,6 +77,7 @@ public class DbUtil {
         } catch (FileNotFoundException | UnsupportedEncodingException e) {
             e.printStackTrace();
         }
+        DbUtil.closeConnection();
     }
 
     private static ArrayList<ArrayList<String>> getQueryResult(String query, Statement stm) {

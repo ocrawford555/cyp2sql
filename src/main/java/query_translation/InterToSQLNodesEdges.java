@@ -4,6 +4,7 @@ import clauseObjects.*;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
 
@@ -87,17 +88,41 @@ public class InterToSQLNodesEdges {
                 amount = Integer.parseInt(dirAndAmount[0].split("-")[1]);
             }
         }
-        CypNode cN;
+        CypNode cN1;
+        CypNode cN2 = null;
         if (direction.equals("left")) {
-            cN = matchC.getNodes().get(1);
-            sql.append(getZeroStep(cN));
-        }
-        if (direction.equals("right")) {
-            cN = matchC.getNodes().get(0);
-            sql.append(getZeroStep(cN));
+            cN1 = matchC.getNodes().get(1);
+            cN2 = matchC.getNodes().get(0);
+            sql.append(getZeroStep(cN1));
+        } else if (direction.equals("right")) {
+            cN1 = matchC.getNodes().get(0);
+            cN2 = matchC.getNodes().get(1);
+            sql.append(getZeroStep(cN1));
         }
         sql.append(" ");
         sql = createStepView(sql, amount);
+        if (cN2 != null) {
+            if (cN2.getType() != null || cN2.getProps() != null) {
+                sql = addWhereToSelectForVarRels(sql, cN2);
+            }
+        }
+        return sql;
+    }
+
+    private static StringBuilder addWhereToSelectForVarRels(StringBuilder sql, CypNode cN2) {
+        sql.append(" WHERE ");
+        if (cN2.getType() != null) {
+            sql.append("n.label = '").append(cN2.getType()).append("' AND ");
+        }
+        if (cN2.getProps() != null) {
+            JsonObject obj = cN2.getProps();
+            Set<Map.Entry<String, JsonElement>> entries = obj.entrySet();
+            for (Map.Entry<String, JsonElement> entry : entries) {
+                sql.append("n.").append(entry.getKey()).append(" = '");
+                sql.append(entry.getValue().getAsString()).append("' AND ");
+            }
+        }
+        sql.setLength(sql.length() - 5);
         return sql;
     }
 
@@ -106,7 +131,7 @@ public class InterToSQLNodesEdges {
         sql.append(" FROM tClosure JOIN zerostep on idl = zerostep.id");
         sql.append(" JOIN nodes as n on idr = n.id where depth <=");
         sql.append(amount).append(") SELECT * from graphT); ");
-        sql.append("SELECT * FROM nodes JOIN step on x = id");
+        sql.append("SELECT * FROM nodes n JOIN step on x = n.id");
         return sql;
     }
 
@@ -380,8 +405,20 @@ public class InterToSQLNodesEdges {
             }
         }
 
-        for (CypReturn cR : returnC.getItems())
-            if (cR.getType() != null)
+        ArrayList<String> nodeIDS = new ArrayList<>();
+        ArrayList<String> crossResults = new ArrayList<>();
+
+        for (CypNode cN : matchC.getNodes()) {
+            if (cN.getId() != null) {
+                if (nodeIDS.contains(cN.getId())) {
+                    crossResults.add(nodeIDS.indexOf(cN.getId()) + "," +
+                            (nodeIDS.size() + crossResults.size()));
+                } else nodeIDS.add(cN.getId());
+            }
+        }
+
+        for (CypReturn cR : returnC.getItems()) {
+            if (cR.getType() != null) {
                 switch (cR.getType()) {
                     case "node":
                         if (!hasWhereKeyword) {
@@ -408,6 +445,8 @@ public class InterToSQLNodesEdges {
                     default:
                         break;
                 }
+            }
+        }
 
         if (numRels > 1) {
             for (int i = 0; i < numRels - 1; i++) {
@@ -419,6 +458,21 @@ public class InterToSQLNodesEdges {
                     sql.append(alphabet[i + 1]).append(".").append(alphabet[i + 1]).append(2);
                 }
                 sql.append(" AND ");
+            }
+        }
+
+        if (!crossResults.isEmpty()) {
+            for (String s : crossResults) {
+                String[] t = s.split(",");
+                int[] indices = new int[2];
+                indices[0] = Integer.parseInt(t[0]);
+                indices[1] = Integer.parseInt(t[1]);
+                String a = "";
+                String b = "";
+                if (indices[0] == 0) a = "a.a1";
+                else a = alphabet[indices[0] - 1] + "." + alphabet[indices[0] - 1] + "2";
+                b = alphabet[indices[1] - 1] + "." + alphabet[indices[1] - 1] + "2";
+                sql.append(a).append(" = ").append(b).append(" AND ");
             }
         }
 
@@ -466,9 +520,11 @@ public class InterToSQLNodesEdges {
     public static String getZeroStep(CypNode cN) {
         String getZStep = "CREATE TEMP VIEW zerostep AS" +
                 " (SELECT id from nodes";
+        boolean hasWhere = false;
         JsonObject obj = cN.getProps();
         if (obj != null) {
             getZStep += " WHERE ";
+            hasWhere = true;
             Set<Map.Entry<String, JsonElement>> entries = obj.entrySet();
             for (Map.Entry<String, JsonElement> entry : entries) {
                 getZStep = getZStep + entry.getKey() + " = ";
@@ -476,6 +532,15 @@ public class InterToSQLNodesEdges {
                 getZStep = getZStep + " AND ";
             }
             getZStep = getZStep.substring(0, getZStep.length() - 5);
+        }
+
+        if (cN.getType() != null) {
+            if (!hasWhere) {
+                getZStep += " WHERE ";
+            } else {
+                getZStep += " AND ";
+            }
+            getZStep = getZStep + "label = '" + cN.getType() + "'";
         }
 
         getZStep = getZStep + ");";
