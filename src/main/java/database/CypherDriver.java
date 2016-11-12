@@ -4,12 +4,10 @@ import clauseObjects.CypNode;
 import clauseObjects.DecodedQuery;
 import org.neo4j.driver.v1.*;
 import org.neo4j.driver.v1.exceptions.ClientException;
-import schemaConversion.SchemaTranslate;
 import toolv1.CypherTokenizer;
 
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
+import java.util.ArrayList;
 import java.util.List;
 
 public class CypherDriver {
@@ -50,16 +48,19 @@ public class CypherDriver {
                             writer.println(bits[1].toLowerCase() + " : " + record.get(t).asString().toLowerCase());
                         } else {
                             // currently only deals with returning nodes
-                            List<String> fields = SchemaTranslate.nodeRelLabels;
+                            List<String> fields = getAllFields();
                             if (fields != null) {
                                 for (String s : fields) {
-                                    writer.println(s + " : " + record.get(t).asNode().get(s.split(" ")[0])
-                                            .asString().toLowerCase());
+                                    try {
+                                        writer.println(s + " : " + record.get(t).asNode().get(s).asString().toLowerCase());
+                                    } catch (ClientException ce) {
+                                        writer.println(s + " : " + record.get(t).asNode().get(s).asInt());
+                                    }
                                 }
                             }
                         }
                     } catch (ClientException ce) {
-                        System.out.println("Error handled correctly in CypherDriver.");
+                        System.out.println("Error handled correctly in CypherDriver." + ce.toString());
                     }
                 }
                 countRecords++;
@@ -79,5 +80,23 @@ public class CypherDriver {
         for (CypNode cN : dQ.getMc().getNodes()) {
             writer.println("name : " + record.get(cN.getId()).asNode().get("name").asString().toLowerCase());
         }
+    }
+
+    private static List<String> getAllFields() {
+        List<String> toReturn = new ArrayList<>();
+        try {
+            FileInputStream fis = new FileInputStream("C:/Users/ocraw/Desktop/meta.txt");
+            BufferedReader br = new BufferedReader(new InputStreamReader(fis));
+            String line;
+            while ((line = br.readLine()) != null) {
+                if (!line.equals("id"))
+                    toReturn.add(line);
+            }
+            br.close();
+            fis.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return toReturn;
     }
 }

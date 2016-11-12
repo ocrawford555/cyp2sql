@@ -99,6 +99,7 @@ public class InterToSQLNodesEdges {
             cN2 = matchC.getNodes().get(1);
             sql.append(getZeroStep(cN1));
         }
+
         sql.append(" ");
         sql = createStepView(sql, amount);
         if (cN2 != null) {

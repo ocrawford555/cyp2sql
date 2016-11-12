@@ -59,13 +59,13 @@ public class c2sqlV1 {
             String sql;
             while ((line = br.readLine()) != null) {
                 if (!line.startsWith("//")) {
-                    CypherDriver.run(line);
                     sql = convertCypherToSQL(line);
                     System.out.println(sql);
                     if (sql != null) {
                         executeSQL(sql);
 
                     } else throw new Exception("Conversion of SQL failed");
+                    CypherDriver.run(line);
                     System.out.println("QUERY: " + line + "\nRESULT: " +
                             FileUtils.contentEquals(f1, f2));
                 }

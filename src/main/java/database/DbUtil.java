@@ -7,11 +7,13 @@ import schemaConversion.SchemaTranslate;
 import java.io.*;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.List;
 
 public class DbUtil {
     private static Connection c = null;
     private static int numRecords = 0;
     private static boolean DB_OPEN = false;
+    private static List<String> fieldsForMetaFile = new ArrayList<>();
 
     public static void createConnection(String dbName) {
         try {
@@ -115,6 +117,7 @@ public class DbUtil {
 
         for (String y : SchemaTranslate.nodeRelLabels) {
             sb.append(y.split(" ")[0]).append(", ");
+            fieldsForMetaFile.add(y.split(" ")[0]);
         }
         sb.setLength(sb.length() - 2);
         sb.append(")");
@@ -206,6 +209,21 @@ public class DbUtil {
             DbUtil.createInsert(sqlInsertNodes);
             DbUtil.createInsert(sqlInsertEdges);
         } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        FileOutputStream fos;
+        try {
+            fos = new FileOutputStream("C:/Users/ocraw/Desktop/meta.txt");
+            //Construct BufferedReader from InputStreamReader
+            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos));
+            for (String s : fieldsForMetaFile) {
+                bw.write(s);
+                bw.newLine();
+            }
+            bw.close();
+            fos.close();
+        } catch (IOException e) {
             e.printStackTrace();
         }
 
