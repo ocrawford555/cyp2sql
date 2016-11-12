@@ -42,26 +42,26 @@ public class c2sqlV1 {
 
         // with the conversion having occurred, proceed to go through text file containing Cypher
         // queries, convert them to intermediate form, convert that to SQL, and run on Postgres.
-        try {
-            FileInputStream fis = new FileInputStream((args.length == 2) ? args[0] : args[1]);
-            BufferedReader br = new BufferedReader(new InputStreamReader(fis));
-            String line;
-            String sql;
-            while ((line = br.readLine()) != null) {
-                if (!line.startsWith("//")) {
-                    sql = convertCypherToSQL(line);
-                    System.out.println(sql);
-                    if (sql != null) {
-                        executeSQL(sql);
-
-                    } else throw new Exception("Conversion of SQL failed");
-
-                }
-            }
-            br.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+//        try {
+//            FileInputStream fis = new FileInputStream((args.length == 2) ? args[0] : args[1]);
+//            BufferedReader br = new BufferedReader(new InputStreamReader(fis));
+//            String line;
+//            String sql;
+//            while ((line = br.readLine()) != null) {
+//                if (!line.startsWith("//")) {
+//                    sql = convertCypherToSQL(line);
+//                    System.out.println(sql);
+//                    if (sql != null) {
+//                        executeSQL(sql);
+//
+//                    } else throw new Exception("Conversion of SQL failed");
+//
+//                }
+//            }
+//            br.close();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
 
         System.out.println("Success : Results written to file <pg_results.txt>.");
     }
@@ -83,7 +83,6 @@ public class c2sqlV1 {
     private static String convertCypherToSQL(String cypher) {
         try {
             if (cypher.toLowerCase().contains(" union all ")) {
-                System.out.println("HELLO");
                 String[] queries = cypher.toLowerCase().split(" union all ");
                 ArrayList<String> unionSQL = new ArrayList<>();
                 DecodedQuery dQ;

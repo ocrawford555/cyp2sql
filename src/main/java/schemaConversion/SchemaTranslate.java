@@ -4,9 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -16,6 +14,12 @@ import java.util.regex.Pattern;
 
 public class SchemaTranslate {
     public static Map<String, String> translate(String file, boolean DEBUG_PRINT) {
+        // perform initial preprocess of the file to remove content such as new file markers
+        // and other aspects that will break the schema converter.
+        boolean success = performPreProcessFile(file);
+
+        if (!success) return null;
+
         // read through all lines in the text file containing the schema of the Cypher DB
         Map<String, String> returnSchema = new HashMap<>();
 
@@ -45,7 +49,13 @@ public class SchemaTranslate {
         Metadata_Schema ms = new Metadata_Schema();
 
         try {
-            for (String line : Files.readAllLines(Paths.get(file))) {
+            FileInputStream fis = new FileInputStream(file.replace(".txt", "_new.txt"));
+
+            //Construct BufferedReader from InputStreamReader
+            BufferedReader br = new BufferedReader(new InputStreamReader(fis));
+            String line;
+
+            while ((line = br.readLine()) != null) {
                 // remove CREATE characters
                 line = line.substring(7).toLowerCase();
 
@@ -58,15 +68,27 @@ public class SchemaTranslate {
                     // firstSplit[1] contains properties of the node
                     String[] firstSplit = line.split("` ");
 
-                    String[] idAndTable = firstSplit[0].split(":");
+                    String[] idAndTable = firstSplit[0].split(":`");
                     int id = Integer.parseInt(idAndTable[0].substring(2));
-                    String nodeLabel = idAndTable[1].substring(1, idAndTable[1].length());
 
-                    // remove bad characters from text file
-                    // TODO: can this be made better to avoid removing illegal characters.
+                    // TODO: fix for the large movies parsing - need to fix for multiple labels issues
+                    for (int i = 2; i < idAndTable.length; i++) {
+                        idAndTable[1] += idAndTable[i];
+                        //hack to remove extra labels
+                        i += 8;
+                    }
+
+                    String nodeLabel;
+                    idAndTable[1] = idAndTable[1].replace("`", "");
+
+                    if (idAndTable[1].contains("person")) {
+                        nodeLabel = idAndTable[1].substring(6, idAndTable[1].length());
+                    } else
+                        nodeLabel = idAndTable[1].substring(0, idAndTable[1].length());
+
                     String props = firstSplit[1].replace("`", "");
 
-                    JsonObject o = parser.parse(props.substring(0, props.length() - 1)).getAsJsonObject();
+                    JsonObject o = (JsonObject) parser.parse(props.substring(0, props.length() - 1));
 
                     // add to the metadata file
                     if (!nodeLabelList.contains(nodeLabel)) {
@@ -148,11 +170,55 @@ public class SchemaTranslate {
 
         if (DEBUG_PRINT) {
             System.out.println("NODES : " + returnSchema.get("nodes"));
-            System.out.println("EDGES : " + returnSchema.get("edges"));
+            //System.out.println("EDGES : " + returnSchema.get("edges"));
         }
 
         ms.createFile();
         return returnSchema;
+    }
+
+    private static boolean performPreProcessFile(String file) {
+        FileInputStream fis;
+        FileOutputStream fos;
+
+        try {
+            fis = new FileInputStream(file);
+            //Construct BufferedReader from InputStreamReader
+            BufferedReader br = new BufferedReader(new InputStreamReader(fis));
+            String line;
+
+            fos = new FileOutputStream(file.replace(".txt", "_new.txt"));
+
+            //Construct BufferedReader from InputStreamReader
+            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos));
+            String output = "";
+            boolean firstLine = true;
+
+
+            while ((line = br.readLine()) != null) {
+                if (line.startsWith("create")) {
+                    if (firstLine) {
+                        firstLine = false;
+                    } else {
+                        bw.write(output);
+                        bw.newLine();
+                    }
+                    output = line;
+                } else if (line.isEmpty()) {
+                    //do nothing
+                } else {
+                    output += line;
+                }
+            }
+
+            br.close();
+            bw.flush();
+            bw.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
     }
 
     private static void addToMetaData(Metadata_Schema ms, String nodeLabel, JsonObject o, int typeAdd) {
