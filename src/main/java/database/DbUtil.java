@@ -1,17 +1,12 @@
 package database;
 
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import schemaConversion.SchemaTranslate;
 
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
 
 public class DbUtil {
     private static Connection c = null;
@@ -119,40 +114,33 @@ public class DbUtil {
         stmt.close();
     }
 
-    private static StringBuilder insertTableData(Map<String, String> schemaToBuild, StringBuilder sb, String tableName,
-                                                 Map<String, String> fields) {
-        sb.append("INSERT INTO ");
-        sb.append(tableName).append("(");
-        for (String y : fields.keySet()) {
-            sb.append(y).append(", ");
+    private static StringBuilder insertTableDataNodes(StringBuilder sb) {
+        sb.append("INSERT INTO nodes (");
+
+        for (String y : SchemaTranslate.nodeRelLabels) {
+            sb.append(y.split(" ")[0]).append(", ");
         }
         sb.setLength(sb.length() - 2);
         sb.append(")");
 
         sb.append(" VALUES ");
 
-        String[] jsonObjs = schemaToBuild.get(tableName).split("###");
-
-        for (String obj : jsonObjs) {
-            JsonParser parser = new JsonParser();
-            JsonObject o = parser.parse(obj).getAsJsonObject();
-            sb.append("(");
-            for (String z : fields.keySet()) {
-                try {
-                    if (fields.get(z).equals("INT")) {
-                        int value = o.get(z).getAsInt();
-                        sb.append(value).append(", ");
-                    } else {
-                        // is text
-                        String value = o.get(z).getAsString();
-                        sb.append("'").append(value).append("', ");
-                    }
-                } catch (NullPointerException npe) {
-                    sb.append("null, ");
+        try {
+            FileInputStream fis = new FileInputStream(SchemaTranslate.nodesFile);
+            BufferedReader br = new BufferedReader(new InputStreamReader(fis));
+            String line;
+            while ((line = br.readLine()) != null) {
+                JsonParser parser = new JsonParser();
+                JsonObject o = (JsonObject) parser.parse(line);
+                sb.append("(");
+                for (String z : SchemaTranslate.nodeRelLabels) {
+                    sb = getInsertString(z, sb, o);
                 }
+                sb.setLength(sb.length() - 2);
+                sb.append("), ");
             }
-            sb.setLength(sb.length() - 2);
-            sb.append("), ");
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
         sb.setLength(sb.length() - 2);
@@ -161,68 +149,98 @@ public class DbUtil {
         return sb;
     }
 
+    private static StringBuilder insertTableDataEdges(StringBuilder sb) {
+        sb.append("INSERT INTO edges (");
 
-    public static void insertSchema(Map<String, String> schemaToBuild, String database) {
-        DbUtil.createConnection(database);
-        try {
-            // iterate over each table to create
-            for (String s : schemaToBuild.keySet()) {
-                String sql = obtainSQL(s, schemaToBuild);
-                createInsert(sql);
-            }
-        } catch (SQLException sqle) {
-            System.err.println("FAILED : could not execute SQL for schema - " +
-                    sqle.getMessage());
-        } finally {
-            DbUtil.closeConnection();
+        for (String y : SchemaTranslate.edgesRelLabels) {
+            sb.append(y.split(" ")[0]).append(", ");
         }
+        sb.setLength(sb.length() - 2);
+        sb.append(")");
+
+        sb.append(" VALUES ");
+
+        try {
+            FileInputStream fis = new FileInputStream(SchemaTranslate.edgesFile);
+            BufferedReader br = new BufferedReader(new InputStreamReader(fis));
+            String line;
+            while ((line = br.readLine()) != null) {
+                JsonParser parser = new JsonParser();
+                JsonObject o = (JsonObject) parser.parse(line);
+                sb.append("(");
+                for (String z : SchemaTranslate.edgesRelLabels) {
+                    sb = getInsertString(z, sb, o);
+                }
+                sb.setLength(sb.length() - 2);
+                sb.append("), ");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        sb.setLength(sb.length() - 2);
+        sb.append(";");
+
+        return sb;
     }
 
-    private static String obtainSQL(String s, Map<String, String> schemaToBuild) {
+    private static StringBuilder getInsertString(String z, StringBuilder sb, JsonObject o) {
+        try {
+            if (z.endsWith("INT")) {
+                int value = o.get(z.split(" ")[0]).getAsInt();
+                sb.append(value).append(", ");
+            } else {
+                // is text
+                String value = o.get(z.split(" ")[0]).getAsString();
+                sb.append("'").append(value).append("', ");
+            }
+        } catch (NullPointerException npe) {
+            sb.append("null, ");
+        }
+        return sb;
+    }
+
+
+    public static void insertSchema(String database) {
+        DbUtil.createConnection(database);
+        String sqlInsertNodes = insertNodes();
+        String sqlInsertEdges = insertEdges();
+
+        try {
+            DbUtil.createInsert(sqlInsertNodes);
+            DbUtil.createInsert(sqlInsertEdges);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        DbUtil.closeConnection();
+    }
+
+    private static String insertEdges() {
         StringBuilder sb = new StringBuilder();
 
-        sb.append("CREATE TABLE ");
-        sb.append(s);
-
-        JsonParser parser = new JsonParser();
-        Map<String, String> fields = getFieldsForDatabase(s, parser, schemaToBuild);
-
-        sb.append("(");
-        for (String x : fields.keySet()) {
-            sb.append(x).append(" ");
-            sb.append(fields.get(x)).append(", ");
+        sb.append("CREATE TABLE edges(");
+        for (String x : SchemaTranslate.edgesRelLabels) {
+            sb.append(x).append(", ");
         }
         sb.setLength(sb.length() - 2);
         sb.append("); ");
 
-        // insert the data to the table
-        sb = insertTableData(schemaToBuild, sb, s, fields);
-
-        // turn the stringbuilder into a string
+        sb = insertTableDataEdges(sb);
         return sb.toString();
     }
 
-    private static Map<String, String> getFieldsForDatabase(String s, JsonParser parser,
-                                                            Map<String, String> schemaToBuild) {
-        String[] jsonObjs = schemaToBuild.get(s).split("###");
-        Map<String, String> fields = new LinkedHashMap<>();
+    private static String insertNodes() {
+        StringBuilder sb = new StringBuilder();
 
-        for (String jobj : jsonObjs) {
-            System.out.println(jobj);
-            JsonObject o = parser.parse(jobj).getAsJsonObject();
-            Set<Map.Entry<String, JsonElement>> entries = o.entrySet();
-
-            for (Map.Entry<String, JsonElement> entry : entries) {
-                if (!fields.containsKey(entry.getKey()))
-                    try {
-                        Integer.parseInt(entry.getValue().getAsString());
-                        fields.put(entry.getKey(), "INT");
-                    } catch (NumberFormatException nfe) {
-                        fields.put(entry.getKey(), "TEXT");
-                    }
-            }
+        sb.append("CREATE TABLE nodes(");
+        for (String x : SchemaTranslate.nodeRelLabels) {
+            sb.append(x).append(", ");
         }
+        sb.setLength(sb.length() - 2);
+        sb.append("); ");
 
-        return fields;
+        sb = insertTableDataNodes(sb);
+        return sb.toString();
     }
 }

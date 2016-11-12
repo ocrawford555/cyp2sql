@@ -113,6 +113,6 @@ public class c2sqlV1 {
         // true is a debug print parameter
         SchemaTranslate.translate(dumpFile, false);
         // testa is the default database location
-        //DbUtil.insertSchema(dbName);
+        DbUtil.insertSchema(dbName);
     }
 }

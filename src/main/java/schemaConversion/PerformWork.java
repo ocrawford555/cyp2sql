@@ -1,5 +1,6 @@
 package schemaConversion;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import java.io.BufferedWriter;
@@ -7,18 +8,18 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 
 class PerformWork implements Runnable {
     private ArrayList<String> lines;
-    private int idP;
     private String fileExt;
     private BufferedWriter bwNodes;
     private BufferedWriter bwEdges;
 
     PerformWork(ArrayList<String> strings, int id, String file) {
         this.lines = strings;
-        this.idP = id;
         this.fileExt = file;
 
         FileOutputStream fosNodes;
@@ -39,11 +40,13 @@ class PerformWork implements Runnable {
     }
 
     public void run() {
+        Set<Map.Entry<String, JsonElement>> entries;
+        Matcher m;
+
         for (String s : lines) {
             // remove CREATE characters
             s = s.substring(7).toLowerCase();
 
-            Matcher m;
             //using regex to decide between node or relationship
             m = SchemaTranslate.patternN.matcher(s);
 
@@ -77,6 +80,20 @@ class PerformWork implements Runnable {
 
                 o.addProperty("id", id);
                 o.addProperty("label", nodeLabel);
+
+                entries = o.entrySet();
+                for (Map.Entry<String, JsonElement> entry : entries) {
+                    if (!SchemaTranslate.nodeRelLabels.contains(entry.getKey() + " TEXT") &&
+                            !SchemaTranslate.nodeRelLabels.contains(entry.getKey() + " INT")) {
+                        try {
+                            Integer.parseInt(entry.getValue().getAsString());
+                            SchemaTranslate.nodeRelLabels.add(entry.getKey() + " INT");
+                        } catch (NumberFormatException nfe) {
+                            SchemaTranslate.nodeRelLabels.add(entry.getKey() + " TEXT");
+                        }
+                    }
+                }
+
 
                 try {
                     bwNodes.write(o.toString());
@@ -117,6 +134,19 @@ class PerformWork implements Runnable {
                 o.addProperty("idL", idL);
                 o.addProperty("idR", idR);
                 o.addProperty("type", relationship);
+
+                entries = o.entrySet();
+                for (Map.Entry<String, JsonElement> entry : entries) {
+                    if (!SchemaTranslate.edgesRelLabels.contains(entry.getKey() + " TEXT") &&
+                            !SchemaTranslate.edgesRelLabels.contains(entry.getKey() + " INT")) {
+                        try {
+                            Integer.parseInt(entry.getValue().getAsString());
+                            SchemaTranslate.edgesRelLabels.add(entry.getKey() + " INT");
+                        } catch (NumberFormatException nfe) {
+                            SchemaTranslate.edgesRelLabels.add(entry.getKey() + " TEXT");
+                        }
+                    }
+                }
 
                 try {
                     bwEdges.write(o.toString());

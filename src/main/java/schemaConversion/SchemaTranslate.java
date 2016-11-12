@@ -3,17 +3,19 @@ package schemaConversion;
 import com.google.gson.JsonParser;
 
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.regex.Pattern;
 
 public class SchemaTranslate {
+    public static List<String> nodeRelLabels = Collections.synchronizedList(new ArrayList<>());
+    public static List<String> edgesRelLabels = Collections.synchronizedList(new ArrayList<>());
+    public static String nodesFile = "C:/Users/ocraw/Desktop/nodes.txt";
+    public static String edgesFile = "C:/Users/ocraw/Desktop/edges.txt";
     // JSON Parser for creating JSON objects from the text file.
     // passed to all of the threads
     static JsonParser parser = new JsonParser();
-    static String nodesFile = "C:/Users/ocraw/Desktop/nodes.txt";
-    static String edgesFile = "C:/Users/ocraw/Desktop/edges.txt";
     // regex for deciding whether a line is a node or a relationship
     private static String patternForNode = "(_\\d+:.*)";
     static Pattern patternN = Pattern.compile(patternForNode);
@@ -108,7 +110,7 @@ public class SchemaTranslate {
                         temp = s4;
                         break;
                 }
-                ts[i] = new Thread(new PerformWork(temp, i + 1, files[i]));
+                ts[i] = new Thread(new PerformWork(temp, i, files[i]));
             }
 
             for (Thread q : ts) {
@@ -154,6 +156,9 @@ public class SchemaTranslate {
                 f.delete();
             }
             out.close();
+
+            System.out.println(nodeRelLabels);
+            System.out.println(edgesRelLabels);
 
 
         } catch (IOException e) {
