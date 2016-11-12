@@ -57,13 +57,9 @@ public class DbUtil {
             writer = new PrintWriter(file_location_results, "UTF-8");
             for (ArrayList<String> as : results) {
                 int i = 0;
-                if (colNames.size() == 0) {
-                    writer.println("" + " : " + as.get(i));
-                } else {
-                    for (String column : colNames) {
-                        if (!column.equals("id")) writer.println(column + " : " + as.get(i));
-                        i++;
-                    }
+                for (String column : colNames) {
+                    if (!column.equals("id")) writer.println(column + " : " + as.get(i));
+                    i++;
                 }
             }
             writer.println();
@@ -85,8 +81,8 @@ public class DbUtil {
             ResultSetMetaData rsm = rs.getMetaData();
 
             feed = new ArrayList<>();
-            for (int y = 1; y < rsm.getColumnCount(); y++) {
-                feed.add(rsm.getColumnName(y));
+            for (int y = 0; y < rsm.getColumnCount(); y++) {
+                feed.add(rsm.getColumnName(y + 1));
             }
             feedback.add(feed);
 

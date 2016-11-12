@@ -112,7 +112,7 @@ public class InterToSQLNodesEdges {
     private static StringBuilder addWhereToSelectForVarRels(StringBuilder sql, CypNode cN2) {
         sql.append(" WHERE ");
         if (cN2.getType() != null) {
-            sql.append("n.label = '").append(cN2.getType()).append("' AND ");
+            sql.append("n.label LIKE '%").append(cN2.getType()).append("%' AND ");
         }
         if (cN2.getProps() != null) {
             JsonObject obj = cN2.getProps();
@@ -141,7 +141,7 @@ public class InterToSQLNodesEdges {
             if (cR.getNodeID() == null && cR.getField().equals("*")) {
                 CypNode cN = matchC.getNodes().get(0);
                 hasWhere = true;
-                sql.append(" WHERE n.label = '").append(cN.getType()).append("' AND ");
+                sql.append(" WHERE n.label LIKE '%").append(cN.getType()).append("%' AND ");
                 if (cN.getProps() != null) {
                     JsonObject obj = cN.getProps();
                     Set<Map.Entry<String, JsonElement>> entries = obj.entrySet();
@@ -165,7 +165,7 @@ public class InterToSQLNodesEdges {
                         sql.append(" WHERE ");
                         hasWhere = true;
                     }
-                    sql.append("n.label = '").append(cN.getType()).append("' AND ");
+                    sql.append("n.label LIKE '%").append(cN.getType()).append("%' AND ");
                     if (cN.getProps() != null) {
                         JsonObject obj = cN.getProps();
                         Set<Map.Entry<String, JsonElement>> entries = obj.entrySet();
@@ -269,8 +269,8 @@ public class InterToSQLNodesEdges {
                 sql.append(" WHERE ");
                 includesWhere = true;
             }
-            sql.append("n1.label = '");
-            sql.append(leftNode.getType()).append("' AND ");
+            sql.append("n1.label LIKE '%");
+            sql.append(leftNode.getType()).append("%' AND ");
         }
 
         if (rightNode.getType() != null) {
@@ -278,8 +278,8 @@ public class InterToSQLNodesEdges {
                 sql.append(" WHERE ");
                 includesWhere = true;
             }
-            sql.append("n2.label = '");
-            sql.append(rightNode.getType()).append("' AND ");
+            sql.append("n2.label LIKE '%");
+            sql.append(rightNode.getType()).append("%' AND ");
         }
 
         if (typeRel != null) {
@@ -364,6 +364,7 @@ public class InterToSQLNodesEdges {
             sql.append(alphabet[i]).append(", ");
 
         sql.setLength(sql.length() - 2);
+        sql.append(" ");
         return sql;
     }
 
@@ -439,6 +440,9 @@ public class InterToSQLNodesEdges {
                             sql.append(" AND ");
                         } else if (posInClause == 4) {
                             sql.append("c.c2");
+                            sql.append(" AND ");
+                        } else if (posInClause == 5) {
+                            sql.append("d.d2");
                             sql.append(" AND ");
                         }
                         break;
@@ -540,7 +544,7 @@ public class InterToSQLNodesEdges {
             } else {
                 getZStep += " AND ";
             }
-            getZStep = getZStep + "label = '" + cN.getType() + "'";
+            getZStep = getZStep + "label LIKE '%" + cN.getType() + "%'";
         }
 
         getZStep = getZStep + ");";

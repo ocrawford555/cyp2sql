@@ -4,13 +4,13 @@ import clauseObjects.CypNode;
 import clauseObjects.DecodedQuery;
 import org.neo4j.driver.v1.*;
 import org.neo4j.driver.v1.exceptions.ClientException;
+import schemaConversion.SchemaTranslate;
 import toolv1.CypherTokenizer;
-import schemaConversion.Metadata_Schema;
 
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
+import java.util.List;
 
 public class CypherDriver {
     private static final String databaseName = "neo4j";
@@ -40,20 +40,21 @@ public class CypherDriver {
             while (result.hasNext()) {
                 Record record = result.next();
                 for (String t : returnItems) {
-                    if (t.equals("*")) {
-                        doAllReturn(dQ, record, writer);
-                        break;
-                    }
+//                    if (t.equals("*")) {
+//                        doAllReturn(dQ, record, writer);
+//                        break;
+//                    }
                     try {
                         if (t.contains(".")) {
                             String bits[] = t.split("\\.");
                             writer.println(bits[1].toLowerCase() + " : " + record.get(t).asString().toLowerCase());
                         } else {
                             // currently only deals with returning nodes
-                            ArrayList<String> fields = Metadata_Schema.getAllFields();
+                            List<String> fields = SchemaTranslate.nodeRelLabels;
                             if (fields != null) {
                                 for (String s : fields) {
-                                    writer.println(s + " : " + record.get(t).asNode().get(s).asString().toLowerCase());
+                                    writer.println(s + " : " + record.get(t).asNode().get(s.split(" ")[0])
+                                            .asString().toLowerCase());
                                 }
                             }
                         }
@@ -63,7 +64,6 @@ public class CypherDriver {
                 }
                 countRecords++;
             }
-            System.out.println("\nNUM RECORDS : " + countRecords);
             writer.println();
             writer.println("NUM RECORDS : " + countRecords);
             writer.close();

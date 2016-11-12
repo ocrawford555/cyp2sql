@@ -3,9 +3,7 @@ package schemaConversion;
 import com.google.gson.JsonParser;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Pattern;
 
 public class SchemaTranslate {
@@ -23,21 +21,15 @@ public class SchemaTranslate {
     private static String patternForRel = "\\{.+\\}";
     static Pattern patternR = Pattern.compile(patternForRel);
 
-    public static void translate(String file, boolean DEBUG_PRINT) {
+    public static void translate(String file) {
         // perform initial preprocess of the file to remove content such as new file markers
         // and other aspects that will break the schema converter.
         // returns true if no issue, else fails
         int count = performPreProcessFile(file);
         if (count == -1) return;
 
-
-        // create a class for the generation of the additional metadata file
-        // TODO: implement the meta file, leave alone for now whilst working out concurrent thing.
-        // Metadata_Schema ms = new Metadata_Schema();
-
-        int lines = count;
         final int segments = 4;
-        final int amountPerSeg = (int) Math.ceil(lines / segments);
+        final int amountPerSeg = (int) Math.ceil(count / segments);
 
         ArrayList<String> s1 = new ArrayList<>();
         ArrayList<String> s2 = new ArrayList<>();
@@ -156,6 +148,16 @@ public class SchemaTranslate {
                 f.delete();
             }
             out.close();
+
+            // remove strange duplicates appearing in the arraylist
+            Set<String> hs = new HashSet<>();
+            hs.addAll(nodeRelLabels);
+            nodeRelLabels.clear();
+            nodeRelLabels.addAll(hs);
+            hs.clear();
+            hs.addAll(edgesRelLabels);
+            edgesRelLabels.clear();
+            edgesRelLabels.addAll(hs);
 
             System.out.println(nodeRelLabels);
             System.out.println(edgesRelLabels);

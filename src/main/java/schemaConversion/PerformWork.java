@@ -59,20 +59,13 @@ class PerformWork implements Runnable {
                 String[] idAndTable = firstSplit[0].split(":`");
                 int id = Integer.parseInt(idAndTable[0].substring(2));
 
-                // TODO: fix for the large movies parsing - need to fix for multiple labels issues
                 for (int i = 2; i < idAndTable.length; i++) {
                     idAndTable[1] += idAndTable[i];
-                    //hack to remove extra labels
-                    i += 8;
                 }
 
                 String nodeLabel;
-                idAndTable[1] = idAndTable[1].replace("`", "");
-
-                if (idAndTable[1].contains("person")) {
-                    nodeLabel = idAndTable[1].substring(6, idAndTable[1].length());
-                } else
-                    nodeLabel = idAndTable[1].substring(0, idAndTable[1].length());
+                idAndTable[1] = idAndTable[1].replace("`", ", ");
+                nodeLabel = idAndTable[1];
 
                 String props = firstSplit[1].replace("`", "");
 
