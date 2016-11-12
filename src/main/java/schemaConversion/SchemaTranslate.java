@@ -103,13 +103,12 @@ public class SchemaTranslate {
                     o.addProperty("id", id);
                     o.addProperty("label", nodeLabel);
 
-                    //TODO: could be made more efficient
                     if (firstLineNodes) {
                         returnSchema.put("nodes", o.toString());
                         firstLineNodes = false;
                     } else {
                         String currentV = returnSchema.get("nodes");
-                        returnSchema.put("nodes", currentV + ", " + o.toString());
+                        returnSchema.put("nodes", currentV + "###" + o.toString());
                     }
                 } else {
                     // relationship to add to SQL
@@ -125,24 +124,24 @@ public class SchemaTranslate {
                     String[] innerItems = items[1].split("->");
                     int idR = Integer.parseInt(innerItems[1].substring(2, innerItems[1].length() - 1));
 
-                    JsonObject o = new JsonObject();
-                    o.addProperty("idL", idL);
-                    o.addProperty("idR", idR);
-
                     String relationship = innerItems[0].substring(2, innerItems[0].length() - 1);
 
                     // does the relationship have properties
                     m = patternR.matcher(line);
-                    String jsonProps = null;
+
+                    JsonObject o = null;
 
                     if (m.find()) {
                         String[] relAndProps = relationship.split(" \\{");
                         relationship = relAndProps[0];
                         relAndProps[1] = "{".concat(relAndProps[1]);
-                        jsonProps = relAndProps[1];
-                        o = addToExisitingJSON(o, jsonProps, parser);
+                        o = (JsonObject) parser.parse(relAndProps[1]);
                     }
 
+                    if (o == null) o = new JsonObject();
+
+                    o.addProperty("idL", idL);
+                    o.addProperty("idR", idR);
                     o.addProperty("type", relationship);
 
                     // add to the metadata file
@@ -152,15 +151,14 @@ public class SchemaTranslate {
                     }
 
                     if (DEBUG_PRINT)
-                        System.out.println("RELATIONSHIP::  ID(LEFT): " + idL + "\tREL: " +
-                                relationship + "\tID(RIGHT): " + idR + "\tAdd Props: " + jsonProps);
+                        System.out.println("RELATIONSHIP::  " + o.toString());
 
                     if (firstLineRels) {
                         returnSchema.put("edges", o.toString());
                         firstLineRels = false;
                     } else {
                         String currentV = returnSchema.get("edges");
-                        returnSchema.put("edges", currentV + ", " + o.toString());
+                        returnSchema.put("edges", currentV + "###" + o.toString());
                     }
                 }
             }
@@ -170,7 +168,7 @@ public class SchemaTranslate {
 
         if (DEBUG_PRINT) {
             System.out.println("NODES : " + returnSchema.get("nodes"));
-            //System.out.println("EDGES : " + returnSchema.get("edges"));
+            System.out.println("EDGES : " + returnSchema.get("edges"));
         }
 
         ms.createFile();
@@ -194,8 +192,10 @@ public class SchemaTranslate {
             String output = "";
             boolean firstLine = true;
 
-
             while ((line = br.readLine()) != null) {
+                // escape character in SQL (' replaced with '')
+                line = line.replace("'", "''");
+
                 if (line.startsWith("create")) {
                     if (firstLine) {
                         firstLine = false;
@@ -212,6 +212,7 @@ public class SchemaTranslate {
             }
 
             br.close();
+            bw.write(output);
             bw.flush();
             bw.close();
         } catch (IOException e) {
@@ -236,17 +237,5 @@ public class SchemaTranslate {
 
         metaEntry = metaEntry.substring(0, metaEntry.length() - 2);
         ms.addLabelProps(nodeLabel, metaEntry);
-    }
-
-    private static JsonObject addToExisitingJSON(JsonObject o, String jsonProps, JsonParser parser) {
-        JsonElement element = parser.parse(jsonProps);
-        JsonObject obj = element.getAsJsonObject();
-        Set<Map.Entry<String, JsonElement>> entries = obj.entrySet();
-        for (Map.Entry<String, JsonElement> entry : entries) {
-            // TODO: having to remove comma to make work, fix this issue in later versions
-            // possibly involve changing JSON library
-            o.addProperty(entry.getKey(), String.valueOf(entry.getValue()).replace("\"", ""));
-        }
-        return o;
     }
 }

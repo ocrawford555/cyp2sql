@@ -131,7 +131,7 @@ public class DbUtil {
 
         sb.append(" VALUES ");
 
-        String[] jsonObjs = schemaToBuild.get(tableName).split(", ");
+        String[] jsonObjs = schemaToBuild.get(tableName).split("###");
 
         for (String obj : jsonObjs) {
             JsonParser parser = new JsonParser();
@@ -204,10 +204,11 @@ public class DbUtil {
 
     private static Map<String, String> getFieldsForDatabase(String s, JsonParser parser,
                                                             Map<String, String> schemaToBuild) {
-        String[] jsonObjs = schemaToBuild.get(s).split(", ");
+        String[] jsonObjs = schemaToBuild.get(s).split("###");
         Map<String, String> fields = new LinkedHashMap<>();
 
         for (String jobj : jsonObjs) {
+            System.out.println(jobj);
             JsonObject o = parser.parse(jobj).getAsJsonObject();
             Set<Map.Entry<String, JsonElement>> entries = o.entrySet();
 
