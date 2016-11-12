@@ -1,183 +1,171 @@
 package schemaConversion;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class SchemaTranslate {
-    public static Map<String, String> translate(String file, boolean DEBUG_PRINT) {
+    // JSON Parser for creating JSON objects from the text file.
+    // passed to all of the threads
+    static JsonParser parser = new JsonParser();
+    static String nodesFile = "C:/Users/ocraw/Desktop/nodes.txt";
+    static String edgesFile = "C:/Users/ocraw/Desktop/edges.txt";
+    // regex for deciding whether a line is a node or a relationship
+    private static String patternForNode = "(_\\d+:.*)";
+    static Pattern patternN = Pattern.compile(patternForNode);
+    // regex for deciding whether relationship has properties
+    private static String patternForRel = "\\{.+\\}";
+    static Pattern patternR = Pattern.compile(patternForRel);
+
+    public static void translate(String file, boolean DEBUG_PRINT) {
         // perform initial preprocess of the file to remove content such as new file markers
         // and other aspects that will break the schema converter.
-        boolean success = performPreProcessFile(file);
+        // returns true if no issue, else fails
+        int count = performPreProcessFile(file);
+        if (count == -1) return;
 
-        if (!success) return null;
-
-        // read through all lines in the text file containing the schema of the Cypher DB
-        Map<String, String> returnSchema = new HashMap<>();
-
-        // keep track of all the types of nodes seen so far
-        ArrayList<String> nodeLabelList = new ArrayList<>();
-
-        // keep track of all the types of nodes seen so far
-        ArrayList<String> relsLabelList = new ArrayList<>();
-
-        // regex for deciding whether a line is a node or a relationship
-        String patternForNode = "(_\\d+:.*)";
-        Pattern patternN = Pattern.compile(patternForNode);
-
-        // regex for deciding whether relationship has properties
-        String patternForRel = "\\{.+\\}";
-        Pattern patternR = Pattern.compile(patternForRel);
-
-        Matcher m;
-
-        // JSON Parser for creating JSON objects from the text file.
-        JsonParser parser = new JsonParser();
-
-        boolean firstLineNodes = true;
-        boolean firstLineRels = true;
 
         // create a class for the generation of the additional metadata file
-        Metadata_Schema ms = new Metadata_Schema();
+        // TODO: implement the meta file, leave alone for now whilst working out concurrent thing.
+        // Metadata_Schema ms = new Metadata_Schema();
+
+        int lines = count;
+        final int segments = 4;
+        final int amountPerSeg = (int) Math.ceil(lines / segments);
+
+        ArrayList<String> s1 = new ArrayList<>();
+        ArrayList<String> s2 = new ArrayList<>();
+        ArrayList<String> s3 = new ArrayList<>();
+        ArrayList<String> s4 = new ArrayList<>();
 
         try {
+            // open correctly preparsed file
             FileInputStream fis = new FileInputStream(file.replace(".txt", "_new.txt"));
 
             //Construct BufferedReader from InputStreamReader
             BufferedReader br = new BufferedReader(new InputStreamReader(fis));
             String line;
 
+            int segNum = 0;
+            int amountInSeg = 0;
+
             while ((line = br.readLine()) != null) {
-                // remove CREATE characters
-                line = line.substring(7).toLowerCase();
-
-                //using regex to decide between node or relationship
-                m = patternN.matcher(line);
-
-                // is a node
-                if (m.find()) {
-                    // firstSplit[0] contains id and node label
-                    // firstSplit[1] contains properties of the node
-                    String[] firstSplit = line.split("` ");
-
-                    String[] idAndTable = firstSplit[0].split(":`");
-                    int id = Integer.parseInt(idAndTable[0].substring(2));
-
-                    // TODO: fix for the large movies parsing - need to fix for multiple labels issues
-                    for (int i = 2; i < idAndTable.length; i++) {
-                        idAndTable[1] += idAndTable[i];
-                        //hack to remove extra labels
-                        i += 8;
-                    }
-
-                    String nodeLabel;
-                    idAndTable[1] = idAndTable[1].replace("`", "");
-
-                    if (idAndTable[1].contains("person")) {
-                        nodeLabel = idAndTable[1].substring(6, idAndTable[1].length());
-                    } else
-                        nodeLabel = idAndTable[1].substring(0, idAndTable[1].length());
-
-                    String props = firstSplit[1].replace("`", "");
-
-                    JsonObject o = (JsonObject) parser.parse(props.substring(0, props.length() - 1));
-
-                    // add to the metadata file
-                    if (!nodeLabelList.contains(nodeLabel)) {
-                        nodeLabelList.add(nodeLabel);
-                        // 1 for nodes
-                        addToMetaData(ms, nodeLabel, o, 1);
-                    }
-
-                    if (DEBUG_PRINT)
-                        System.out.println("NODE::  ID: " + id + "\tLABEL: " + nodeLabel + "\tPROPS: " + o.toString());
-
-                    o.addProperty("id", id);
-                    o.addProperty("label", nodeLabel);
-
-                    if (firstLineNodes) {
-                        returnSchema.put("nodes", o.toString());
-                        firstLineNodes = false;
-                    } else {
-                        String currentV = returnSchema.get("nodes");
-                        returnSchema.put("nodes", currentV + "###" + o.toString());
+                if (amountInSeg++ <= amountPerSeg) {
+                    switch (segNum) {
+                        case 0:
+                            s1.add(line);
+                            break;
+                        case 1:
+                            s2.add(line);
+                            break;
+                        case 2:
+                            s3.add(line);
+                            break;
+                        case 3:
+                            s4.add(line);
+                            break;
                     }
                 } else {
-                    // relationship to add to SQL
-                    line = line.replace("`", "");
-
-                    //items[0] is left part of relationship
-                    //items[1] is relationship identifier
-                    //items[2] is the right part (has direction in example but ignoring currently)
-                    String[] items = line.split("\\)-");
-
-                    int idL = Integer.parseInt(items[0].substring(2, items[0].length()));
-
-                    String[] innerItems = items[1].split("->");
-                    int idR = Integer.parseInt(innerItems[1].substring(2, innerItems[1].length() - 1));
-
-                    String relationship = innerItems[0].substring(2, innerItems[0].length() - 1);
-
-                    // does the relationship have properties
-                    m = patternR.matcher(line);
-
-                    JsonObject o = null;
-
-                    if (m.find()) {
-                        String[] relAndProps = relationship.split(" \\{");
-                        relationship = relAndProps[0];
-                        relAndProps[1] = "{".concat(relAndProps[1]);
-                        o = (JsonObject) parser.parse(relAndProps[1]);
+                    segNum++;
+                    switch (segNum) {
+                        case 0:
+                            s1.add(line);
+                            break;
+                        case 1:
+                            s2.add(line);
+                            break;
+                        case 2:
+                            s3.add(line);
+                            break;
+                        case 3:
+                            s4.add(line);
+                            break;
                     }
-
-                    if (o == null) o = new JsonObject();
-
-                    o.addProperty("idL", idL);
-                    o.addProperty("idR", idR);
-                    o.addProperty("type", relationship);
-
-                    // add to the metadata file
-                    if (!relsLabelList.contains(relationship)) {
-                        relsLabelList.add(relationship);
-                        addToMetaData(ms, relationship, o, 2);
-                    }
-
-                    if (DEBUG_PRINT)
-                        System.out.println("RELATIONSHIP::  " + o.toString());
-
-                    if (firstLineRels) {
-                        returnSchema.put("edges", o.toString());
-                        firstLineRels = false;
-                    } else {
-                        String currentV = returnSchema.get("edges");
-                        returnSchema.put("edges", currentV + "###" + o.toString());
-                    }
+                    amountInSeg = 1;
                 }
             }
+
+            String[] files = {"a", "b", "c", "d"};
+
+            Thread[] ts = new Thread[segments];
+            for (int i = 0; i < ts.length; i++) {
+                ArrayList<String> temp = null;
+                switch (i) {
+                    case 0:
+                        temp = s1;
+                        break;
+                    case 1:
+                        temp = s2;
+                        break;
+                    case 2:
+                        temp = s3;
+                        break;
+                    case 3:
+                        temp = s4;
+                        break;
+                }
+                ts[i] = new Thread(new PerformWork(temp, i + 1, files[i]));
+            }
+
+            for (Thread q : ts) {
+                q.start();
+            }
+
+            int done = 0;
+            while (done < ts.length) {
+                try {
+                    ts[done].join();
+                    done++;
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            OutputStream out = new FileOutputStream(nodesFile);
+            byte[] buf = new byte[1024];
+            for (String a : files) {
+                InputStream in = new FileInputStream(nodesFile.replace(".txt", a + ".txt"));
+                int b;
+                while ((b = in.read(buf)) >= 0) {
+                    out.write(buf, 0, b);
+                    out.flush();
+                }
+                in.close();
+                File f = new File(nodesFile.replace(".txt", a + ".txt"));
+                f.delete();
+            }
+            out.close();
+
+            out = new FileOutputStream(edgesFile);
+            buf = new byte[1024];
+            for (String a : files) {
+                InputStream in = new FileInputStream(edgesFile.replace(".txt", a + ".txt"));
+                int b;
+                while ((b = in.read(buf)) >= 0) {
+                    out.write(buf, 0, b);
+                    out.flush();
+                }
+                in.close();
+                File f = new File(edgesFile.replace(".txt", a + ".txt"));
+                f.delete();
+            }
+            out.close();
+
+
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        if (DEBUG_PRINT) {
-            System.out.println("NODES : " + returnSchema.get("nodes"));
-            System.out.println("EDGES : " + returnSchema.get("edges"));
-        }
-
-        ms.createFile();
-        return returnSchema;
     }
 
-    private static boolean performPreProcessFile(String file) {
+    private static int performPreProcessFile(String file) {
         FileInputStream fis;
         FileOutputStream fos;
+        int count = 0;
 
         try {
             fis = new FileInputStream(file);
@@ -193,6 +181,7 @@ public class SchemaTranslate {
             boolean firstLine = true;
 
             while ((line = br.readLine()) != null) {
+                count++;
                 // escape character in SQL (' replaced with '')
                 line = line.replace("'", "''");
 
@@ -217,25 +206,9 @@ public class SchemaTranslate {
             bw.close();
         } catch (IOException e) {
             e.printStackTrace();
-            return false;
+            return -1;
         }
-        return true;
+        return count;
     }
 
-    private static void addToMetaData(Metadata_Schema ms, String nodeLabel, JsonObject o, int typeAdd) {
-        Set<Map.Entry<String, JsonElement>> entries = o.entrySet();
-
-        // all nodes have an internal id
-        String metaEntry = "";
-        if (typeAdd == 1)
-            metaEntry = "id, ";
-
-        for (Map.Entry<String, JsonElement> entry : entries) {
-            String keyName = entry.getKey();
-            metaEntry += keyName + ", ";
-        }
-
-        metaEntry = metaEntry.substring(0, metaEntry.length() - 2);
-        ms.addLabelProps(nodeLabel, metaEntry);
-    }
 }

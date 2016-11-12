@@ -111,8 +111,8 @@ public class c2sqlV1 {
 
     private static void convertNeo4JToSQL(String dumpFile) {
         // true is a debug print parameter
-        Map<String, String> schemaGenerated = SchemaTranslate.translate(dumpFile, true);
+        SchemaTranslate.translate(dumpFile, false);
         // testa is the default database location
-        DbUtil.insertSchema(schemaGenerated, dbName);
+        //DbUtil.insertSchema(dbName);
     }
 }
