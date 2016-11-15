@@ -3,9 +3,9 @@ package clauseObjects;
 import java.util.ArrayList;
 
 public class MatchClause {
-    private ArrayList<CypRel> rels = new ArrayList<CypRel>();
+    private ArrayList<CypNode> nodes = new ArrayList<>();
+    private ArrayList<CypRel> rels = new ArrayList<>();
     private boolean varRel = false;
-    private ArrayList<CypNode> nodes = new ArrayList<CypNode>();
     private int internalID;
 
     public MatchClause(){

@@ -11,7 +11,7 @@ import java.sql.SQLException;
 public class Cyp2SQL {
     public static String convertQuery(String q) {
         try {
-            DecodedQuery decodedQuery = CypherTokenizer.decode(q);
+            DecodedQuery decodedQuery = CypherTokenizer.decode(q, false);
             return InterToSQLNodesEdges.translate(decodedQuery);
         } catch (Exception e) {
             e.printStackTrace();

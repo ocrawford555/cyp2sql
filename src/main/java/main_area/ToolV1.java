@@ -14,7 +14,7 @@ public class ToolV1 {
 //                        2);
 
         String cQuery = "match (n:Club {name:\"Sunderland AFC\"})-[*1..2]-(x) return x order by x.name asc";
-        DecodedQuery dQ = CypherTokenizer.decode(cQuery);
+        DecodedQuery dQ = CypherTokenizer.decode(cQuery, false);
         String sqlFromCypher = InterToSQLNodesEdges.translate(dQ);
         System.out.println(sqlFromCypher);
 

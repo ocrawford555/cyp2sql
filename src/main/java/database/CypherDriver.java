@@ -24,7 +24,7 @@ public class CypherDriver {
         StatementResult result = session.run(query);
 
         // obtain information about the query from the decoder module
-        DecodedQuery dQ = CypherTokenizer.decode(query);
+        DecodedQuery dQ = CypherTokenizer.decode(query, false);
 
         String returnItems[] = dQ.getCypherAdditionalInfo().getReturnClause().replace(" ", "").split(",");
 

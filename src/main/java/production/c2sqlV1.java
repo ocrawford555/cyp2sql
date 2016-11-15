@@ -25,8 +25,6 @@ import java.util.ArrayList;
  */
 public class c2sqlV1 {
     private static String dbName;
-    private static String cypher_results = "C:/Users/ocraw/Desktop/cypher_results.txt";
-    private static String pg_results = "C:/Users/ocraw/Desktop/pg_results.txt";
 
     public static void main(String args[]) {
         // STEP 1 : input to the command line the Neo4J dump (to take args[0])
@@ -46,7 +44,9 @@ public class c2sqlV1 {
             dbName = args[1];
         }
 
+        String cypher_results = "C:/Users/ocraw/Desktop/cypher_results.txt";
         File f1 = new File(cypher_results);
+        String pg_results = "C:/Users/ocraw/Desktop/pg_results.txt";
         File f2 = new File(pg_results);
 
 
@@ -65,7 +65,7 @@ public class c2sqlV1 {
                         executeSQL(sql);
 
                     } else throw new Exception("Conversion of SQL failed");
-                    CypherDriver.run(line);
+                    //CypherDriver.run(line);
                     System.out.println("QUERY: " + line + "\nRESULT: " +
                             FileUtils.contentEquals(f1, f2));
                 }
@@ -99,7 +99,7 @@ public class c2sqlV1 {
                 ArrayList<String> unionSQL = new ArrayList<>();
                 DecodedQuery dQ;
                 for (String s : queries) {
-                    dQ = CypherTokenizer.decode(s);
+                    dQ = CypherTokenizer.decode(s, false);
                     unionSQL.add(InterToSQLNodesEdges.translate(dQ));
                 }
                 return SQLUnion.genUnion(unionSQL, "UNION ALL");
@@ -108,12 +108,12 @@ public class c2sqlV1 {
                 ArrayList<String> unionSQL = new ArrayList<>();
                 DecodedQuery dQ;
                 for (String s : queries) {
-                    dQ = CypherTokenizer.decode(s);
+                    dQ = CypherTokenizer.decode(s, false);
                     unionSQL.add(InterToSQLNodesEdges.translate(dQ));
                 }
                 return SQLUnion.genUnion(unionSQL, "UNION");
             } else {
-                DecodedQuery decodedQuery = CypherTokenizer.decode(cypher);
+                DecodedQuery decodedQuery = CypherTokenizer.decode(cypher, false);
                 return InterToSQLNodesEdges.translate(decodedQuery);
             }
         } catch (Exception e) {

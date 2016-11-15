@@ -19,7 +19,7 @@ public class InterToSQLNodesEdges {
                 decodedQuery.getCypherAdditionalInfo().getAliasMap());
 
         if (decodedQuery.getCypherAdditionalInfo().hasCount())
-            sql = obtainGroupByClause(sql);
+            sql = obtainGroupByClause(decodedQuery.getRc(), sql);
 
         if (decodedQuery.getOc() != null)
             sql = obtainOrderByClause(decodedQuery.getOc(), sql);
@@ -37,11 +37,17 @@ public class InterToSQLNodesEdges {
         return sql.toString();
     }
 
-    private static StringBuilder obtainGroupByClause(StringBuilder sql) {
+    private static StringBuilder obtainGroupByClause(ReturnClause rc, StringBuilder sql) {
         sql.append(" GROUP BY ");
-        sql.append("n").append(".").append("id, ");
-        sql.append("n").append(".").append("name, ");
-        sql.append("n").append(".").append("label");
+        for (CypReturn cR : rc.getItems()) {
+            if (cR.getField() != null && !cR.getField().startsWith("count")) {
+                String prop = cR.getField();
+                if (prop != null) {
+                    sql.append("n").append(".").append(prop).append(", ");
+                }
+            }
+        }
+        sql.setLength(sql.length() - 2);
         return sql;
     }
 
@@ -54,30 +60,26 @@ public class InterToSQLNodesEdges {
         if (matchC.getRels().isEmpty()) {
             // no relationships, just return some nodes
             sql = obtainSelectAndFromClause(returnC, matchC, sql, hasDistinct, alias);
-
             sql = obtainWhereClauseOnlyNodes(sql, returnC, matchC);
             return sql;
         } else {
             // there are relationships to deal with, so use the WITH structure
-
             // furthermore, if there ae variable path ones, do something clever.
             if (matchC.isVarRel()) {
                 // assuming only one car relation for time being.
-                sql = obtainVarRel(sql, matchC, returnC);
+                sql = obtainVarRel(sql, matchC);
                 return sql;
             }
 
             sql = obtainWithClause(sql, matchC);
-
             sql = obtainSelectAndFromClause(returnC, matchC, sql, hasDistinct, alias);
-
             sql = obtainWhereClause(sql, returnC, matchC);
 
             return sql;
         }
     }
 
-    private static StringBuilder obtainVarRel(StringBuilder sql, MatchClause matchC, ReturnClause returnC) {
+    private static StringBuilder obtainVarRel(StringBuilder sql, MatchClause matchC) {
         sql.append(getTClosureQuery()).append(" ");
         String direction = "none";
         int amount = 0;
@@ -113,7 +115,7 @@ public class InterToSQLNodesEdges {
     private static StringBuilder addWhereToSelectForVarRels(StringBuilder sql, CypNode cN2) {
         sql.append(" WHERE ");
         if (cN2.getType() != null) {
-            sql.append("n.label LIKE '%").append(cN2.getType()).append("%' AND ");
+            sql.append("n.label LIKE ").append(genLabelLike(cN2)).append(" AND ");
         }
         if (cN2.getProps() != null) {
             JsonObject obj = cN2.getProps();
@@ -138,11 +140,12 @@ public class InterToSQLNodesEdges {
 
     private static StringBuilder obtainWhereClauseOnlyNodes(StringBuilder sql, ReturnClause returnC, MatchClause matchC) {
         boolean hasWhere = false;
+
         for (CypReturn cR : returnC.getItems()) {
             if (cR.getNodeID() == null && cR.getField().equals("*")) {
                 CypNode cN = matchC.getNodes().get(0);
                 hasWhere = true;
-                sql.append(" WHERE n.label LIKE '%").append(cN.getType()).append("%' AND ");
+                sql.append(" WHERE n.label LIKE ").append(genLabelLike(cN)).append(" AND ");
                 if (cN.getProps() != null) {
                     JsonObject obj = cN.getProps();
                     Set<Map.Entry<String, JsonElement>> entries = obj.entrySet();
@@ -161,21 +164,23 @@ public class InterToSQLNodesEdges {
             }
 
             if (cN != null) {
-                if (cN.getType() != null) {
-                    if (!hasWhere) {
-                        sql.append(" WHERE ");
-                        hasWhere = true;
-                    }
-                    sql.append("n.label LIKE '%").append(cN.getType()).append("%' AND ");
-                    if (cN.getProps() != null) {
-                        JsonObject obj = cN.getProps();
-                        Set<Map.Entry<String, JsonElement>> entries = obj.entrySet();
-                        for (Map.Entry<String, JsonElement> entry : entries) {
-                            sql.append("n.").append(entry.getKey()).append(" = '");
-                            sql.append(entry.getValue().getAsString()).append("' AND ");
-                        }
+                if (!hasWhere) {
+                    sql.append(" WHERE ");
+                    hasWhere = true;
+                }
+
+                if (cN.getType() != null)
+                    sql.append("n.label LIKE ").append(genLabelLike(cN)).append(" AND ");
+
+                if (cN.getProps() != null) {
+                    JsonObject obj = cN.getProps();
+                    Set<Map.Entry<String, JsonElement>> entries = obj.entrySet();
+                    for (Map.Entry<String, JsonElement> entry : entries) {
+                        sql.append("n.").append(entry.getKey()).append(" = '");
+                        sql.append(entry.getValue().getAsString()).append("' AND ");
                     }
                 }
+
             }
         }
 
@@ -240,6 +245,7 @@ public class InterToSQLNodesEdges {
         CypNode rightNode = obtainNode(matchC, posOfRel + 1);
         JsonObject rightProps = rightNode.getProps();
         String typeRel = cR.getType();
+        JsonObject o = cR.getProps();
 
         if (leftProps != null) {
             sql.append(" WHERE ");
@@ -270,8 +276,8 @@ public class InterToSQLNodesEdges {
                 sql.append(" WHERE ");
                 includesWhere = true;
             }
-            sql.append("n1.label LIKE '%");
-            sql.append(leftNode.getType()).append("%' AND ");
+            sql.append("n1.label LIKE ");
+            sql.append(genLabelLike(leftNode)).append(" AND ");
         }
 
         if (rightNode.getType() != null) {
@@ -279,8 +285,8 @@ public class InterToSQLNodesEdges {
                 sql.append(" WHERE ");
                 includesWhere = true;
             }
-            sql.append("n2.label LIKE '%");
-            sql.append(rightNode.getType()).append("%' AND ");
+            sql.append("n2.label LIKE ");
+            sql.append(genLabelLike(rightNode)).append(" AND ");
         }
 
         if (typeRel != null) {
@@ -291,6 +297,19 @@ public class InterToSQLNodesEdges {
 
             sql.append("e1.type = '").append(typeRel);
             sql.append("' AND ");
+        }
+
+        if (o != null) {
+            if (!includesWhere) {
+                sql.append(" WHERE ");
+                includesWhere = true;
+            }
+
+            Set<Map.Entry<String, JsonElement>> entries = o.entrySet();
+            for (Map.Entry<String, JsonElement> entry : entries) {
+                sql.append("e1.").append(entry.getKey()).append(" = '");
+                sql.append(entry.getValue().getAsString()).append("' AND ");
+            }
         }
 
         if (includesWhere) sql.setLength(sql.length() - 5);
@@ -335,6 +354,12 @@ public class InterToSQLNodesEdges {
                 break;
             }
 
+            if (cR.getField() != null && cR.getField().startsWith("count")) {
+                sql.append(cR.getField()).append("  ");
+                usesNodesTable = true;
+                break;
+            }
+
             for (CypNode cN : matchC.getNodes()) {
                 if (cR.getNodeID().equals(cN.getId())) {
                     String prop = cR.getField();
@@ -351,7 +376,16 @@ public class InterToSQLNodesEdges {
 
             if (!isNode) {
                 for (CypRel cRel : matchC.getRels()) {
-                    //TODO: sort out returning relationships.
+                    if (cRel.getId().equals(cR.getNodeID())) {
+                        String prop = cR.getField();
+                        if (prop != null) {
+                            sql.append("n").append(".").append(prop).append(useAlias(cR.getNodeID(), alias)).append(", ");
+                        } else {
+                            sql.append("n.*").append(useAlias(cR.getNodeID(), alias)).append(", ");
+                        }
+                        usesRelsTable = true;
+                        break;
+                    }
                 }
             }
         }
@@ -360,6 +394,7 @@ public class InterToSQLNodesEdges {
 
         sql.append(" FROM ");
         if (usesNodesTable) sql.append("nodes n, ");
+        if (usesRelsTable) sql.append("edges n, ");
         int numRels = matchC.getRels().size();
         for (int i = 0; i < numRels; i++)
             sql.append(alphabet[i]).append(", ");
@@ -386,24 +421,28 @@ public class InterToSQLNodesEdges {
 
     private static StringBuilder obtainWhereClause(StringBuilder sql,
                                                    ReturnClause returnC, MatchClause matchC) throws Exception {
-        boolean hasWhereKeyword = false;
+        sql.append(" WHERE ");
         int numRels = matchC.getRels().size();
 
-        if (numRels > 0) {
-            if ((numRels == 1) && matchC.getRels().get(0).getDirection().equals("none")) {
+        for (int i = 0; i < numRels - 1; i++) {
+            sql.append(alphabet[i]).append(".").append(alphabet[i]).append(2);
+            sql.append(" = ");
+            sql.append(alphabet[i + 1]).append(".").append(alphabet[i + 1]).append(1);
+            sql.append(" AND ");
+        }
+
+        if ((numRels == 1)) {
+            if (returnC.getItems().size() == 1 && returnC.getItems().get(0).getType().equals("rel")) {
+                if (matchC.getRels().get(0).getDirection().equals("left")) {
+                    sql.append(" a.a1 = n.idr AND a.a2 = n.idl ");
+                } else if (matchC.getRels().get(0).getDirection().equals("right")) {
+                    sql.append(" a.a1 = n.idl AND a.a2 = n.idr ");
+                } else
+                    sql.append(" (a.a1 = n.idl AND a.a2 = n.idr) OR (a.a1 = n.idr AND a.a2 = n.idl) ");
+            } else if (matchC.getRels().get(0).getDirection().equals("none")) {
                 int posInCl = returnC.getItems().get(0).getPosInClause();
-                if (posInCl == 1) return sql.append(" WHERE n.id = a.a1");
-                else return sql.append("WHERE n.id = a.a2");
-            }
-
-            sql.append(" WHERE ");
-            hasWhereKeyword = true;
-
-            for (int i = 0; i < numRels - 1; i++) {
-                sql.append(alphabet[i]).append(".").append(alphabet[i]).append(2);
-                sql.append(" = ");
-                sql.append(alphabet[i + 1]).append(".").append(alphabet[i + 1]).append(1);
-                sql.append(" AND ");
+                if (posInCl == 1) return sql.append(" n.id = a.a1");
+                else return sql.append("n.id = a.a2");
             }
         }
 
@@ -423,27 +462,15 @@ public class InterToSQLNodesEdges {
             if (cR.getType() != null) {
                 switch (cR.getType()) {
                     case "node":
-                        if (!hasWhereKeyword) {
-                            sql.append(" WHERE ");
-                            hasWhereKeyword = true;
-                        }
-
                         int posInClause = cR.getPosInClause();
                         sql.append("n.id = ");
+
                         if (posInClause == 1) {
                             sql.append("a.a1");
                             sql.append(" AND ");
-                        } else if (posInClause == 2) {
-                            sql.append("a.a2");
-                            sql.append(" AND ");
-                        } else if (posInClause == 3) {
-                            sql.append("b.b2");
-                            sql.append(" AND ");
-                        } else if (posInClause == 4) {
-                            sql.append("c.c2");
-                            sql.append(" AND ");
-                        } else if (posInClause == 5) {
-                            sql.append("d.d2");
+                        } else {
+                            sql.append(alphabet[posInClause - 2]).append(".").append(alphabet[posInClause - 2])
+                                    .append(2);
                             sql.append(" AND ");
                         }
                         break;
@@ -472,8 +499,8 @@ public class InterToSQLNodesEdges {
                 int[] indices = new int[2];
                 indices[0] = Integer.parseInt(t[0]);
                 indices[1] = Integer.parseInt(t[1]);
-                String a = "";
-                String b = "";
+                String a;
+                String b;
                 if (indices[0] == 0) a = "a.a1";
                 else a = alphabet[indices[0] - 1] + "." + alphabet[indices[0] - 1] + "2";
                 b = alphabet[indices[1] - 1] + "." + alphabet[indices[1] - 1] + "2";
@@ -490,6 +517,10 @@ public class InterToSQLNodesEdges {
         sql.append(" ");
         sql.append("ORDER BY ");
         for (CypOrder cO : orderC.getItems()) {
+            if (cO.getField().startsWith("count")) {
+                sql.append("count(n) ").append(cO.getAscOrDesc()).append(", ");
+                break;
+            }
             sql.append("n").append(".").append(cO.getField()).append(" ").append(cO.getAscOrDesc());
             sql.append(", ");
         }
@@ -545,11 +576,23 @@ public class InterToSQLNodesEdges {
             } else {
                 getZStep += " AND ";
             }
-            getZStep = getZStep + "label LIKE '%" + cN.getType() + "%'";
+            getZStep = getZStep + "label LIKE " + genLabelLike(cN);
         }
 
         getZStep = getZStep + ");";
         System.out.println(getZStep);
         return getZStep;
+    }
+
+    private static String genLabelLike(CypNode cN) {
+        String label = cN.getType();
+        String stmt = "'%";
+        String[] labels = label.split(", ");
+        for (String l : labels) {
+            stmt = stmt + l + "%' AND n.label LIKE '%";
+        }
+        stmt = stmt.substring(0, stmt.length() - 19);
+        System.out.println(stmt);
+        return stmt;
     }
 }

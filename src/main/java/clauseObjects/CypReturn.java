@@ -32,6 +32,7 @@ public class CypReturn {
                 return "rel";
             }
         }
+
         posInClause = -1;
         return null;
     }
@@ -46,7 +47,7 @@ public class CypReturn {
 
     @Override
     public String toString() {
-        return "(ID:" + this.nodeID + ",FIELD:" + this.field + ")";
+        return "(ID:" + this.nodeID + ",FIELD:" + this.field + ",TYPE:" + this.type + ")";
     }
 
     public String getType() {

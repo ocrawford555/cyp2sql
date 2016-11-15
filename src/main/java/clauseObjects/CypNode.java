@@ -6,14 +6,14 @@ import toolv1.GenerateAlias;
 public class CypNode {
     private int posInClause;
     private String id;
-    private String type;
+    private String labels;
     private JsonObject props;
-    private String[] alias = {null, null};
+    //private String[] alias = {null, null};
 
     public CypNode(int posInClause, String id, String type, JsonObject props) {
         this.posInClause = posInClause;
         this.id = id;
-        this.type = type;
+        this.labels = type;
         this.props = props;
     }
 
@@ -22,7 +22,7 @@ public class CypNode {
     }
 
     public String getType() {
-        return type;
+        return labels;
     }
 
     public JsonObject getProps() {
@@ -35,7 +35,7 @@ public class CypNode {
 
     @Override
     public String toString() {
-        return "(ID:" + this.id + ",TYPE:" + this.type + ",PROPS:"
+        return "(ID:" + this.id + ",LABELS:" + this.labels + ",PROPS:"
                 + this.props + ",POS:" + this.posInClause + ")";
     }
 
@@ -43,15 +43,15 @@ public class CypNode {
         return posInClause;
     }
 
-    private void createAlias() {
-        alias[0] = this.type;
-        alias[1] = GenerateAlias.gen();
-    }
+//    private void createAlias() {
+//        alias[0] = this.labels;
+//        alias[1] = GenerateAlias.gen();
+//    }
 
-    public String[] getAlias() {
-        if (alias[0] == null) {
-            createAlias();
-        }
-        return this.alias;
-    }
+//    public String[] getAlias() {
+//        if (alias[0] == null) {
+//            createAlias();
+//        }
+//        return this.alias;
+//    }
 }
