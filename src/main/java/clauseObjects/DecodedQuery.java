@@ -11,6 +11,7 @@ public class DecodedQuery {
     private int skipAmount;
     private int limitAmount;
     private CypherWalker cypherAdditionalInfo;
+    private String sqlEquiv;
 
     public DecodedQuery(MatchClause m, ReturnClause r, OrderClause o,
                         int skip, int limit, CypherWalker c) {
@@ -44,5 +45,13 @@ public class DecodedQuery {
 
     public CypherWalker getCypherAdditionalInfo() {
         return cypherAdditionalInfo;
+    }
+
+    public String getSqlEquiv() {
+        return sqlEquiv;
+    }
+
+    public void setSqlEquiv(String sqlEquiv) {
+        this.sqlEquiv = sqlEquiv;
     }
 }

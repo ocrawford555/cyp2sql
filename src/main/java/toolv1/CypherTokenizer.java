@@ -12,7 +12,13 @@ import parsing_lexing.CypherParser;
 import java.util.ArrayList;
 
 public class CypherTokenizer {
+    private static CypherWalker cypherWalker;
+
     public static DecodedQuery decode(String cyp, boolean DEBUG_PRINT) throws Exception {
+        return CypherTranslator.generateDecodedQuery(getTokenList(cyp, DEBUG_PRINT), cypherWalker);
+    }
+
+    public static ArrayList<String> getTokenList(String cyp, boolean DEBUG_PRINT) {
         CypherLexer lexer = new CypherLexer(new ANTLRInputStream(cyp));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         tokens.fill();
@@ -20,7 +26,8 @@ public class CypherTokenizer {
         ParseTree tree = parser.cypher();
         ParseTreeWalker walker = new ParseTreeWalker();
 
-        CypherWalker cypherWalker = new CypherWalker();
+        cypherWalker = null;
+        cypherWalker = new CypherWalker();
         walker.walk(cypherWalker, tree);
 
         if (DEBUG_PRINT) cypherWalker.printInformation();
@@ -36,6 +43,6 @@ public class CypherTokenizer {
                 tokenList.add(s);
         }
 
-        return CypherTranslator.generateDecodedQuery(tokenList, cypherWalker);
+        return tokenList;
     }
 }

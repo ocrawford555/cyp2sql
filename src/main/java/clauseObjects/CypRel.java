@@ -30,6 +30,10 @@ public class CypRel {
         return props;
     }
 
+    public void setProps(JsonObject o) {
+        this.props = o;
+    }
+
     public String getDirection() {
         return direction;
     }

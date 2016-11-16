@@ -102,8 +102,7 @@ class CypherTranslator {
     private static ArrayList<CypNode> extractNodes(List<String> clause, MatchClause m) {
         // nodes to return at the end of the function.
         ArrayList<CypNode> nodes = new ArrayList<>();
-        // keep track of current nodes if node of the same ID reappears later on in the
-        // query.
+        // keep track of current nodes if node of the same ID reappears later on in the query.
         Map<String, Integer> nodeIDS = new HashMap<>();
 
         JsonObject o;
@@ -190,10 +189,10 @@ class CypherTranslator {
           -[:a {c}]->      (id: null     type: a         props: c        direction : right)
           -[b:a {c}]->     (id: b        type: a         props: c        direction : right)
 
-          -[*1..2]-        (id: null     type: null      props: null     direction : var1-2)
-          -[*]-            (id: null     type: null      props: null     direction : var)
-          -[*1..4]-        (id: null     type: null      props: null     direction : var1-4)
-          -[*3..4]-        (id: null     type: null      props: null     direction : var3-4)
+          -[*1..2]->        (id: null     type: null      props: null     direction : var1-2)
+          <-[*]-            (id: null     type: null      props: null     direction : var)
+          -[*1..4]->        (id: null     type: null      props: null     direction : var1-4)
+          <-[*3..4]-        (id: null     type: null      props: null     direction : var3-4)
          */
 
         String id;
@@ -415,9 +414,19 @@ class CypherTranslator {
                 return;
             }
         }
+
+        for (CypRel cR : matchC.getRels()) {
+            if (cR.getId().equals(idAndProp[0])) {
+                JsonObject obj = cR.getProps();
+                if (obj == null) obj = new JsonObject();
+                if (op.equals("equals")) obj.addProperty(idAndProp[1], idAndValue[1].replace("\"", "").toLowerCase());
+                else obj.addProperty(idAndProp[1], "<#" + idAndValue[1].replace("\"", "").toLowerCase() + "#>");
+                cR.setProps(obj);
+                return;
+            }
+        }
         throw new Exception("WHERE CLAUSE MALFORMED");
     }
-
 
     private static CypRel extractVarRel(List<String> varRel, MatchClause m, String varD) throws Exception {
         varRel = varRel.subList(1, varRel.size());
@@ -460,27 +469,23 @@ class CypherTranslator {
 
     private static CypReturn extractReturn(List<String> clause, MatchClause matchC, CypherWalker cypherQ)
             throws Exception {
-        // if cluase of type (id).(property)
+        // if clause of type (id).(property)
         if (clause.size() == 3 && clause.contains(".")) {
             return new CypReturn(clause.get(0), clause.get(2), matchC);
-        } else
-            // TODO: something OOP style for types of return objects, such as normal and '*'
-            // for now do a nice hack (RETURN * returns the value of all variables.
-
-            if (clause.size() == 1)
-                if (clause.get(0).equals("*"))
-                    return new CypReturn(null, "*", null);
-                else
-                    return new CypReturn(clause.get(0), null, matchC);
-            else if (cypherQ.hasCount())
-                return new CypReturn(null, "count(n)", null);
-            else throw new Exception("RETURN CLAUSE MALFORMED");
+        } else if (clause.size() == 1)
+            if (clause.get(0).equals("*"))
+                return new CypReturn(null, "*", null);
+            else
+                return new CypReturn(clause.get(0), null, matchC);
+        else if (cypherQ.hasCount())
+            return new CypReturn(null, "count(" + clause.get(2) + ")", null);
+        else throw new Exception("RETURN CLAUSE MALFORMED");
     }
 
     private static OrderClause orderDecode(List<String> orderClause) throws Exception {
         OrderClause o = new OrderClause();
 
-        List<CypOrder> items = new ArrayList<CypOrder>();
+        List<CypOrder> items = new ArrayList<>();
 
         List<String> currentWorking;
 

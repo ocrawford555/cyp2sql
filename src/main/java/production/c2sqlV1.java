@@ -1,11 +1,11 @@
 package production;
 
 import clauseObjects.DecodedQuery;
-import database.CypherDriver;
 import database.DbUtil;
 import org.apache.commons.io.FileUtils;
 import query_translation.InterToSQLNodesEdges;
 import query_translation.SQLUnion;
+import query_translation.SQLWith;
 import schemaConversion.SchemaTranslate;
 import toolv1.CypherTokenizer;
 
@@ -15,6 +15,7 @@ import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * This is version 1 of the translation tool.
@@ -59,7 +60,21 @@ public class c2sqlV1 {
             String sql;
             while ((line = br.readLine()) != null) {
                 if (!line.startsWith("//")) {
-                    sql = convertCypherToSQL(line);
+                    if (line.toLowerCase().contains(" with ")) {
+                        String changeLine = line.toLowerCase().replace("with", "return");
+                        String[] withParts = changeLine.toLowerCase().split("where");
+                        System.out.println(Arrays.toString(withParts));
+                        DecodedQuery dQ = convertCypherToSQL(withParts[0] + ";");
+                        String withTemp = null;
+                        if (dQ != null) {
+                            withTemp = SQLWith.genTemp(dQ.getSqlEquiv());
+                        }
+                        System.out.println(withTemp);
+                        String sqlSelect = SQLWith.createSelect(withParts[1].trim(), dQ);
+                        sql = withTemp + " " + sqlSelect;
+                    } else {
+                        sql = convertCypherToSQL(line).getSqlEquiv();
+                    }
                     System.out.println(sql);
                     if (sql != null) {
                         executeSQL(sql);
@@ -92,29 +107,32 @@ public class c2sqlV1 {
         }
     }
 
-    private static String convertCypherToSQL(String cypher) {
+    public static DecodedQuery convertCypherToSQL(String cypher) {
         try {
             if (cypher.toLowerCase().contains(" union all ")) {
                 String[] queries = cypher.toLowerCase().split(" union all ");
                 ArrayList<String> unionSQL = new ArrayList<>();
-                DecodedQuery dQ;
+                DecodedQuery dQ = null;
                 for (String s : queries) {
                     dQ = CypherTokenizer.decode(s, false);
                     unionSQL.add(InterToSQLNodesEdges.translate(dQ));
                 }
-                return SQLUnion.genUnion(unionSQL, "UNION ALL");
+                dQ.setSqlEquiv(SQLUnion.genUnion(unionSQL, "UNION ALL"));
+                return dQ;
             } else if (cypher.toLowerCase().contains(" union ")) {
                 String[] queries = cypher.toLowerCase().split(" union ");
                 ArrayList<String> unionSQL = new ArrayList<>();
-                DecodedQuery dQ;
+                DecodedQuery dQ = null;
                 for (String s : queries) {
                     dQ = CypherTokenizer.decode(s, false);
                     unionSQL.add(InterToSQLNodesEdges.translate(dQ));
                 }
-                return SQLUnion.genUnion(unionSQL, "UNION");
+                dQ.setSqlEquiv(SQLUnion.genUnion(unionSQL, "UNION"));
+                return dQ;
             } else {
-                DecodedQuery decodedQuery = CypherTokenizer.decode(cypher, false);
-                return InterToSQLNodesEdges.translate(decodedQuery);
+                DecodedQuery decodedQuery = CypherTokenizer.decode(cypher, true);
+                decodedQuery.setSqlEquiv(InterToSQLNodesEdges.translate(decodedQuery));
+                return decodedQuery;
             }
         } catch (Exception e) {
             e.printStackTrace();

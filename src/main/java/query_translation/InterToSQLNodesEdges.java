@@ -3,7 +3,10 @@ package query_translation;
 import clauseObjects.*;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import schemaConversion.SchemaTranslate;
 
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
@@ -32,18 +35,23 @@ public class InterToSQLNodesEdges {
 
         sql.append(";");
 
-        System.out.println(sql.toString());
-
         return sql.toString();
     }
 
-    private static StringBuilder obtainGroupByClause(ReturnClause rc, StringBuilder sql) {
+    private static StringBuilder obtainGroupByClause(ReturnClause rc, StringBuilder sql) throws IOException {
         sql.append(" GROUP BY ");
         for (CypReturn cR : rc.getItems()) {
             if (cR.getField() != null && !cR.getField().startsWith("count")) {
                 String prop = cR.getField();
                 if (prop != null) {
                     sql.append("n").append(".").append(prop).append(", ");
+                }
+            } else {
+                FileInputStream fis = new FileInputStream("C:/Users/ocraw/Desktop/meta.txt");
+                BufferedReader br = new BufferedReader(new InputStreamReader(fis));
+                String line;
+                while ((line = br.readLine()) != null) {
+                    sql.append("n").append(".").append(line).append(", ");
                 }
             }
         }
@@ -54,8 +62,7 @@ public class InterToSQLNodesEdges {
     private static StringBuilder obtainMatchAndReturn(MatchClause matchC, ReturnClause returnC,
                                                       StringBuilder sql, boolean hasDistinct,
                                                       Map<String, String> alias) throws Exception {
-        if (returnC.getItems() == null)
-            throw new Exception("NOTHING SPECIFIED TO RETURN");
+        if (returnC.getItems() == null) throw new Exception("NOTHING SPECIFIED TO RETURN");
 
         if (matchC.getRels().isEmpty()) {
             // no relationships, just return some nodes
@@ -74,7 +81,6 @@ public class InterToSQLNodesEdges {
             sql = obtainWithClause(sql, matchC);
             sql = obtainSelectAndFromClause(returnC, matchC, sql, hasDistinct, alias);
             sql = obtainWhereClause(sql, returnC, matchC);
-
             return sql;
         }
     }
@@ -90,8 +96,10 @@ public class InterToSQLNodesEdges {
                 amount = Integer.parseInt(dirAndAmount[0].split("-")[1]);
             }
         }
+
         CypNode cN1;
         CypNode cN2 = null;
+
         if (direction.equals("left")) {
             cN1 = matchC.getNodes().get(1);
             cN2 = matchC.getNodes().get(0);
@@ -104,11 +112,13 @@ public class InterToSQLNodesEdges {
 
         sql.append(" ");
         sql = createStepView(sql, amount);
+
         if (cN2 != null) {
             if (cN2.getType() != null || cN2.getProps() != null) {
                 sql = addWhereToSelectForVarRels(sql, cN2);
             }
         }
+
         return sql;
     }
 
@@ -355,8 +365,14 @@ public class InterToSQLNodesEdges {
             }
 
             if (cR.getField() != null && cR.getField().startsWith("count")) {
-                sql.append(cR.getField()).append("  ");
-                usesNodesTable = true;
+                String toAdd;
+                int posInCluase = cR.getPosInClause();
+                if (posInCluase == 1) toAdd = "a1";
+                else toAdd = "a2";
+                sql.append("count(").append(toAdd).append(")");
+                sql.append(useAlias(cR.getField(), alias)).append(", ");
+                if (cR.getType().equals("node")) usesNodesTable = true;
+                else if (cR.getType().equals("rel")) usesRelsTable = true;
                 break;
             }
 
