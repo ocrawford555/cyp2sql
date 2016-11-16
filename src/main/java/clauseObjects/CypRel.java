@@ -2,6 +2,9 @@ package clauseObjects;
 
 import com.google.gson.JsonObject;
 
+/**
+ * Class for storing the relationships in a Cypher query.
+ */
 public class CypRel {
     private int posInClause;
     private String id;

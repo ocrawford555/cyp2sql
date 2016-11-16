@@ -12,16 +12,33 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * MAIN TRANSLATION UNIT FROM INTERMEDIATE TRANSLATION TO SQL.
+ * <p>
+ * Read individual method documentation for more understanding.
+ */
 public class InterToSQLNodesEdges {
+    // alphabet allows for a consistent and logical naming approach to the intermediate parts
+    // of the queries. Assumption is that # of relationships in a query has an upper bound of 26.
     private static final char[] alphabet = "abcdefghijklmnopqrstuvwxyz".toCharArray();
 
+    /**
+     * Translate calls other methods, stitching the results together into one SQL query.
+     *
+     * @param decodedQuery All the intermediate data gatahered about the original Cypher query.
+     * @return SQL string that maps to the original Cypher command.
+     * @throws Exception
+     */
     public static String translate(DecodedQuery decodedQuery) throws Exception {
+        // SQL built up from a StringBuilder object.
         StringBuilder sql = new StringBuilder();
 
         sql = obtainMatchAndReturn(decodedQuery.getMc(), decodedQuery.getRc(), sql,
                 decodedQuery.getCypherAdditionalInfo().hasDistinct(),
                 decodedQuery.getCypherAdditionalInfo().getAliasMap());
 
+        // hasCount refers to the possibility that the Cypher query wishes to return the
+        // count of something. For example, ...RETURN count(a)...
         if (decodedQuery.getCypherAdditionalInfo().hasCount())
             sql = obtainGroupByClause(decodedQuery.getRc(), sql);
 
@@ -35,12 +52,20 @@ public class InterToSQLNodesEdges {
         if (limitAmount != -1) sql.append(" LIMIT ").append(limitAmount);
 
         sql.append(";");
-
         return sql.toString();
     }
 
+    /**
+     * Appends GROUP BY clause to query. This is needed if COUNT is used.
+     *
+     * @param rc  Return Clause of the Cypher query.
+     * @param sql Query before GROUP BY
+     * @return Query after GROUP BY
+     * @throws IOException
+     */
     private static StringBuilder obtainGroupByClause(ReturnClause rc, StringBuilder sql) throws IOException {
         sql.append(" GROUP BY ");
+
         for (CypReturn cR : rc.getItems()) {
             if (cR.getField() != null && !cR.getField().startsWith("count")) {
                 String prop = cR.getField();
@@ -56,10 +81,22 @@ public class InterToSQLNodesEdges {
                 }
             }
         }
+
         sql.setLength(sql.length() - 2);
         return sql;
     }
 
+    /**
+     * Generates bulk of the query, mostly by calling other methods and collating results.
+     *
+     * @param matchC      Match clause from Cypher.
+     * @param returnC     Return clause from Cypher.
+     * @param sql         Existing SQL.
+     * @param hasDistinct Do we need to select DISTINCT or not?
+     * @param alias       Does the Cypher query use aliasing when returning data?
+     * @return New SQL statement.
+     * @throws Exception
+     */
     private static StringBuilder obtainMatchAndReturn(MatchClause matchC, ReturnClause returnC,
                                                       StringBuilder sql, boolean hasDistinct,
                                                       Map<String, String> alias) throws Exception {
@@ -86,10 +123,18 @@ public class InterToSQLNodesEdges {
         }
     }
 
+    /**
+     * Generates SQL for when there is a relationship of type -[*a..b]
+     * @param sql Existing SQL
+     * @param matchC Match Clause of Cypher.
+     * @return New SQL.
+     */
     private static StringBuilder obtainVarRel(StringBuilder sql, MatchClause matchC) {
         sql.append(getTClosureQuery()).append(" ");
+
         String direction = "none";
         int amount = 0;
+
         for (CypRel cR : matchC.getRels()) {
             if (cR.getDirection().contains("var")) {
                 String dirAndAmount[] = cR.getDirection().split("#");

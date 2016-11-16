@@ -1,5 +1,8 @@
 package clauseObjects;
 
+/**
+ * Class for storing the order by cluase of a cypher query (if there is one).
+ */
 public class CypOrder {
     private String nodeID;
     private String field;

@@ -1,5 +1,8 @@
 package clauseObjects;
 
+/**
+ * Class for storing the return fields of a Cypher query.
+ */
 public class CypReturn {
     private String nodeID;
     private String field;
@@ -10,8 +13,11 @@ public class CypReturn {
         this.nodeID = id;
         this.field = f;
         if (this.nodeID != null) {
+            // discoverType finds out whether we are returning a node or a
+            // relationship.
             this.type = discoverType(this.nodeID, matchC);
         } else {
+            // TODO: is this needed still?
             this.type = "node";
             this.posInClause = 1;
         }
@@ -25,6 +31,7 @@ public class CypReturn {
                 return "node";
             }
         }
+
         //check relationships
         for (CypRel cR : matchC.getRels()) {
             if (cR.getId() != null && cR.getId().equals(nodeID)) {
@@ -33,6 +40,7 @@ public class CypReturn {
             }
         }
 
+        //TODO: is this needed?
         posInClause = -1;
         return null;
     }
@@ -47,7 +55,8 @@ public class CypReturn {
 
     @Override
     public String toString() {
-        return "(ID:" + this.nodeID + ",FIELD:" + this.field + ",TYPE:" + this.type + ")";
+        return "(ID:" + this.nodeID +
+                ",FIELD:" + this.field + ",TYPE:" + this.type + ")";
     }
 
     public String getType() {

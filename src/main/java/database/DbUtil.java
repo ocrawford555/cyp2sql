@@ -1,26 +1,32 @@
 package database;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import schemaConversion.SchemaTranslate;
-
-import java.io.*;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.List;
 
+/**
+ * Database driver for Postgres. Runs SQL, and parses result into appropriate text file.
+ */
 public class DbUtil {
+    //TODO: put these in config file of some sort.
     private static Connection c = null;
     private static int numRecords = 0;
     private static boolean DB_OPEN = false;
-    private static List<String> fieldsForMetaFile = new ArrayList<>();
 
+    /**
+     * Create the intial connection to the database.
+     *
+     * @param dbName Name of the database to connect to.
+     */
     public static void createConnection(String dbName) {
         try {
             Class.forName("org.postgresql.Driver");
+            // hide password in PRODUCTION!
             c = DriverManager
                     .getConnection("jdbc:postgresql://localhost:5432/" + dbName,
-                            "postgres", "OJC9511abc");
+                            "postgres", "awesomeDB");
             DB_OPEN = true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -28,6 +34,9 @@ public class DbUtil {
         }
     }
 
+    /**
+     * Close connection to the database.
+     */
     public static void closeConnection() {
         try {
             c.close();
@@ -37,6 +46,15 @@ public class DbUtil {
         }
     }
 
+    /**
+     * If the SQL begins with a CREATE keyword, then this query should be executed
+     * and committed first before other queries execute. This is needed when TEMP
+     * views are created.
+     *
+     * @param query  SQL to execute (beginning with CREATE)
+     * @param dbName Database name to execute on.
+     * @throws SQLException
+     */
     public static void executeCreateView(String query, String dbName) throws SQLException {
         if (!DB_OPEN) DbUtil.createConnection(dbName);
         Statement stmt = c.createStatement();
@@ -44,19 +62,28 @@ public class DbUtil {
         stmt.close();
     }
 
+    /**
+     * Execute standard read SQL statement.
+     *
+     * @param query    SQL statement
+     * @param database Database to execute statement on.
+     * @throws SQLException
+     */
     public static void select(String query, String database) throws SQLException {
         if (!DB_OPEN) DbUtil.createConnection(database);
         Statement stmt;
         stmt = c.createStatement();
 
+        // obtain the columns returned from the result.
         ArrayList<ArrayList<String>> results = getQueryResult(query, stmt);
         ArrayList<String> colNames = results.get(0);
         results.remove(0);
 
         PrintWriter writer;
         try {
-            String file_location_results = "C:/Users/ocraw/Desktop/pg_results.txt";
-            writer = new PrintWriter(file_location_results, "UTF-8");
+            String results_file = "C:/Users/ocraw/Desktop/pg_results.txt";
+            writer = new PrintWriter(results_file, "UTF-8");
+
             for (ArrayList<String> as : results) {
                 int i = 0;
                 for (String column : colNames) {
@@ -64,197 +91,57 @@ public class DbUtil {
                     i++;
                 }
             }
+
             writer.println();
             writer.println("NUM RECORDS : " + numRecords);
             writer.close();
         } catch (FileNotFoundException | UnsupportedEncodingException e) {
             e.printStackTrace();
         }
+
         DbUtil.closeConnection();
     }
 
-    private static ArrayList<ArrayList<String>> getQueryResult(String query, Statement stm) {
+    /**
+     * Obtain results from the database (along with additional metadata such as the columns
+     * returned).
+     *
+     * @param query SQL to execute.
+     * @param stm   Internal JDBC statement.
+     * @return List of the results and column names.
+     */
+    private static ArrayList<ArrayList<String>> getQueryResult(String query, Statement stm)
+            throws SQLException {
         ArrayList<ArrayList<String>> feedback = new ArrayList<>();
         ArrayList<String> feed;
 
-        try {
-            ResultSet rs = stm.executeQuery(query);
+        ResultSet rs = stm.executeQuery(query);
+        ResultSetMetaData rsm = rs.getMetaData();
 
-            ResultSetMetaData rsm = rs.getMetaData();
+        feed = new ArrayList<>();
+        for (int y = 0; y < rsm.getColumnCount(); y++) {
+            feed.add(rsm.getColumnName(y + 1));
+        }
+        feedback.add(feed);
 
+        numRecords = 0;
+
+        while (rs.next()) {
             feed = new ArrayList<>();
-            for (int y = 0; y < rsm.getColumnCount(); y++) {
-                feed.add(rsm.getColumnName(y + 1));
+            for (int i = 1; i <= rsm.getColumnCount(); i++) {
+                feed.add(rs.getString(i));
             }
             feedback.add(feed);
-
-            numRecords = 0;
-
-            while (rs.next()) {
-                feed = new ArrayList<>();
-                for (int i = 1; i <= rsm.getColumnCount(); i++) {
-                    feed.add(rs.getString(i));
-                }
-                feedback.add(feed);
-                numRecords++;
-            }
-
-            stm.close();
-        } catch (SQLException e) {
-            //handler
+            numRecords++;
         }
+
+        stm.close();
         return feedback;
     }
 
-    private static void createInsert(String query) throws SQLException {
+    static void createInsert(String query) throws SQLException {
         Statement stmt = c.createStatement();
         stmt.executeUpdate(query);
         stmt.close();
-    }
-
-    private static StringBuilder insertTableDataNodes(StringBuilder sb) {
-        sb.append("INSERT INTO nodes (");
-
-        for (String y : SchemaTranslate.nodeRelLabels) {
-            sb.append(y.split(" ")[0]).append(", ");
-            fieldsForMetaFile.add(y.split(" ")[0]);
-        }
-        sb.setLength(sb.length() - 2);
-        sb.append(")");
-
-        sb.append(" VALUES ");
-
-        try {
-            FileInputStream fis = new FileInputStream(SchemaTranslate.nodesFile);
-            BufferedReader br = new BufferedReader(new InputStreamReader(fis));
-            String line;
-            while ((line = br.readLine()) != null) {
-                JsonParser parser = new JsonParser();
-                JsonObject o = (JsonObject) parser.parse(line);
-                sb.append("(");
-                for (String z : SchemaTranslate.nodeRelLabels) {
-                    sb = getInsertString(z, sb, o);
-                }
-                sb.setLength(sb.length() - 2);
-                sb.append("), ");
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        sb.setLength(sb.length() - 2);
-        sb.append(";");
-
-        return sb;
-    }
-
-    private static StringBuilder insertTableDataEdges(StringBuilder sb) {
-        sb.append("INSERT INTO edges (");
-
-        for (String y : SchemaTranslate.edgesRelLabels) {
-            sb.append(y.split(" ")[0]).append(", ");
-        }
-        sb.setLength(sb.length() - 2);
-        sb.append(")");
-
-        sb.append(" VALUES ");
-
-        try {
-            FileInputStream fis = new FileInputStream(SchemaTranslate.edgesFile);
-            BufferedReader br = new BufferedReader(new InputStreamReader(fis));
-            String line;
-            while ((line = br.readLine()) != null) {
-                JsonParser parser = new JsonParser();
-                JsonObject o = (JsonObject) parser.parse(line);
-                sb.append("(");
-                for (String z : SchemaTranslate.edgesRelLabels) {
-                    sb = getInsertString(z, sb, o);
-                }
-                sb.setLength(sb.length() - 2);
-                sb.append("), ");
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        sb.setLength(sb.length() - 2);
-        sb.append(";");
-
-        return sb;
-    }
-
-    private static StringBuilder getInsertString(String z, StringBuilder sb, JsonObject o) {
-        try {
-            if (z.endsWith("INT")) {
-                int value = o.get(z.split(" ")[0]).getAsInt();
-                sb.append(value).append(", ");
-            } else {
-                // is text
-                String value = o.get(z.split(" ")[0]).getAsString();
-                sb.append("'").append(value).append("', ");
-            }
-        } catch (NullPointerException npe) {
-            sb.append("null, ");
-        }
-        return sb;
-    }
-
-
-    public static void insertSchema(String database) {
-        DbUtil.createConnection(database);
-        String sqlInsertNodes = insertNodes();
-        String sqlInsertEdges = insertEdges();
-
-        try {
-            DbUtil.createInsert(sqlInsertNodes);
-            DbUtil.createInsert(sqlInsertEdges);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        FileOutputStream fos;
-        try {
-            fos = new FileOutputStream("C:/Users/ocraw/Desktop/meta.txt");
-            //Construct BufferedReader from InputStreamReader
-            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos));
-            for (String s : fieldsForMetaFile) {
-                bw.write(s);
-                bw.newLine();
-            }
-            bw.close();
-            fos.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        DbUtil.closeConnection();
-    }
-
-    private static String insertEdges() {
-        StringBuilder sb = new StringBuilder();
-
-        sb.append("CREATE TABLE edges(");
-        for (String x : SchemaTranslate.edgesRelLabels) {
-            sb.append(x).append(", ");
-        }
-        sb.setLength(sb.length() - 2);
-        sb.append("); ");
-
-        sb = insertTableDataEdges(sb);
-        return sb.toString();
-    }
-
-    private static String insertNodes() {
-        StringBuilder sb = new StringBuilder();
-
-        sb.append("CREATE TABLE nodes(");
-        for (String x : SchemaTranslate.nodeRelLabels) {
-            sb.append(x).append(", ");
-        }
-        sb.setLength(sb.length() - 2);
-        sb.append("); ");
-
-        sb = insertTableDataNodes(sb);
-        return sb.toString();
     }
 }

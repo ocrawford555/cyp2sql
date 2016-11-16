@@ -2,13 +2,19 @@ package clauseObjects;
 
 import java.util.ArrayList;
 
+/**
+ * Stores all the CypNodes, CypRels, and has an internal ID to keep track of order.
+ */
 public class MatchClause {
     private ArrayList<CypNode> nodes = new ArrayList<>();
     private ArrayList<CypRel> rels = new ArrayList<>();
+
+    // varRel indicates that a relationshiop of the type -[*a..b]- is being used.
     private boolean varRel = false;
+
     private int internalID;
 
-    public MatchClause(){
+    public MatchClause() {
         internalID = 0;
     }
 
@@ -33,7 +39,7 @@ public class MatchClause {
         return internalID;
     }
 
-    public void resetInternalID(){
+    public void resetInternalID() {
         internalID = 0;
     }
 

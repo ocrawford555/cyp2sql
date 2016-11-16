@@ -4,6 +4,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Stores the return clause.
+ */
 public class ReturnClause {
     private List<CypReturn> items;
     private Map<String, String> alias = new HashMap<>();

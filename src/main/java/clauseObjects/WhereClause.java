@@ -2,6 +2,9 @@ package clauseObjects;
 
 import java.util.ArrayList;
 
+/**
+ * Stores the where clause.
+ */
 public class WhereClause {
     private boolean hasOr = false;
     private ArrayList<String[]> orClauses = new ArrayList<>();
@@ -11,6 +14,7 @@ public class WhereClause {
         this.clause = c;
     }
 
+    // OR functionality and other boolean operations in the where clause not tested yet.
     public boolean isHasOr() {
         return hasOr;
     }

@@ -3,12 +3,14 @@ package clauseObjects;
 import com.google.gson.JsonObject;
 import toolv1.GenerateAlias;
 
+/**
+ * Class for storing nodes from a Cypher query.
+ */
 public class CypNode {
     private int posInClause;
     private String id;
     private String labels;
     private JsonObject props;
-    //private String[] alias = {null, null};
 
     public CypNode(int posInClause, String id, String type, JsonObject props) {
         this.posInClause = posInClause;
@@ -42,16 +44,4 @@ public class CypNode {
     public int getPosInClause() {
         return posInClause;
     }
-
-//    private void createAlias() {
-//        alias[0] = this.labels;
-//        alias[1] = GenerateAlias.gen();
-//    }
-
-//    public String[] getAlias() {
-//        if (alias[0] == null) {
-//            createAlias();
-//        }
-//        return this.alias;
-//    }
 }

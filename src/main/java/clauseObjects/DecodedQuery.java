@@ -2,9 +2,10 @@ package clauseObjects;
 
 import toolv1.CypherWalker;
 
+/**
+ * This contains all of the intermediate representation of the Cypher query
+ */
 public class DecodedQuery {
-    // this contains all of the intermediate representation of the Cypher query
-
     private MatchClause mc;
     private ReturnClause rc;
     private OrderClause oc;
@@ -13,8 +14,7 @@ public class DecodedQuery {
     private CypherWalker cypherAdditionalInfo;
     private String sqlEquiv;
 
-    public DecodedQuery(MatchClause m, ReturnClause r, OrderClause o,
-                        int skip, int limit, CypherWalker c) {
+    public DecodedQuery(MatchClause m, ReturnClause r, OrderClause o, int skip, int limit, CypherWalker c) {
         this.mc = m;
         this.rc = r;
         this.oc = o;

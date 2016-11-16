@@ -2,6 +2,9 @@ package clauseObjects;
 
 import java.util.List;
 
+/**
+ * Stores the order clause.
+ */
 public class OrderClause {
     private List<CypOrder> items;
 

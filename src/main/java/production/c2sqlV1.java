@@ -2,6 +2,7 @@ package production;
 
 import clauseObjects.DecodedQuery;
 import database.DbUtil;
+import database.InsertSchema;
 import org.apache.commons.io.FileUtils;
 import query_translation.InterToSQLNodesEdges;
 import query_translation.SQLUnion;
@@ -144,6 +145,6 @@ public class c2sqlV1 {
         // true is a debug print parameter
         SchemaTranslate.translate(dumpFile);
         // testa is the default database location
-        DbUtil.insertSchema(dbName);
+        InsertSchema.executeSchemaChange(dbName);
     }
 }
