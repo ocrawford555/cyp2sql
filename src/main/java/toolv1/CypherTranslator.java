@@ -381,7 +381,6 @@ class CypherTranslator {
 
     private static WhereClause extractWhere(String clause, MatchClause matchC, WhereClause wc) throws Exception {
         if (clause.contains(" or ")) {
-            System.out.println("hello...");
             String[] items = clause.split(" or ");
             wc.setHasOr(true);
             wc.addToOr(items);
@@ -416,7 +415,7 @@ class CypherTranslator {
         }
 
         for (CypRel cR : matchC.getRels()) {
-            if (cR.getId().equals(idAndProp[0])) {
+            if (cR.getId() != null && cR.getId().equals(idAndProp[0])) {
                 JsonObject obj = cR.getProps();
                 if (obj == null) obj = new JsonObject();
                 if (op.equals("equals")) obj.addProperty(idAndProp[1], idAndValue[1].replace("\"", "").toLowerCase());

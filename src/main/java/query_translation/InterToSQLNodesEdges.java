@@ -3,10 +3,11 @@ package query_translation;
 import clauseObjects.*;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import schemaConversion.SchemaTranslate;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
@@ -209,31 +210,33 @@ public class InterToSQLNodesEdges {
             sql.append(withAlias).append(" AS ");
             sql.append("(SELECT n1.id AS ").append(withAlias).append(1).append(", ");
             sql.append("n2.id AS ").append(withAlias).append(2);
+            sql.append(", e").append(indexRel + 1).append(".*");
 
             switch (cR.getDirection()) {
                 case "right":
-                    sql.append(" FROM nodes n1 " +
-                            "INNER JOIN edges e1 on n1.id = e1.idl " +
-                            "INNER JOIN nodes n2 on e1.idr = n2.id");
-                    sql = obtainWhereInWithClause(cR, matchC, sql, false);
+                    sql.append(" FROM nodes n1 " + "INNER JOIN edges e").append(indexRel + 1)
+                            .append(" on n1.id = e").append(indexRel + 1).append(".idl ")
+                            .append("INNER JOIN nodes n2 on e").append(indexRel + 1).append(".idr = n2.id");
+                    sql = obtainWhereInWithClause(cR, matchC, sql, false, indexRel);
                     break;
                 case "left":
-                    sql.append(" FROM nodes n1 " +
-                            "INNER JOIN edges e1 on n1.id = e1.idr " +
-                            "INNER JOIN nodes n2 on e1.idl = n2.id");
-                    sql = obtainWhereInWithClause(cR, matchC, sql, false);
+                    sql.append(" FROM nodes n1 " + "INNER JOIN edges e").append(indexRel + 1)
+                            .append(" on n1.id = e").append(indexRel + 1).append(".idr ")
+                            .append("INNER JOIN nodes n2 on e").append(indexRel + 1).append(".idl = n2.id");
+                    sql = obtainWhereInWithClause(cR, matchC, sql, false, indexRel);
                     break;
                 case "none":
-                    sql.append(" FROM nodes n1 " +
-                            "INNER JOIN edges e1 on n1.id = e1.idl " +
-                            "INNER JOIN nodes n2 on e1.idr = n2.id");
-                    sql = obtainWhereInWithClause(cR, matchC, sql, true);
+                    sql.append(" FROM nodes n1 " + "INNER JOIN edges e").append(indexRel + 1)
+                            .append(" on n1.id = e").append(indexRel + 1).append(".idl ")
+                            .append("INNER JOIN nodes n2 on e").append(indexRel + 1).append(".idr = n2.id");
+                    sql = obtainWhereInWithClause(cR, matchC, sql, true, indexRel);
                     sql.append("SELECT n1.id AS ").append(withAlias).append(1).append(", ");
                     sql.append("n2.id AS ").append(withAlias).append(2);
-                    sql.append(" FROM nodes n1 " +
-                            "INNER JOIN edges e1 on n1.id = e1.idr " +
-                            "INNER JOIN nodes n2 on e1.idl = n2.id");
-                    sql = obtainWhereInWithClause(cR, matchC, sql, false);
+                    sql.append(", e").append(indexRel + 1).append(".*");
+                    sql.append(" FROM nodes n1 " + "INNER JOIN edges e").append(indexRel + 1)
+                            .append(" on n1.id = e").append(indexRel + 1).append(".idr ")
+                            .append("INNER JOIN nodes n2 on e").append(indexRel + 1).append(".idl = n2.id");
+                    sql = obtainWhereInWithClause(cR, matchC, sql, false, indexRel);
                     break;
             }
 
@@ -246,7 +249,7 @@ public class InterToSQLNodesEdges {
     }
 
     private static StringBuilder obtainWhereInWithClause(CypRel cR, MatchClause matchC, StringBuilder sql,
-                                                         boolean isBiDirectional) {
+                                                         boolean isBiDirectional, int indexRel) {
         boolean includesWhere = false;
         int posOfRel = cR.getPosInClause();
 
@@ -305,7 +308,7 @@ public class InterToSQLNodesEdges {
                 includesWhere = true;
             }
 
-            sql.append("e1.type = '").append(typeRel);
+            sql.append("e").append(indexRel + 1).append(".type = '").append(typeRel);
             sql.append("' AND ");
         }
 
@@ -317,7 +320,7 @@ public class InterToSQLNodesEdges {
 
             Set<Map.Entry<String, JsonElement>> entries = o.entrySet();
             for (Map.Entry<String, JsonElement> entry : entries) {
-                sql.append("e1.").append(entry.getKey()).append(" = '");
+                sql.append("e").append(indexRel + 1).append(".").append(entry.getKey()).append(" = '");
                 sql.append(entry.getValue().getAsString()).append("' AND ");
             }
         }
@@ -352,15 +355,11 @@ public class InterToSQLNodesEdges {
         sql.append("SELECT ");
         if (hasDistinct) sql.append("DISTINCT ");
 
-        boolean usesNodesTable = false;
-        boolean usesRelsTable = false;
-
         for (CypReturn cR : returnC.getItems()) {
             boolean isNode = false;
 
             if (cR.getNodeID() == null && cR.getField().equals("*")) {
                 sql.append("*  ");
-                usesNodesTable = true;
                 break;
             }
 
@@ -371,8 +370,6 @@ public class InterToSQLNodesEdges {
                 else toAdd = "a2";
                 sql.append("count(").append(toAdd).append(")");
                 sql.append(useAlias(cR.getField(), alias)).append(", ");
-                if (cR.getType().equals("node")) usesNodesTable = true;
-                else if (cR.getType().equals("rel")) usesRelsTable = true;
                 break;
             }
 
@@ -385,21 +382,21 @@ public class InterToSQLNodesEdges {
                         sql.append("n.*").append(useAlias(cR.getNodeID(), alias)).append(", ");
                     }
                     isNode = true;
-                    usesNodesTable = true;
                     break;
                 }
             }
 
             if (!isNode) {
                 for (CypRel cRel : matchC.getRels()) {
-                    if (cRel.getId().equals(cR.getNodeID())) {
+                    if (cRel.getId() != null && cRel.getId().equals(cR.getNodeID())) {
                         String prop = cR.getField();
+                        int relPos = cRel.getPosInClause();
+                        String idRel = (relPos == 1) ? "a" : (relPos == 2) ? "b" : (relPos == 3) ? "c" : "a";
                         if (prop != null) {
-                            sql.append("n").append(".").append(prop).append(useAlias(cR.getNodeID(), alias)).append(", ");
+                            sql.append(idRel).append(".").append(prop).append(useAlias(cR.getNodeID(), alias)).append(", ");
                         } else {
-                            sql.append("n.*").append(useAlias(cR.getNodeID(), alias)).append(", ");
+                            sql.append(idRel).append(".*").append(useAlias(cR.getNodeID(), alias)).append(", ");
                         }
-                        usesRelsTable = true;
                         break;
                     }
                 }
@@ -408,9 +405,8 @@ public class InterToSQLNodesEdges {
 
         sql.setLength(sql.length() - 2);
 
-        sql.append(" FROM ");
-        if (usesNodesTable) sql.append("nodes n, ");
-        if (usesRelsTable) sql.append("edges n, ");
+        sql.append(" FROM nodes n, ");
+
         int numRels = matchC.getRels().size();
         for (int i = 0; i < numRels; i++)
             sql.append(alphabet[i]).append(", ");
@@ -421,7 +417,6 @@ public class InterToSQLNodesEdges {
     }
 
     private static String useAlias(String nodeID, Map<String, String> alias) {
-        System.out.println("NODE ID IN ALIAS : " + nodeID);
         if (alias.isEmpty()) {
             return "";
         } else {

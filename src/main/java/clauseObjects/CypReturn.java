@@ -20,14 +20,14 @@ public class CypReturn {
     private String discoverType(String nodeID, MatchClause matchC) {
         //check the nodes first
         for (CypNode cN : matchC.getNodes()) {
-            if (cN.getId().equals(nodeID)) {
+            if (cN.getId() != null && cN.getId().equals(nodeID)) {
                 posInClause = cN.getPosInClause();
                 return "node";
             }
         }
         //check relationships
         for (CypRel cR : matchC.getRels()) {
-            if (cR.getId().equals(nodeID)) {
+            if (cR.getId() != null && cR.getId().equals(nodeID)) {
                 posInClause = cR.getPosInClause();
                 return "rel";
             }
