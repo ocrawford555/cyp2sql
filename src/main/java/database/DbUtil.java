@@ -1,5 +1,7 @@
 package database;
 
+import production.c2sqlV1;
+
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
@@ -10,23 +12,20 @@ import java.util.ArrayList;
  * Database driver for Postgres. Runs SQL, and parses result into appropriate text file.
  */
 public class DbUtil {
-    //TODO: put these in config file of some sort.
     private static Connection c = null;
     private static int numRecords = 0;
     private static boolean DB_OPEN = false;
 
     /**
-     * Create the intial connection to the database.
+     * Create the initial connection to the database.
      *
      * @param dbName Name of the database to connect to.
      */
     public static void createConnection(String dbName) {
         try {
             Class.forName("org.postgresql.Driver");
-            // hide password in PRODUCTION!
             c = DriverManager
-                    .getConnection("jdbc:postgresql://localhost:5432/" + dbName,
-                            "postgres", "awesomeDB");
+                    .getConnection("jdbc:postgresql://localhost:5432/" + dbName, c2sqlV1.postUN, c2sqlV1.postPW);
             DB_OPEN = true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -65,11 +64,12 @@ public class DbUtil {
     /**
      * Execute standard read SQL statement.
      *
-     * @param query    SQL statement
-     * @param database Database to execute statement on.
+     * @param query      SQL statement
+     * @param database   Database to execute statement on.
+     * @param pg_results File to store the results.
      * @throws SQLException
      */
-    public static void select(String query, String database) throws SQLException {
+    public static void select(String query, String database, String pg_results) throws SQLException {
         if (!DB_OPEN) DbUtil.createConnection(database);
         Statement stmt;
         stmt = c.createStatement();
@@ -81,8 +81,7 @@ public class DbUtil {
 
         PrintWriter writer;
         try {
-            String results_file = "C:/Users/ocraw/Desktop/pg_results.txt";
-            writer = new PrintWriter(results_file, "UTF-8");
+            writer = new PrintWriter(pg_results, "UTF-8");
 
             for (ArrayList<String> as : results) {
                 int i = 0;

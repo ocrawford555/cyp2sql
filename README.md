@@ -13,14 +13,10 @@ Cyp2SQL v1 is a tool that will perform automatic translation of both graph schem
 - Written in Java.
 - Uses ANTLR4 parsing tool
 
-## Types of queries that can be converted
-- match (n:Film)-[:HAS_VEHICLE]->(m:Vehicle {Brand:"Alfa"}) return n;
-- match (n:Film)-[:HAS_VEHICLE]->(m:Vehicle) where n.Name = 'Die Another Day' return m;
-- match (n)-->(m:Film) return m order by m.Name limit 20;
-- match (n:Film)-[:HAS_VEHICLE]->(m:Vehicle) where n.Name <> 'Die Another Day' return m;
-- match (n:Film)<-[]->(p:People) return *;
-- match (n:Film)-[:HAS_VEHICLE]->(m:Vehicle) where n.Name <> 'Die Another Day' return distinct m.Brand as Things;
-- match (n:Film)-[:HAS_VEHICLE]->(m:Vehicle) where n.Name = 'Die Another Day' return m order by m.Brand DESC;
-- match (n)-->(m:Film) return m order by m.Name skip 20 limit 40;
+## Get dump from Neo4J console and store in a text file.
+neo4jplay.bat -c dump  > testD.txt (then type dump into the console, followed by enter). When file stops growing, then can leave the command.
 
-MORE INFO AND COMMITS TO COME!
+neo4jplay.bat = 
+@echo off
+java -classpath "C:\Program Files\Neo4j CE 3.0.6\bin\neo4j-desktop-3.0.6.jar" org.neo4j.shell.StartClient
+

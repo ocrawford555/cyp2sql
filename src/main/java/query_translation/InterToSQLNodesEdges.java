@@ -3,6 +3,7 @@ package query_translation;
 import clauseObjects.*;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import production.c2sqlV1;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -73,7 +74,7 @@ public class InterToSQLNodesEdges {
                     sql.append("n").append(".").append(prop).append(", ");
                 }
             } else {
-                FileInputStream fis = new FileInputStream("C:/Users/ocraw/Desktop/meta.txt");
+                FileInputStream fis = new FileInputStream(c2sqlV1.workspaceArea + "/meta.txt");
                 BufferedReader br = new BufferedReader(new InputStreamReader(fis));
                 String line;
                 while ((line = br.readLine()) != null) {
@@ -168,13 +169,20 @@ public class InterToSQLNodesEdges {
         return sql;
     }
 
-    private static StringBuilder addWhereToSelectForVarRels(StringBuilder sql, CypNode cN2) {
+    /**
+     * Adds WHERE clause to SQL when there is a variable relationship to match.
+     *
+     * @param sql  Existing SQL statement.
+     * @param node If node being queried has additional properties, add these to the clause.
+     * @return New SQL.
+     */
+    private static StringBuilder addWhereToSelectForVarRels(StringBuilder sql, CypNode node) {
         sql.append(" WHERE ");
-        if (cN2.getType() != null) {
-            sql.append("n.label LIKE ").append(genLabelLike(cN2)).append(" AND ");
+        if (node.getType() != null) {
+            sql.append("n.label LIKE ").append(genLabelLike(node)).append(" AND ");
         }
-        if (cN2.getProps() != null) {
-            JsonObject obj = cN2.getProps();
+        if (node.getProps() != null) {
+            JsonObject obj = node.getProps();
             Set<Map.Entry<String, JsonElement>> entries = obj.entrySet();
             for (Map.Entry<String, JsonElement> entry : entries) {
                 sql.append("n.").append(entry.getKey()).append(" = '");
@@ -185,6 +193,13 @@ public class InterToSQLNodesEdges {
         return sql;
     }
 
+    /**
+     * The query for the binding the results of the variable relationship
+     * query to the nodes relation, thus returning the correct results.
+     * @param sql Existing SQL query.
+     * @param amount Depth user wishes to search.
+     * @return New SQL.
+     */
     private static StringBuilder createStepView(StringBuilder sql, int amount) {
         sql.append("CREATE TEMP VIEW step AS (WITH graphT AS (SELECT idr as x");
         sql.append(" FROM tClosure JOIN zerostep on idl = zerostep.id");
@@ -194,6 +209,13 @@ public class InterToSQLNodesEdges {
         return sql;
     }
 
+    /**
+     * Obtain WHERE clause of SQL when there are no relationships to deal with.
+     * @param sql Existing SQL.
+     * @param returnC Return Clause of original Cypher query.
+     * @param matchC Match Clause of original Cypher query.
+     * @return New SQL.
+     */
     private static StringBuilder obtainWhereClauseOnlyNodes(StringBuilder sql, ReturnClause returnC, MatchClause matchC) {
         boolean hasWhere = false;
 
@@ -246,6 +268,12 @@ public class InterToSQLNodesEdges {
         return sql;
     }
 
+    /**
+     * Obtain WITH clause (Common Table Expression) for query with relationships.
+     * @param sql Existing SQL
+     * @param matchC Match Clause of the original Cypher query.
+     * @return New SQL.
+     */
     private static StringBuilder obtainWithClause(StringBuilder sql, MatchClause matchC) {
         sql.append("WITH ");
         int indexRel = 0;
@@ -293,6 +321,15 @@ public class InterToSQLNodesEdges {
         return sql;
     }
 
+    /**
+     * Obtains the WHERE within each WITH CTE.
+     * @param cR Relationship to map.
+     * @param matchC Match Clause of Cypher.
+     * @param sql Existing SQL.
+     * @param isBiDirectional Does the Cypher relationship map both directions (i.e. -[]-)
+     * @param indexRel Where is the relationship in the whole context of the match clause (index starts at 1)
+     * @return New SQL.
+     */
     private static StringBuilder obtainWhereInWithClause(CypRel cR, MatchClause matchC, StringBuilder sql,
                                                          boolean isBiDirectional, int indexRel) {
         boolean includesWhere = false;
@@ -379,6 +416,12 @@ public class InterToSQLNodesEdges {
         return sql;
     }
 
+    /**
+     *
+     * @param sql
+     * @param entry
+     * @return
+     */
     private static StringBuilder addWhereClause(StringBuilder sql, Map.Entry<String, JsonElement> entry) {
         String value = entry.getValue().getAsString();
         if (value.startsWith("<#") && value.endsWith("#>")) {
@@ -393,6 +436,16 @@ public class InterToSQLNodesEdges {
         return sql;
     }
 
+    /**
+     *
+     * @param returnC
+     * @param matchC
+     * @param sql
+     * @param hasDistinct
+     * @param alias
+     * @return
+     * @throws Exception
+     */
     private static StringBuilder obtainSelectAndFromClause(ReturnClause returnC, MatchClause matchC,
                                                            StringBuilder sql, boolean hasDistinct,
                                                            Map<String, String> alias)
@@ -461,6 +514,12 @@ public class InterToSQLNodesEdges {
         return sql;
     }
 
+    /**
+     *
+     * @param nodeID
+     * @param alias
+     * @return
+     */
     private static String useAlias(String nodeID, Map<String, String> alias) {
         if (alias.isEmpty()) {
             return "";
@@ -475,6 +534,14 @@ public class InterToSQLNodesEdges {
         return "";
     }
 
+    /**
+     *
+     * @param sql
+     * @param returnC
+     * @param matchC
+     * @return
+     * @throws Exception
+     */
     private static StringBuilder obtainWhereClause(StringBuilder sql,
                                                    ReturnClause returnC, MatchClause matchC) throws Exception {
         sql.append(" WHERE ");
@@ -569,6 +636,12 @@ public class InterToSQLNodesEdges {
         return sql;
     }
 
+    /**
+     *
+     * @param orderC
+     * @param sql
+     * @return
+     */
     private static StringBuilder obtainOrderByClause(OrderClause orderC, StringBuilder sql) {
         sql.append(" ");
         sql.append("ORDER BY ");
@@ -584,6 +657,12 @@ public class InterToSQLNodesEdges {
         return sql;
     }
 
+    /**
+     *
+     * @param matchC
+     * @param i
+     * @return
+     */
     private static CypNode obtainNode(MatchClause matchC, int i) {
         for (CypNode c : matchC.getNodes()) {
             if (c.getPosInClause() == i) {
@@ -593,6 +672,10 @@ public class InterToSQLNodesEdges {
         return null;
     }
 
+    /**
+     *
+     * @return
+     */
     private static String getTClosureQuery() {
         return "CREATE TEMP VIEW tclosure AS(WITH RECURSIVE search_graph(idl, idr, depth, path, cycle) AS (" +
                 "SELECT e.idl, e.idr, 1," +
@@ -606,9 +689,14 @@ public class InterToSQLNodesEdges {
                 " FROM edges e, search_graph sg" +
                 " WHERE e.idl = sg.idr AND NOT cycle" +
                 ") " +
-                "SELECT * FROM search_graph);";
+                "SELECT * FROM search_graph where (not cycle OR not idr = ANY(path)));";
     }
 
+    /**
+     *
+     * @param cN
+     * @return
+     */
     public static String getZeroStep(CypNode cN) {
         String getZStep = "CREATE TEMP VIEW zerostep AS" +
                 " (SELECT id from nodes";
@@ -640,6 +728,11 @@ public class InterToSQLNodesEdges {
         return getZStep;
     }
 
+    /**
+     *
+     * @param cN
+     * @return
+     */
     private static String genLabelLike(CypNode cN) {
         String label = cN.getType();
         String stmt = "'%";

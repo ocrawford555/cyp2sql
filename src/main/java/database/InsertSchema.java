@@ -2,6 +2,7 @@ package database;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import production.c2sqlV1;
 import schemaConversion.SchemaTranslate;
 
 import java.io.*;
@@ -114,7 +115,7 @@ public class InsertSchema {
 
         FileOutputStream fos;
         try {
-            fos = new FileOutputStream("C:/Users/ocraw/Desktop/meta.txt");
+            fos = new FileOutputStream(c2sqlV1.workspaceArea + "/meta.txt");
             //Construct BufferedReader from InputStreamReader
             BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos));
             for (String s : fieldsForMetaFile) {

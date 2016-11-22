@@ -3,6 +3,7 @@ package database;
 import clauseObjects.DecodedQuery;
 import org.neo4j.driver.v1.*;
 import org.neo4j.driver.v1.exceptions.ClientException;
+import production.c2sqlV1;
 import toolv1.CypherTokenizer;
 
 import java.io.*;
@@ -16,21 +17,17 @@ import java.util.List;
  * be automatically compared against the results from Postgres.
  */
 public class CypherDriver {
-    //TODO: have these in some xml/properties file?
-    private static final String databaseName = "neo4j";
-    private static final String dbPassword = "ojc37";
-    private static final String file_location_results = "C:/Users/ocraw/Desktop/cypher_results.txt";
-
-
     /**
      * Method that runs Cypher query.
      *
-     * @param query Cypher to execute.
+     * @param query          Cypher to execute.
+     * @param cypher_results File to store the results.
      * @throws Exception Cypher database driver failed to perform some action.
      */
-    public static void run(String query) throws Exception {
+    public static void run(String query, String cypher_results) throws Exception {
         // database essentials
-        Driver driver = GraphDatabase.driver("bolt://localhost", AuthTokens.basic(databaseName, dbPassword));
+        Driver driver = GraphDatabase.driver("bolt://localhost",
+                AuthTokens.basic(c2sqlV1.neoUN, c2sqlV1.neoPW));
         Session session = driver.session();
         StatementResult result = session.run(query);
 
@@ -44,7 +41,7 @@ public class CypherDriver {
 
         PrintWriter writer;
         try {
-            writer = new PrintWriter(file_location_results, "UTF-8");
+            writer = new PrintWriter(cypher_results, "UTF-8");
             while (result.hasNext()) {
                 Record record = result.next();
                 for (String t : returnItems) {
@@ -92,7 +89,7 @@ public class CypherDriver {
     private static List<String> getAllFieldsNodes() {
         List<String> toReturn = new ArrayList<>();
         try {
-            FileInputStream fis = new FileInputStream("C:/Users/ocraw/Desktop/meta.txt");
+            FileInputStream fis = new FileInputStream(c2sqlV1.workspaceArea + "/meta.txt");
             BufferedReader br = new BufferedReader(new InputStreamReader(fis));
             String line;
             while ((line = br.readLine()) != null) {

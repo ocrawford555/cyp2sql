@@ -1,6 +1,7 @@
 package production;
 
 import clauseObjects.DecodedQuery;
+import database.CypherDriver;
 import database.DbUtil;
 import database.InsertSchema;
 import org.apache.commons.io.FileUtils;
@@ -16,7 +17,6 @@ import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 /**
  * This is version 1 of the translation tool.
@@ -26,31 +26,49 @@ import java.util.Arrays;
  * Deadline : 5th December 2016 (show to supervisor and upload to GitHub).
  */
 public class c2sqlV1 {
+    // work area for manipulating files if necessary
+    // currently used when converting the schema.
+    public static String workspaceArea;
+
+    public static String postUN;
+    public static String postPW;
+    public static String neoUN;
+    public static String neoPW;
+
+    // database name is given to the program as an argument.
     private static String dbName;
 
+    /**
+     * Main method when application is launched.
+     *
+     * @param args arguments to the application.
+     *             [queries file] [database name]
+     *             [dump file from neo4j] [queries file] [database name]
+     */
     public static void main(String args[]) {
-        // STEP 1 : input to the command line the Neo4J dump (to take args[0])
-        // in future versions, attempt to automate this, but not important yet
-        // if supplied without file, then do not do this step - assumes data already
-        // in PostGres
+        C2SProperties props = new C2SProperties();
+        String[] fileLocations = props.setLocalProperties();
+
+        String cypher_results = fileLocations[0];
+        String pg_results = fileLocations[1];
+        workspaceArea = fileLocations[2];
+        postUN = fileLocations[3];
+        postPW = fileLocations[4];
+        neoUN = fileLocations[5];
+        neoPW = fileLocations[6];
 
         if (args.length == 3) {
             dbName = args[2];
-            long startMillis = System.currentTimeMillis();
             convertNeo4JToSQL(args[0]);
-            System.out.println(System.currentTimeMillis() - startMillis + " ms.");
         } else if (args.length != 2) {
-            System.err.println("Incorrect usage of Cyp2SQL v1 : <dumpFile> <queriesFile> <database>");
+            System.err.println("Incorrect usage of Cyp2SQL v1 : [OPTIONAL: <dumpFile>] <queriesFile> <database>");
             System.exit(1);
         } else {
             dbName = args[1];
         }
 
-        String cypher_results = "C:/Users/ocraw/Desktop/cypher_results.txt";
-        File f1 = new File(cypher_results);
-        String pg_results = "C:/Users/ocraw/Desktop/pg_results.txt";
-        File f2 = new File(pg_results);
-
+        File f_cypher = new File(cypher_results);
+        File f_pg = new File(pg_results);
 
         // with the conversion having occurred, proceed to go through text file containing Cypher
         // queries, convert them to intermediate form, convert that to SQL, and run on Postgres.
@@ -59,56 +77,72 @@ public class c2sqlV1 {
             BufferedReader br = new BufferedReader(new InputStreamReader(fis));
             String line;
             String sql;
+
             while ((line = br.readLine()) != null) {
+                // if line is commented out in the read queries file, then do not attempt to convert it
                 if (!line.startsWith("//")) {
                     if (line.toLowerCase().contains(" with ")) {
                         String changeLine = line.toLowerCase().replace("with", "return");
                         String[] withParts = changeLine.toLowerCase().split("where");
-                        System.out.println(Arrays.toString(withParts));
                         DecodedQuery dQ = convertCypherToSQL(withParts[0] + ";");
+
                         String withTemp = null;
                         if (dQ != null) {
                             withTemp = SQLWith.genTemp(dQ.getSqlEquiv());
                         }
-                        System.out.println(withTemp);
+
                         String sqlSelect = SQLWith.createSelect(withParts[1].trim(), dQ);
                         sql = withTemp + " " + sqlSelect;
                     } else {
                         sql = convertCypherToSQL(line).getSqlEquiv();
                     }
-                    System.out.println(sql);
+
                     if (sql != null) {
-                        executeSQL(sql);
+                        executeSQL(sql, pg_results);
 
                     } else throw new Exception("Conversion of SQL failed");
-                    //CypherDriver.run(line);
-                    System.out.println("QUERY: " + line + "\nRESULT: " +
-                            FileUtils.contentEquals(f1, f2));
+                    CypherDriver.run(line, cypher_results);
+                    System.out.println("QUERY: " + line + "\nRESULT: " + FileUtils.contentEquals(f_cypher, f_pg));
                 }
             }
             br.close();
+            fis.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        System.out.println("Success : Results written to file <pg_results.txt>.");
     }
 
-    private static void executeSQL(String sql) {
+    /**
+     * Execute the SQL command on the database.
+     * If query is a concatenation of multiple queries, then perform then
+     * one by one in order that was passed to the method.
+     * Type of method call depends on whether or not query begins with CREATE
+     * or not.
+     *
+     * @param sql        SQL to execute.
+     * @param pg_results File to store the results.
+     */
+    private static void executeSQL(String sql, String pg_results) {
         try {
             String indivSQL[] = sql.split(";");
             for (String q : indivSQL) {
                 if (q.trim().startsWith("CREATE")) {
                     DbUtil.executeCreateView(q + ";", dbName);
                 } else
-                    DbUtil.select(q + ";", dbName);
+                    DbUtil.select(q + ";", dbName, pg_results);
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    public static DecodedQuery convertCypherToSQL(String cypher) {
+    /**
+     * Convert Cypher queries to SQL
+     *
+     * @param cypher Original Cypher query to translate.
+     * @return SQL that maps to the Cypher input.
+     */
+    private static DecodedQuery convertCypherToSQL(String cypher) {
         try {
             if (cypher.toLowerCase().contains(" union all ")) {
                 String[] queries = cypher.toLowerCase().split(" union all ");
@@ -141,10 +175,13 @@ public class c2sqlV1 {
         }
     }
 
+    /**
+     * Convert Neo4J schema to Postgres (relational schema)
+     *
+     * @param dumpFile Generated BY THE USER from Neo4J shell (see README)
+     */
     private static void convertNeo4JToSQL(String dumpFile) {
-        // true is a debug print parameter
         SchemaTranslate.translate(dumpFile);
-        // testa is the default database location
         InsertSchema.executeSchemaChange(dbName);
     }
 }

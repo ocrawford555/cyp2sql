@@ -14,24 +14,23 @@ import java.util.regex.Matcher;
 
 class PerformWork implements Runnable {
     private ArrayList<String> lines;
-    private String fileExt;
     private BufferedWriter bwNodes;
     private BufferedWriter bwEdges;
 
-    PerformWork(ArrayList<String> strings, int id, String file) {
+    PerformWork(ArrayList<String> strings, String file) {
         this.lines = strings;
-        this.fileExt = file;
+        String fileExt = file;
 
         FileOutputStream fosNodes;
         FileOutputStream fosEdges;
         try {
             fosNodes = new FileOutputStream(
-                    SchemaTranslate.nodesFile.replace(".txt", this.fileExt + ".txt"));
+                    SchemaTranslate.nodesFile.replace(".txt", fileExt + ".txt"));
             //Construct BufferedReader from InputStreamReader
             this.bwNodes = new BufferedWriter(new OutputStreamWriter(fosNodes));
 
             fosEdges = new FileOutputStream(
-                    SchemaTranslate.edgesFile.replace(".txt", this.fileExt + ".txt"));
+                    SchemaTranslate.edgesFile.replace(".txt", fileExt + ".txt"));
             //Construct BufferedReader from InputStreamReader
             this.bwEdges = new BufferedWriter(new OutputStreamWriter(fosEdges));
         } catch (IOException e) {

@@ -1,33 +1,46 @@
 package schemaConversion;
 
 import com.google.gson.JsonParser;
+import production.c2sqlV1;
 
 import java.io.*;
 import java.util.*;
 import java.util.regex.Pattern;
 
 public class SchemaTranslate {
+    // storing all the labels for nodes and edges.
     public static List<String> nodeRelLabels = Collections.synchronizedList(new ArrayList<>());
     public static List<String> edgesRelLabels = Collections.synchronizedList(new ArrayList<>());
-    public static String nodesFile = "C:/Users/ocraw/Desktop/nodes.txt";
-    public static String edgesFile = "C:/Users/ocraw/Desktop/edges.txt";
+
+    // workspace area for both nodes and edges
+    public static String nodesFile = c2sqlV1.workspaceArea + "/nodes.txt";
+    public static String edgesFile = c2sqlV1.workspaceArea + "/edges.txt";
+
     // JSON Parser for creating JSON objects from the text file.
     // passed to all of the threads
     static JsonParser parser = new JsonParser();
+
     // regex for deciding whether a line is a node or a relationship
     private static String patternForNode = "(_\\d+:.*)";
     static Pattern patternN = Pattern.compile(patternForNode);
+
     // regex for deciding whether relationship has properties
     private static String patternForRel = "\\{.+\\}";
     static Pattern patternR = Pattern.compile(patternForRel);
 
+    /**
+     * Main method for translating the schema.
+     *
+     * @param file Dump File from Neo4J.
+     */
     public static void translate(String file) {
         // perform initial preprocess of the file to remove content such as new file markers
         // and other aspects that will break the schema converter.
-        // returns true if no issue, else fails
+        // return number of lines if no issue, else -1
         int count = performPreProcessFile(file);
         if (count == -1) return;
 
+        // number of concurrent threads to work on dump file. Currently 4. Test.
         final int segments = 4;
         final int amountPerSeg = (int) Math.ceil(count / segments);
 
@@ -83,6 +96,7 @@ public class SchemaTranslate {
                 }
             }
 
+            // file indicators for the four threads to output to.
             String[] files = {"a", "b", "c", "d"};
 
             Thread[] ts = new Thread[segments];
@@ -102,7 +116,7 @@ public class SchemaTranslate {
                         temp = s4;
                         break;
                 }
-                ts[i] = new Thread(new PerformWork(temp, i, files[i]));
+                ts[i] = new Thread(new PerformWork(temp, files[i]));
             }
 
             for (Thread q : ts) {
@@ -119,56 +133,60 @@ public class SchemaTranslate {
                 }
             }
 
-            OutputStream out = new FileOutputStream(nodesFile);
-            byte[] buf = new byte[1024];
-            for (String a : files) {
-                InputStream in = new FileInputStream(nodesFile.replace(".txt", a + ".txt"));
-                int b;
-                while ((b = in.read(buf)) >= 0) {
-                    out.write(buf, 0, b);
-                    out.flush();
-                }
-                in.close();
-                File f = new File(nodesFile.replace(".txt", a + ".txt"));
-                f.delete();
-            }
-            out.close();
+            combineWork(files);
 
-            out = new FileOutputStream(edgesFile);
-            buf = new byte[1024];
-            for (String a : files) {
-                InputStream in = new FileInputStream(edgesFile.replace(".txt", a + ".txt"));
-                int b;
-                while ((b = in.read(buf)) >= 0) {
-                    out.write(buf, 0, b);
-                    out.flush();
-                }
-                in.close();
-                File f = new File(edgesFile.replace(".txt", a + ".txt"));
-                f.delete();
-            }
-            out.close();
-
-            // remove strange duplicates appearing in the arraylist
+            // remove strange duplicates appearing in the ArrayList
             Set<String> hs = new HashSet<>();
             hs.addAll(nodeRelLabels);
             nodeRelLabels.clear();
             nodeRelLabels.addAll(hs);
             hs.clear();
+
             hs.addAll(edgesRelLabels);
             edgesRelLabels.clear();
             edgesRelLabels.addAll(hs);
-
-            System.out.println(nodeRelLabels);
-            System.out.println(edgesRelLabels);
-
-
         } catch (IOException e) {
             e.printStackTrace();
         }
-
     }
 
+    /**
+     * Concatenate result of individual threads to one file. One method call does this
+     * for both the nodes and relationships.
+     *
+     * @param files 4 files resulted from reading initial dump.
+     * @throws IOException
+     */
+    private static void combineWork(String[] files) throws IOException {
+        OutputStream out = null;
+        byte[] buf;
+
+        for (int i = 0; i < 2; i++) {
+            String file = (i == 0) ? nodesFile : edgesFile;
+            out = new FileOutputStream(file);
+            buf = new byte[1024];
+            for (String a : files) {
+                InputStream in = new FileInputStream(file.replace(".txt", a + ".txt"));
+                int b;
+                while ((b = in.read(buf)) >= 0) {
+                    out.write(buf, 0, b);
+                    out.flush();
+                }
+                in.close();
+                File f = new File(file.replace(".txt", a + ".txt"));
+                f.delete();
+            }
+        }
+
+        out.close();
+    }
+
+    /**
+     * Perform an initial scan of the file and remove invalid new line characters.
+     *
+     * @param file
+     * @return New file
+     */
     private static int performPreProcessFile(String file) {
         FileInputStream fis;
         FileOutputStream fos;
@@ -189,6 +207,7 @@ public class SchemaTranslate {
 
             while ((line = br.readLine()) != null) {
                 count++;
+
                 // escape character in SQL (' replaced with '')
                 line = line.replace("'", "''");
 
@@ -201,7 +220,7 @@ public class SchemaTranslate {
                     }
                     output = line;
                 } else if (line.isEmpty()) {
-                    //do nothing
+                    // do nothing intentionally
                 } else {
                     output += line;
                 }
