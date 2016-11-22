@@ -208,26 +208,34 @@ class CypherTranslator {
             propsString = null;
             o = null;
             direction = null;
+            boolean varAdded = false;
 
             if (!clause.contains("-")) {
                 // no relationships left to consider.
                 break;
-            } else if (clause.contains("*")) {
-                String varD = "none";
-                m.setVarRel(true);
-
-                int posOfLHypher = clause.indexOf("-");
-                if (clause.get(posOfLHypher - 1).equals("<")) varD = "left";
-                int posOfRSq = clause.indexOf("]");
-                if (clause.get(posOfRSq + 2).equals(">")) varD = (varD.equals("left")) ? "none" : "right";
-
-                List<String> varRel = clause.subList(posOfLHypher + 2, posOfRSq);
-                clause = clause.subList(posOfRSq + 2, clause.size());
-                rels.add(extractVarRel(varRel, m, varD));
             } else {
                 int posOfHyphen = clause.indexOf("-");
 
-                if (clause.get(posOfHyphen - 1).equals("<")) {
+                if (clause.get(posOfHyphen + 2).equals("*")) {
+                    String varD = "none";
+                    m.setVarRel(true);
+
+                    int posOfLHypher = clause.indexOf("-");
+                    if (clause.get(posOfLHypher - 1).equals("<")) varD = "left";
+                    int posOfRSq = clause.indexOf("]");
+                    if (clause.get(posOfRSq + 2).equals(">")) varD = (varD.equals("left")) ? "none" : "right";
+
+                    List<String> varRel = clause.subList(posOfLHypher + 2, posOfRSq);
+                    if (varD.equals("right")) {
+                        clause = clause.subList(posOfRSq + 3, clause.size());
+                    } else {
+                        clause = clause.subList(posOfRSq + 2, clause.size());
+                    }
+
+                    // add the variable to the set of relationships.
+                    rels.add(extractVarRel(varRel, m, varD));
+                    varAdded = true;
+                } else if (clause.get(posOfHyphen - 1).equals("<")) {
                     direction = "left";
 
                     int lSq = clause.indexOf("[");
@@ -301,7 +309,7 @@ class CypherTranslator {
                 } else {
                     throw new Exception("RELATIONSHIP STRUCTURE IS INVALID");
                 }
-                rels.add(new CypRel(m.getInternalID(), id, type, o, direction));
+                if (!varAdded) rels.add(new CypRel(m.getInternalID(), id, type, o, direction));
             }
         }
         return rels;
@@ -428,13 +436,20 @@ class CypherTranslator {
     }
 
     private static CypRel extractVarRel(List<String> varRel, MatchClause m, String varD) throws Exception {
-        varRel = varRel.subList(1, varRel.size());
         String direction;
-        if (varRel.size() == 1) {
-            direction = "var" + varRel.get(0) + "#" + varD;
+
+        if (varRel.size() == 1 && varRel.get(0).equals("*")) {
+            direction = "var1-100" + "#" + varD;
         } else {
-            direction = "var" + varRel.get(0) + "-" + varRel.get(2) + "#" + varD;
+            varRel = varRel.subList(1, varRel.size());
+
+            if (varRel.size() == 1) {
+                direction = "var" + varRel.get(0) + "#" + varD;
+            } else {
+                direction = "var" + varRel.get(0) + "-" + varRel.get(2) + "#" + varD;
+            }
         }
+
         return new CypRel(m.getInternalID(), null, null, null, direction);
     }
 

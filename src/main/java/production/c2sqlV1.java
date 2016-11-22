@@ -95,6 +95,7 @@ public class c2sqlV1 {
                         sql = withTemp + " " + sqlSelect;
                     } else {
                         sql = convertCypherToSQL(line).getSqlEquiv();
+                        System.out.println(sql);
                     }
 
                     if (sql != null) {

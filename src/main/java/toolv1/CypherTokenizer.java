@@ -38,10 +38,11 @@ public class CypherTokenizer {
             CommonToken tok = (CommonToken) t;
             String s = tok.getText().toLowerCase();
 
-            if (!" ".equals(s) && !"<eof>".equals(s) && !";".equals(s) && !"as".equals(s) &&
-                    !cypherWalker.getAlias().contains(s))
+            if (!" ".equals(s) && !"<eof>".equals(s) && !";".equals(s) && !"as".equals(s))
                 tokenList.add(s);
         }
+
+        System.out.println(tokenList);
 
         return tokenList;
     }
