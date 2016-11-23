@@ -7,7 +7,9 @@ import java.util.ArrayList;
  */
 public class WhereClause {
     private boolean hasOr = false;
+    private boolean hasAnd = false;
     private ArrayList<String[]> orClauses = new ArrayList<>();
+    private ArrayList<String[]> andClauses = new ArrayList<>();
     private String clause;
 
     public WhereClause(String c) {
@@ -37,5 +39,21 @@ public class WhereClause {
 
     public void setClause(String clause) {
         this.clause = clause;
+    }
+
+    public boolean isHasAnd() {
+        return hasAnd;
+    }
+
+    public void setHasAnd(boolean hasAnd) {
+        this.hasAnd = hasAnd;
+    }
+
+    public void addToAnd(String[] andClause) {
+        andClauses.add(andClause);
+    }
+
+    public ArrayList<String[]> getAndClauses() {
+        return this.andClauses;
     }
 }

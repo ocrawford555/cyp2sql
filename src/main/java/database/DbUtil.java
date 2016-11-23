@@ -86,7 +86,9 @@ public class DbUtil {
             for (ArrayList<String> as : results) {
                 int i = 0;
                 for (String column : colNames) {
-                    if (!column.equals("id")) writer.println(column + " : " + as.get(i));
+                    if (!column.equals("id") && !column.equals("x") && !column.equals("label")) {
+                        writer.println(column + " : " + as.get(i));
+                    }
                     i++;
                 }
             }

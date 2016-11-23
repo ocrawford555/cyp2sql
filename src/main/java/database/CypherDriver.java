@@ -93,7 +93,7 @@ public class CypherDriver {
             BufferedReader br = new BufferedReader(new InputStreamReader(fis));
             String line;
             while ((line = br.readLine()) != null) {
-                if (!line.equals("id"))
+                if (!line.equals("id") && !line.equals("label"))
                     toReturn.add(line);
             }
             br.close();

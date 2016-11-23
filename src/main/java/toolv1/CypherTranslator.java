@@ -388,10 +388,17 @@ class CypherTranslator {
     }
 
     private static WhereClause extractWhere(String clause, MatchClause matchC, WhereClause wc) throws Exception {
-        if (clause.contains(" or ")) {
-            String[] items = clause.split(" or ");
+        if (clause.toLowerCase().contains(" or ")) {
+            String[] items = clause.toLowerCase().split(" or ");
             wc.setHasOr(true);
             wc.addToOr(items);
+            for (String item : items) {
+                extractWhere(item, matchC, wc);
+            }
+        } else if (clause.toLowerCase().contains(" and ")) {
+            String[] items = clause.toLowerCase().split(" and ");
+            wc.setHasAnd(true);
+            wc.addToAnd(items);
             for (String item : items) {
                 extractWhere(item, matchC, wc);
             }
@@ -526,7 +533,6 @@ class CypherTranslator {
     }
 
     private static CypOrder extractOrder(List<String> clause) throws Exception {
-        System.out.println(clause.toString());
         if (clause.size() == 4 && clause.contains(".")) {
             return new CypOrder(clause.get(0), clause.get(2), clause.get(3));
         } else if (clause.size() == 3 && clause.contains(".")) {
