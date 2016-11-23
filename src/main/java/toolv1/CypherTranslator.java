@@ -446,6 +446,7 @@ class CypherTranslator {
         String direction;
 
         if (varRel.size() == 1 && varRel.get(0).equals("*")) {
+            // hack that deals with arbitrary long paths
             direction = "var1-100" + "#" + varD;
         } else {
             varRel = varRel.subList(1, varRel.size());
@@ -490,16 +491,16 @@ class CypherTranslator {
 
     private static CypReturn extractReturn(List<String> clause, MatchClause matchC, CypherWalker cypherQ)
             throws Exception {
-        // if clause of type (id).(property)
         if (clause.size() == 3 && clause.contains(".")) {
-            return new CypReturn(clause.get(0), clause.get(2), matchC);
+            return new CypReturn(clause.get(0), clause.get(2), false, matchC);
         } else if (clause.size() == 1)
             if (clause.get(0).equals("*"))
-                return new CypReturn(null, "*", null);
+                return new CypReturn(null, "*", false, matchC);
             else
-                return new CypReturn(clause.get(0), null, matchC);
+                return new CypReturn(clause.get(0), null, false, matchC);
         else if (cypherQ.hasCount())
-            return new CypReturn(null, "count(" + clause.get(2) + ")", null);
+            return new CypReturn(clause.get(2), null, true, matchC);
+
         else throw new Exception("RETURN CLAUSE MALFORMED");
     }
 

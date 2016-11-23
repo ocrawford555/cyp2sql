@@ -20,27 +20,9 @@ public class CypherWalker extends CypherBaseListener {
     private String latestOrderDirection = "";
     private int skipAmount = -1;
     private int limitAmount = -1;
-    private int typeQuery;
 
     public void enterCypher(CypherParser.CypherContext ctx) {
-        System.out.println("Entering Cypher : " + ctx.getText());
-    }
-
-    public void exitCypher(CypherParser.CypherContext ctx) {
-        System.out.println("Computing query...");
-        computeQuery();
-    }
-
-    private void computeQuery() {
-        // find out what the query is
-        if (matchClause != null && returnClause != null && orderClause != null
-                && (skipAmount != -1 || limitAmount != -1))
-            typeQuery = 3;
-        else if (matchClause != null && returnClause != null && orderClause != null) {
-            typeQuery = 2;
-        } else if (matchClause != null && returnClause != null) {
-            typeQuery = 1;
-        }
+        System.out.println("Cypher Input : " + ctx.getText());
     }
 
     public void enterMatch(CypherParser.MatchContext ctx) {
@@ -126,10 +108,6 @@ public class CypherWalker extends CypherBaseListener {
 
     public String getReturnClause() {
         return returnClause;
-    }
-
-    public int getTypeQuery() {
-        return typeQuery;
     }
 
     public int getSkipAmount() {

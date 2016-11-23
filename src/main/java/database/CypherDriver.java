@@ -4,7 +4,6 @@ import clauseObjects.DecodedQuery;
 import org.neo4j.driver.v1.*;
 import org.neo4j.driver.v1.exceptions.ClientException;
 import production.c2sqlV1;
-import toolv1.CypherTokenizer;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -22,19 +21,17 @@ public class CypherDriver {
      *
      * @param query          Cypher to execute.
      * @param cypher_results File to store the results.
+     * @param lastDQ         Decoded query containing useful information for the Neo4J driver.
      * @throws Exception Cypher database driver failed to perform some action.
      */
-    public static void run(String query, String cypher_results) throws Exception {
+    public static void run(String query, String cypher_results, DecodedQuery lastDQ) throws Exception {
         // database essentials
         Driver driver = GraphDatabase.driver("bolt://localhost",
                 AuthTokens.basic(c2sqlV1.neoUN, c2sqlV1.neoPW));
         Session session = driver.session();
         StatementResult result = session.run(query);
 
-        // obtain information about the query from the decoder module
-        DecodedQuery dQ = CypherTokenizer.decode(query, false);
-
-        String returnItems[] = dQ.getCypherAdditionalInfo().getReturnClause().replace(" ", "").split(",");
+        String returnItems[] = lastDQ.getCypherAdditionalInfo().getReturnClause().replace(" ", "").split(",");
 
         // keep a track of the number of records returned from Neo4J
         int countRecords = 0;
@@ -48,6 +45,13 @@ public class CypherDriver {
                     try {
                         if (t.contains(".")) {
                             String bits[] = t.split("\\.");
+
+                            // fixes problem when an alias is used.
+                            if (bits[1].contains("AS")) {
+                                bits[1] = bits[1].split("AS")[1];
+                                t = bits[1];
+                            }
+
                             writer.println(bits[1].toLowerCase() + " : " + record.get(t).asString().toLowerCase());
                         } else {
                             // currently only deals with returning nodes
