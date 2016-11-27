@@ -1,4 +1,4 @@
-package toolv1;
+package translator;
 
 import clauseObjects.*;
 import com.google.gson.JsonObject;
@@ -88,11 +88,11 @@ class CypherTranslator {
         m.setRels(extractRels(matchClause, m));
 
         for (CypNode c : m.getNodes()) {
-            System.out.println(c.toString());
+            //System.out.println(c.toString());
         }
 
         for (CypRel c : m.getRels()) {
-            System.out.println(c.toString());
+            //System.out.println(c.toString());
         }
 
         return m;
@@ -483,8 +483,9 @@ class CypherTranslator {
 
         r.setItems(items);
 
-        for (CypReturn c : r.getItems())
-            System.out.println(c.toString());
+        for (CypReturn c : r.getItems()) {
+            //System.out.println(c.toString());
+        }
 
         return r;
     }
@@ -527,8 +528,9 @@ class CypherTranslator {
 
         o.setItems(items);
 
-        for (CypOrder c : o.getItems())
-            System.out.println(c.toString());
+        for (CypOrder c : o.getItems()) {
+            //System.out.println(c.toString());
+        }
 
         return o;
     }

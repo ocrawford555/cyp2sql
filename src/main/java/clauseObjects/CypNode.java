@@ -1,7 +1,6 @@
 package clauseObjects;
 
 import com.google.gson.JsonObject;
-import toolv1.GenerateAlias;
 
 /**
  * Class for storing nodes from a Cypher query.

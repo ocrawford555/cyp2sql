@@ -77,6 +77,7 @@ public class CypherDriver {
             writer.println();
             writer.println("NUM RECORDS : " + countRecords);
             writer.close();
+            c2sqlV1.numResultsNeo = countRecords;
         } catch (FileNotFoundException | UnsupportedEncodingException e) {
             e.printStackTrace();
         }

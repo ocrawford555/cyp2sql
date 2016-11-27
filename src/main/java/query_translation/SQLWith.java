@@ -2,7 +2,7 @@ package query_translation;
 
 import clauseObjects.CypReturn;
 import clauseObjects.DecodedQuery;
-import toolv1.CypherTokenizer;
+import translator.CypherTokenizer;
 
 import java.util.ArrayList;
 

@@ -1,4 +1,4 @@
-package toolv1;
+package translator;
 
 import parsing_lexing.CypherBaseListener;
 import parsing_lexing.CypherParser;
@@ -22,7 +22,7 @@ public class CypherWalker extends CypherBaseListener {
     private int limitAmount = -1;
 
     public void enterCypher(CypherParser.CypherContext ctx) {
-        System.out.println("Cypher Input : " + ctx.getText());
+        System.out.println("\n**********\nCypher Input : " + ctx.getText());
     }
 
     public void enterMatch(CypherParser.MatchContext ctx) {

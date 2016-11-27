@@ -1,4 +1,4 @@
-package toolv1;
+package translator;
 
 import clauseObjects.DecodedQuery;
 import org.antlr.v4.runtime.ANTLRInputStream;

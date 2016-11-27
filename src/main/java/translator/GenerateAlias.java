@@ -1,4 +1,4 @@
-package toolv1;
+package translator;
 
 import java.util.UUID;
 

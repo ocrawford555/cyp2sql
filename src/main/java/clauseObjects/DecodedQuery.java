@@ -1,6 +1,6 @@
 package clauseObjects;
 
-import toolv1.CypherWalker;
+import translator.CypherWalker;
 
 /**
  * This contains all of the intermediate representation of the Cypher query

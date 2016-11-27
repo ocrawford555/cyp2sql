@@ -55,17 +55,18 @@ The properties file (configC2S.properties) must first be set with the correct pr
 Run the .jar (to come in next commit!) with the following parameters, depending on whether or not the schema needs to be translated first.
 
 ```bash
-java -jar <location of .jar file> <schema|translate> <schemaFile|queriesFile> <databaseName>
+java -jar <location of .jar file> <-schema|-translate|-s|-t> <schemaFile|queriesFile> <databaseName>
 ```
 
 Thus, if wishing to first convert the schema:
 ```bash
-java -jar c2sv1.jar schema myDump.txt coolDatabase
+java -jar c2sv1.jar -schema myDump.txt coolDatabase
+java -jar c2sv1.jar -s myDump.txt coolDatabase
 ```
 
 If successful, queries can now be translated:
 ```bash
-java -jar c2sv1.jar translate myQueries.txt coolDatabase
+java -jar c2sv1.jar -translate myQueries.txt coolDatabase
 ```
 
 The "myQueries.txt" should have each Cypher query on ONE LINE - adding a comment marker "//" to the start of the line will skip that query when the application is launched:

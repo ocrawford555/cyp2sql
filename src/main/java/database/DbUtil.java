@@ -96,10 +96,10 @@ public class DbUtil {
             writer.println();
             writer.println("NUM RECORDS : " + numRecords);
             writer.close();
+            c2sqlV1.numResultsPost = numRecords;
         } catch (FileNotFoundException | UnsupportedEncodingException e) {
             e.printStackTrace();
         }
-
         DbUtil.closeConnection();
     }
 

@@ -9,7 +9,7 @@ import query_translation.SQLTranslate;
 import query_translation.SQLUnion;
 import query_translation.SQLWith;
 import schemaConversion.SchemaTranslate;
-import toolv1.CypherTokenizer;
+import translator.CypherTokenizer;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -34,18 +34,18 @@ public class c2sqlV1 {
     public static String postPW;
     public static String neoUN;
     public static String neoPW;
-
+    // used for comparing the outputs from both Neo4J and Postgres
+    public static int numResultsNeo = 0;
+    public static int numResultsPost = 0;
     // database name is given to the program as an argument.
     private static String dbName;
-
     private static DecodedQuery lastDQ = null;
 
     /**
      * Main method when application is launched.
      *
      * @param args arguments to the application.
-     *             [queries file] [database name]
-     *             [dump file from neo4j] [queries file] [database name]
+     *             <-schema|-translate|-s|-t> <schemaFile|queriesFile> <databaseName>
      */
     public static void main(String args[]) {
         C2SProperties props = new C2SProperties();
@@ -59,59 +59,66 @@ public class c2sqlV1 {
         neoUN = fileLocations[5];
         neoPW = fileLocations[6];
 
-        if (args.length == 3) {
-            dbName = args[2];
-            convertNeo4JToSQL(args[0]);
-        } else if (args.length != 2) {
-            System.err.println("Incorrect usage of Cyp2SQL v1 : [OPTIONAL: <dumpFile>] <queriesFile> <database>");
+        if (args.length != 3) {
+            System.err.println("Incorrect usage of Cyp2SQL v1 : <schema|translate> " +
+                    "<schemaFile|queriesFile> <databaseName>");
             System.exit(1);
         } else {
-            dbName = args[1];
-        }
+            File f_cypher = new File(cypher_results);
+            File f_pg = new File(pg_results);
 
-        File f_cypher = new File(cypher_results);
-        File f_pg = new File(pg_results);
+            dbName = args[2];
 
-        // with the conversion having occurred, proceed to go through text file containing Cypher
-        // queries, convert them to intermediate form, convert that to SQL, and run on Postgres.
-        try {
-            FileInputStream fis = new FileInputStream((args.length == 2) ? args[0] : args[1]);
-            BufferedReader br = new BufferedReader(new InputStreamReader(fis));
-            String line;
-            String sql;
+            if (args[0].equals("-schema") || args[0].equals("-s")) {
+                // perform the schema translation
+                convertNeo4JToSQL(args[1]);
+            } else if (args[0].equals("-translate") || args[0].equals("-t")) {
+                try {
+                    FileInputStream fis = new FileInputStream(args[1]);
+                    BufferedReader br = new BufferedReader(new InputStreamReader(fis));
+                    String line;
+                    String sql;
 
-            while ((line = br.readLine()) != null) {
-                // if line is commented out in the read queries file, then do not attempt to convert it
-                if (!line.startsWith("//")) {
-                    if (line.toLowerCase().contains(" with ")) {
-                        String changeLine = line.toLowerCase().replace("with", "return");
-                        String[] withParts = changeLine.toLowerCase().split("where");
-                        DecodedQuery dQ = convertCypherToSQL(withParts[0] + ";");
+                    while ((line = br.readLine()) != null) {
+                        // if line is commented out in the read queries file, then do not attempt to convert it
+                        if (!line.startsWith("//")) {
+                            if (line.toLowerCase().contains(" with ")) {
+                                String changeLine = line.toLowerCase().replace("with", "return");
+                                String[] withParts = changeLine.toLowerCase().split("where");
+                                DecodedQuery dQ = convertCypherToSQL(withParts[0] + ";");
 
-                        String withTemp = null;
-                        if (dQ != null) {
-                            withTemp = SQLWith.genTemp(dQ.getSqlEquiv());
+                                String withTemp = null;
+                                if (dQ != null) {
+                                    withTemp = SQLWith.genTemp(dQ.getSqlEquiv());
+                                }
+
+                                String sqlSelect = SQLWith.createSelect(withParts[1].trim(), dQ);
+                                sql = withTemp + " " + sqlSelect;
+                            } else {
+                                sql = convertCypherToSQL(line).getSqlEquiv();
+                            }
+
+                            if (sql != null) {
+                                executeSQL(sql, pg_results);
+                            } else throw new Exception("Conversion of SQL failed");
+
+                            CypherDriver.run(line, cypher_results, lastDQ);
+                            System.out.println("SQL Output: " + sql + "\nExact Result: " +
+                                    FileUtils.contentEquals(f_cypher, f_pg) + "\nNumber of records from Neo4J: " +
+                                    numResultsNeo + "\nNumber of results from PostG: " + numResultsNeo +
+                                    "\n**********\n");
                         }
-
-                        String sqlSelect = SQLWith.createSelect(withParts[1].trim(), dQ);
-                        sql = withTemp + " " + sqlSelect;
-                    } else {
-                        sql = convertCypherToSQL(line).getSqlEquiv();
-                        System.out.println(sql);
                     }
-
-                    if (sql != null) {
-                        executeSQL(sql, pg_results);
-                    } else throw new Exception("Conversion of SQL failed");
-
-                    CypherDriver.run(line, cypher_results, lastDQ);
-                    System.out.println("QUERY: " + line + "\nRESULT: " + FileUtils.contentEquals(f_cypher, f_pg));
+                    br.close();
+                    fis.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
+            } else {
+                System.err.println("Incorrect usage of Cyp2SQL v1 : <schema|translate> " +
+                        "<schemaFile|queriesFile> <databaseName>");
+                System.exit(1);
             }
-            br.close();
-            fis.close();
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 
@@ -170,7 +177,7 @@ public class c2sqlV1 {
                 lastDQ = dQ;
                 return dQ;
             } else {
-                DecodedQuery dQ = CypherTokenizer.decode(cypher, true);
+                DecodedQuery dQ = CypherTokenizer.decode(cypher, false);
                 dQ.setSqlEquiv(SQLTranslate.translate(dQ));
                 lastDQ = dQ;
                 return dQ;
