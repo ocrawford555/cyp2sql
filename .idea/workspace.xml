@@ -6,23 +6,9 @@
     </artifacts-to-build>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="6c07d57f-61cf-46bd-a98b-dbc0449cd683" name="Default" comment="Updated README and refactored SQL translation code to be more readable.">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/artifacts/testANTLR_jar.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/resources/META-INF/MANIFEST.MF" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/src/main/java/toolv1/CypherTokenizer.java" afterPath="$PROJECT_DIR$/src/main/java/translator/CypherTokenizer.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/src/main/java/toolv1/CypherTranslator.java" afterPath="$PROJECT_DIR$/src/main/java/translator/CypherTranslator.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/src/main/java/toolv1/CypherWalker.java" afterPath="$PROJECT_DIR$/src/main/java/translator/CypherWalker.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/src/main/java/toolv1/GenerateAlias.java" afterPath="$PROJECT_DIR$/src/main/java/translator/GenerateAlias.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/misc.xml" afterPath="$PROJECT_DIR$/.idea/misc.xml" />
+    <list default="true" id="6c07d57f-61cf-46bd-a98b-dbc0449cd683" name="Default" comment="Changed code to allow for .jar to be made of version 1.">
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/c2sv1.jar" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/README.md" afterPath="$PROJECT_DIR$/README.md" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/clauseObjects/CypNode.java" afterPath="$PROJECT_DIR$/src/main/java/clauseObjects/CypNode.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/clauseObjects/DecodedQuery.java" afterPath="$PROJECT_DIR$/src/main/java/clauseObjects/DecodedQuery.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/database/CypherDriver.java" afterPath="$PROJECT_DIR$/src/main/java/database/CypherDriver.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/database/DbUtil.java" afterPath="$PROJECT_DIR$/src/main/java/database/DbUtil.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/production/c2sqlV1.java" afterPath="$PROJECT_DIR$/src/main/java/production/c2sqlV1.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/query_translation/SQLWith.java" afterPath="$PROJECT_DIR$/src/main/java/query_translation/SQLWith.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/testANTLR.iml" afterPath="$PROJECT_DIR$/testANTLR.iml" />
     </list>
     <ignored path="testANTLR.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -53,8 +39,8 @@
       <file leaf-file-name="c2sqlV1.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/java/production/c2sqlV1.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="85">
-              <caret line="98" column="29" lean-forward="true" selection-start-line="98" selection-start-column="29" selection-end-line="98" selection-end-column="29" />
+            <state relative-caret-position="136">
+              <caret line="101" column="60" lean-forward="true" selection-start-line="101" selection-start-column="60" selection-end-line="101" selection-end-column="60" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -504,28 +490,6 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="cyp2sql" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="cyp2sql" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="out" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="artifacts" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="cyp2sql_jar" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
         </subPane>
       </pane>
       <pane id="Scope" />
@@ -550,13 +514,12 @@
     <key name="CreateTestDialog.RecentsKey">
       <recent name="main_area" />
     </key>
-    <key name="CreateClassDialog.RecentsKey">
-      <recent name="query_translation" />
-      <recent name="production" />
-      <recent name="clauseObjects" />
-      <recent name="toolv1" />
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\ocraw\IdeaProjects\cyp2sql\src\main" />
+      <recent name="C:\Users\ocraw\IdeaProjects\cyp2sql" />
     </key>
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\ocraw\IdeaProjects\cyp2sql" />
       <recent name="C:\Users\ocraw\Documents\cyp2sql\src\main\java\testing" />
       <recent name="C:\Users\ocraw\IdeaProjects\testANTLR\src\main\java" />
     </key>
@@ -564,9 +527,11 @@
       <recent name="junit.framework.TestCase" />
       <recent name="groovy.util.GroovyTestCase" />
     </key>
-    <key name="MoveFile.RECENT_KEYS">
-      <recent name="C:\Users\ocraw\IdeaProjects\cyp2sql\src\main" />
-      <recent name="C:\Users\ocraw\IdeaProjects\cyp2sql" />
+    <key name="CreateClassDialog.RecentsKey">
+      <recent name="query_translation" />
+      <recent name="production" />
+      <recent name="clauseObjects" />
+      <recent name="toolv1" />
     </key>
   </component>
   <component name="RunManager" selected="Application.c2sqlV1">
@@ -1204,7 +1169,7 @@
       <workItem from="1479899558003" duration="17100000" />
       <workItem from="1479999878723" duration="75000" />
       <workItem from="1480268263590" duration="461000" />
-      <workItem from="1480268910278" duration="2392000" />
+      <workItem from="1480268910278" duration="2722000" />
     </task>
     <task id="LOCAL-00001" summary="Added 'Order By' functionality. Fixed bug with direction of relationship. Refactored Translator code.">
       <created>1475693730437</created>
@@ -1486,7 +1451,14 @@
       <option name="project" value="LOCAL" />
       <updated>1479917838503</updated>
     </task>
-    <option name="localTasksCounter" value="41" />
+    <task id="LOCAL-00041" summary="Changed code to allow for .jar to be made of version 1.">
+      <created>1480271333297</created>
+      <option name="number" value="00041" />
+      <option name="presentableId" value="LOCAL-00041" />
+      <option name="project" value="LOCAL" />
+      <updated>1480271333298</updated>
+    </task>
+    <option name="localTasksCounter" value="42" />
     <servers />
   </component>
   <component name="TestHistory">
@@ -1522,7 +1494,7 @@
     </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="427779000" />
+    <option name="totallyTimeSpent" value="428109000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="1358" y="-8" width="1696" height="1026" extended-state="6" />
@@ -1582,7 +1554,6 @@
     <ignored-roots>
       <path value="$PROJECT_DIR$" />
     </ignored-roots>
-    <MESSAGE value="Rudimentary testing framework added - next commit with implementation included." />
     <MESSAGE value="Initial implementation of testing module. JUnit running on Cypher and PG output." />
     <MESSAGE value="Added sample unit testing of queries. Query translator broken - to fix in next commit." />
     <MESSAGE value="Testing unit in place - now fix all the bugs." />
@@ -1607,7 +1578,8 @@
     <MESSAGE value="Cleaned up code for version 1 - added properties file and more comments." />
     <MESSAGE value="Bug fixes to translation unit and to the way database drivers store results." />
     <MESSAGE value="Updated README and refactored SQL translation code to be more readable." />
-    <option name="LAST_COMMIT_MESSAGE" value="Updated README and refactored SQL translation code to be more readable." />
+    <MESSAGE value="Changed code to allow for .jar to be made of version 1." />
+    <option name="LAST_COMMIT_MESSAGE" value="Changed code to allow for .jar to be made of version 1." />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REARRANGE_BEFORE_PROJECT_COMMIT" value="true" />
   </component>
@@ -2011,8 +1983,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/production/c2sqlV1.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="85">
-          <caret line="98" column="29" lean-forward="true" selection-start-line="98" selection-start-column="29" selection-end-line="98" selection-end-column="29" />
+        <state relative-caret-position="136">
+          <caret line="101" column="60" lean-forward="true" selection-start-line="101" selection-start-column="60" selection-end-line="101" selection-end-column="60" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
