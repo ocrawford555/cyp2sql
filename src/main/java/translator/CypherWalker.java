@@ -21,10 +21,6 @@ public class CypherWalker extends CypherBaseListener {
     private int skipAmount = -1;
     private int limitAmount = -1;
 
-    public void enterCypher(CypherParser.CypherContext ctx) {
-        System.out.println("\n**********\nCypher Input : " + ctx.getText());
-    }
-
     public void enterMatch(CypherParser.MatchContext ctx) {
         //optional keyword attached or not
         if (ctx.getText().toLowerCase().startsWith("optional "))

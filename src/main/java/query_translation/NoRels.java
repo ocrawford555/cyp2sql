@@ -3,7 +3,12 @@ package query_translation;
 import clauseObjects.*;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import production.c2sqlV1;
 
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Map;
 import java.util.Set;
 
@@ -12,7 +17,7 @@ class NoRels {
         sql = getSelect(decodedQuery.getRc(), decodedQuery.getMc(), sql,
                 decodedQuery.getCypherAdditionalInfo().hasDistinct(),
                 decodedQuery.getCypherAdditionalInfo().getAliasMap());
-        sql = getFrom(sql);
+        sql = getFrom(sql, decodedQuery.getMc());
         sql = getWhere(sql, decodedQuery.getRc(), decodedQuery.getMc());
         return sql;
     }
@@ -73,8 +78,10 @@ class NoRels {
         return "";
     }
 
-    private static StringBuilder getFrom(StringBuilder sql) {
-        sql.append("FROM Nodes n");
+    private static StringBuilder getFrom(StringBuilder sql, MatchClause mc) {
+        sql.append("FROM ");
+        sql.append(TranslateUtils.getLabelType(mc.getNodes().get(0).getType()));
+        sql.append(" n");
         return sql;
     }
 

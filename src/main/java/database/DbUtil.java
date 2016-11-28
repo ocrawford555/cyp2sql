@@ -2,9 +2,7 @@ package database;
 
 import production.c2sqlV1;
 
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.sql.*;
 import java.util.ArrayList;
 
@@ -103,6 +101,33 @@ public class DbUtil {
         DbUtil.closeConnection();
     }
 
+
+    public static Object[] getMapping(String line, String database) throws SQLException, IOException,
+            ClassNotFoundException {
+        if (!DB_OPEN) DbUtil.createConnection(database);
+        String query = "SELECT sql, object FROM query_mapping WHERE cypher = ?";
+        PreparedStatement stmt = c.prepareStatement(query);
+        stmt.setString(1, line);
+        ResultSet rs = stmt.executeQuery();
+
+        String sql = null;
+        byte[] bytes = null;
+
+        while (rs.next()) {
+            sql = rs.getString(1);
+            bytes = rs.getBytes(2);
+        }
+
+        ObjectInputStream objectIn = null;
+        String[] toReturn = null;
+        if (bytes != null) {
+            objectIn = new ObjectInputStream(new ByteArrayInputStream(bytes));
+            toReturn = (String[]) objectIn.readObject();
+        }
+
+        return new Object[]{sql, toReturn};
+    }
+
     /**
      * Obtain results from the database (along with additional metadata such as the columns
      * returned).
@@ -138,6 +163,24 @@ public class DbUtil {
 
         stm.close();
         return feedback;
+    }
+
+    public static void insertMapping(String cypher, String sql, Object obj, String dbName)
+            throws SQLException, IOException {
+        String preparedStatement = "INSERT INTO query_mapping(cypher, sql, object) VALUES (?, ?, ?)";
+        if (!DB_OPEN) createConnection(dbName);
+        PreparedStatement pstmt = c.prepareStatement(preparedStatement);
+        pstmt.setString(1, cypher);
+        pstmt.setString(2, sql);
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ObjectOutputStream oos = new ObjectOutputStream(baos);
+        oos.writeObject(obj);
+        oos.close();
+        pstmt.setBytes(3, baos.toByteArray());
+
+        pstmt.executeUpdate();
+        pstmt.close();
     }
 
     static void createInsert(String query) throws SQLException {

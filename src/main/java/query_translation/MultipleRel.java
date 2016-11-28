@@ -40,30 +40,42 @@ class MultipleRel {
             sql.append("n2.id AS ").append(withAlias).append(2);
             sql.append(", e").append(indexRel + 1).append(".*");
 
+            //int posInClause = cR.getPosInClause();
+            //CypNode c1 = matchC.getNodes().get(posInClause - 1);
+            //CypNode c2 = matchC.getNodes().get(posInClause);
+            //String labelC1 = TranslateUtils.getLabelType(c1.getType());
+            //String labelC2 = TranslateUtils.getLabelType(c2.getType());
+            String labelC1 = "nodes";
+            String labelC2 = "nodes";
+
             switch (cR.getDirection()) {
                 case "right":
-                    sql.append(" FROM nodes n1 " + "INNER JOIN edges e").append(indexRel + 1)
+                    sql.append(" FROM ").append(labelC2).append(" n1 " + "INNER JOIN edges e").append(indexRel + 1)
                             .append(" on n1.id = e").append(indexRel + 1).append(".idl ")
-                            .append("INNER JOIN nodes n2 on e").append(indexRel + 1).append(".idr = n2.id");
+                            .append("INNER JOIN ").append(labelC1).append(" n2 on e").append(indexRel + 1)
+                            .append(".idr = n2.id");
                     sql = obtainWhereInWithClause(cR, matchC, sql, false, indexRel);
                     break;
                 case "left":
-                    sql.append(" FROM nodes n1 " + "INNER JOIN edges e").append(indexRel + 1)
+                    sql.append(" FROM ").append(labelC1).append(" n1 " + "INNER JOIN edges e").append(indexRel + 1)
                             .append(" on n1.id = e").append(indexRel + 1).append(".idr ")
-                            .append("INNER JOIN nodes n2 on e").append(indexRel + 1).append(".idl = n2.id");
+                            .append("INNER JOIN ").append(labelC2).append(" n2 on e").append(indexRel + 1)
+                            .append(".idl = n2.id");
                     sql = obtainWhereInWithClause(cR, matchC, sql, false, indexRel);
                     break;
                 case "none":
-                    sql.append(" FROM nodes n1 " + "INNER JOIN edges e").append(indexRel + 1)
+                    sql.append(" FROM ").append(labelC2).append(" n1 " + "INNER JOIN edges e").append(indexRel + 1)
                             .append(" on n1.id = e").append(indexRel + 1).append(".idl ")
-                            .append("INNER JOIN nodes n2 on e").append(indexRel + 1).append(".idr = n2.id");
+                            .append("INNER JOIN ").append(labelC1).append(" n2 on e").append(indexRel + 1)
+                            .append(".idr = n2.id");
                     sql = obtainWhereInWithClause(cR, matchC, sql, true, indexRel);
                     sql.append("SELECT n1.id AS ").append(withAlias).append(1).append(", ");
                     sql.append("n2.id AS ").append(withAlias).append(2);
                     sql.append(", e").append(indexRel + 1).append(".*");
-                    sql.append(" FROM nodes n1 " + "INNER JOIN edges e").append(indexRel + 1)
+                    sql.append(" FROM ").append(labelC1).append(" n1 " + "INNER JOIN edges e").append(indexRel + 1)
                             .append(" on n1.id = e").append(indexRel + 1).append(".idr ")
-                            .append("INNER JOIN nodes n2 on e").append(indexRel + 1).append(".idl = n2.id");
+                            .append("INNER JOIN ").append(labelC2).append(" n2 on e").append(indexRel + 1)
+                            .append(".idl = n2.id");
                     sql = obtainWhereInWithClause(cR, matchC, sql, false, indexRel);
                     break;
             }

@@ -1,6 +1,5 @@
 package database;
 
-import clauseObjects.DecodedQuery;
 import org.neo4j.driver.v1.*;
 import org.neo4j.driver.v1.exceptions.ClientException;
 import production.c2sqlV1;
@@ -24,14 +23,12 @@ public class CypherDriver {
      * @param lastDQ         Decoded query containing useful information for the Neo4J driver.
      * @throws Exception Cypher database driver failed to perform some action.
      */
-    public static void run(String query, String cypher_results, DecodedQuery lastDQ) throws Exception {
+    public static void run(String query, String cypher_results, String[] returnItems) throws Exception {
         // database essentials
         Driver driver = GraphDatabase.driver("bolt://localhost",
                 AuthTokens.basic(c2sqlV1.neoUN, c2sqlV1.neoPW));
         Session session = driver.session();
         StatementResult result = session.run(query);
-
-        String returnItems[] = lastDQ.getCypherAdditionalInfo().getReturnClause().replace(" ", "").split(",");
 
         // keep a track of the number of records returned from Neo4J
         int countRecords = 0;
@@ -69,7 +66,8 @@ public class CypherDriver {
                             }
                         }
                     } catch (ClientException ce) {
-                        System.out.println("Error thrown in CypherDriver." + ce.toString());
+                        // silently throw away error message.
+                        // System.out.println("Error thrown in CypherDriver." + ce.toString());
                     }
                 }
                 countRecords++;

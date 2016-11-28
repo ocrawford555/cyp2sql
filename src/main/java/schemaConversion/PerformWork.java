@@ -19,18 +19,17 @@ class PerformWork implements Runnable {
 
     PerformWork(ArrayList<String> strings, String file) {
         this.lines = strings;
-        String fileExt = file;
 
         FileOutputStream fosNodes;
         FileOutputStream fosEdges;
         try {
             fosNodes = new FileOutputStream(
-                    SchemaTranslate.nodesFile.replace(".txt", fileExt + ".txt"));
+                    SchemaTranslate.nodesFile.replace(".txt", file + ".txt"));
             //Construct BufferedReader from InputStreamReader
             this.bwNodes = new BufferedWriter(new OutputStreamWriter(fosNodes));
 
             fosEdges = new FileOutputStream(
-                    SchemaTranslate.edgesFile.replace(".txt", fileExt + ".txt"));
+                    SchemaTranslate.edgesFile.replace(".txt", file + ".txt"));
             //Construct BufferedReader from InputStreamReader
             this.bwEdges = new BufferedWriter(new OutputStreamWriter(fosEdges));
         } catch (IOException e) {
@@ -75,6 +74,7 @@ class PerformWork implements Runnable {
 
                 entries = o.entrySet();
                 for (Map.Entry<String, JsonElement> entry : entries) {
+                    addToLabelMap(nodeLabel, entry.getKey(), entry.getValue().getAsString());
                     if (!SchemaTranslate.nodeRelLabels.contains(entry.getKey() + " TEXT") &&
                             !SchemaTranslate.nodeRelLabels.contains(entry.getKey() + " INT")) {
                         try {
@@ -85,7 +85,6 @@ class PerformWork implements Runnable {
                         }
                     }
                 }
-
 
                 try {
                     bwNodes.write(o.toString());
@@ -154,6 +153,26 @@ class PerformWork implements Runnable {
             bwEdges.close();
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    private void addToLabelMap(String nodeLabel, String key, String testValue) {
+        if (SchemaTranslate.labelMappings.keySet().contains(nodeLabel)) {
+            String currentValue = SchemaTranslate.labelMappings.get(nodeLabel);
+            if (!currentValue.contains(key))
+                try {
+                    Integer.parseInt(testValue);
+                    SchemaTranslate.labelMappings.put(nodeLabel, currentValue + ", " + key + " INT");
+                } catch (NumberFormatException nfe) {
+                    SchemaTranslate.labelMappings.put(nodeLabel, currentValue + ", " + key + " TEXT");
+                }
+        } else {
+            try {
+                Integer.parseInt(testValue);
+                SchemaTranslate.labelMappings.put(nodeLabel, key + " INT");
+            } catch (NumberFormatException nfe) {
+                SchemaTranslate.labelMappings.put(nodeLabel, key + " TEXT");
+            }
         }
     }
 }

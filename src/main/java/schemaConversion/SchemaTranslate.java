@@ -12,6 +12,9 @@ public class SchemaTranslate {
     public static List<String> nodeRelLabels = Collections.synchronizedList(new ArrayList<>());
     public static List<String> edgesRelLabels = Collections.synchronizedList(new ArrayList<>());
 
+    // storing separate information for types of nodes
+    public static Map<String, String> labelMappings = Collections.synchronizedMap(new HashMap<>());
+
     // workspace area for both nodes and edges
     public static String nodesFile = c2sqlV1.workspaceArea + "/nodes.txt";
     public static String edgesFile = c2sqlV1.workspaceArea + "/edges.txt";

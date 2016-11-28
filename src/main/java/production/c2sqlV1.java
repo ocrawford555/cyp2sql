@@ -34,11 +34,14 @@ public class c2sqlV1 {
     public static String postPW;
     public static String neoUN;
     public static String neoPW;
+
     // used for comparing the outputs from both Neo4J and Postgres
     public static int numResultsNeo = 0;
     public static int numResultsPost = 0;
+
     // database name is given to the program as an argument.
     private static String dbName;
+
     private static DecodedQuery lastDQ = null;
 
     /**
@@ -82,31 +85,47 @@ public class c2sqlV1 {
                     while ((line = br.readLine()) != null) {
                         // if line is commented out in the read queries file, then do not attempt to convert it
                         if (!line.startsWith("//")) {
-                            if (line.toLowerCase().contains(" with ")) {
-                                String changeLine = line.toLowerCase().replace("with", "return");
-                                String[] withParts = changeLine.toLowerCase().split("where");
-                                DecodedQuery dQ = convertCypherToSQL(withParts[0] + ";");
+                            long startTimeMillis = System.currentTimeMillis();
+                            Object[] mapping = DbUtil.getMapping(line, dbName);
 
-                                String withTemp = null;
-                                if (dQ != null) {
-                                    withTemp = SQLWith.genTemp(dQ.getSqlEquiv());
+                            String[] returnItemsForCypher;
+                            if (mapping[0] != null) {
+                                sql = (String) mapping[0];
+                                returnItemsForCypher = (String[]) mapping[1];
+                            } else {
+                                if (line.toLowerCase().contains(" with ")) {
+                                    String changeLine = line.toLowerCase().replace("with", "return");
+                                    String[] withParts = changeLine.toLowerCase().split("where");
+                                    DecodedQuery dQ = convertCypherToSQL(withParts[0] + ";");
+
+                                    String withTemp = null;
+                                    if (dQ != null) {
+                                        withTemp = SQLWith.genTemp(dQ.getSqlEquiv());
+                                    }
+
+                                    String sqlSelect = SQLWith.createSelect(withParts[1].trim(), dQ);
+                                    sql = withTemp + " " + sqlSelect;
+                                } else {
+                                    sql = convertCypherToSQL(line).getSqlEquiv();
                                 }
 
-                                String sqlSelect = SQLWith.createSelect(withParts[1].trim(), dQ);
-                                sql = withTemp + " " + sqlSelect;
-                            } else {
-                                sql = convertCypherToSQL(line).getSqlEquiv();
+                                returnItemsForCypher = lastDQ.getCypherAdditionalInfo().
+                                        getReturnClause().replace(" ", "").split(",");
                             }
+                            long endTimeMillis = System.currentTimeMillis();
 
                             if (sql != null) {
                                 executeSQL(sql, pg_results);
                             } else throw new Exception("Conversion of SQL failed");
 
-                            CypherDriver.run(line, cypher_results, lastDQ);
+                            CypherDriver.run(line, cypher_results, returnItemsForCypher);
+                            System.out.println("\n**********\nCypher Input : " + line);
                             System.out.println("SQL Output: " + sql + "\nExact Result: " +
                                     FileUtils.contentEquals(f_cypher, f_pg) + "\nNumber of records from Neo4J: " +
-                                    numResultsNeo + "\nNumber of results from PostG: " + numResultsNeo +
+                                    numResultsNeo + "\nNumber of results from PostG: " + numResultsNeo + "\nTime : " +
+                                    (endTimeMillis - startTimeMillis) +
                                     "\n**********\n");
+                            DbUtil.insertMapping(line, sql, returnItemsForCypher, dbName);
                         }
                     }
                     br.close();
