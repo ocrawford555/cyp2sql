@@ -106,8 +106,8 @@ public class c2sqlV2 {
                 // if line is commented out in the read queries file, then do not attempt to convert it
                 if (!line.startsWith("//")) {
                     long startTimeMillis = System.currentTimeMillis();
-                    //Object[] mapping = DbUtil.getMapping(line, dbName);
-                    Object[] mapping = {null, null};
+                    Object[] mapping = DbUtil.getMapping(line, dbName);
+                    //Object[] mapping = {null, null};
 
                     String[] returnItemsForCypher;
                     if (mapping[0] != null) {
@@ -132,7 +132,7 @@ public class c2sqlV2 {
 
                         returnItemsForCypher = lastDQ.getCypherAdditionalInfo().
                                 getReturnClause().replace(" ", "").split(",");
-                        //DbUtil.insertMapping(line, sql, returnItemsForCypher, dbName);
+                        DbUtil.insertMapping(line, sql, returnItemsForCypher, dbName);
                     }
                     long endTimeMillis = System.currentTimeMillis();
 
@@ -257,8 +257,6 @@ public class c2sqlV2 {
                 if (mapLabels.containsKey(s))
                     mapLabels.remove(s);
             }
-
-            System.out.println(mapLabels);
         } catch (IOException e) {
             e.printStackTrace();
         }
