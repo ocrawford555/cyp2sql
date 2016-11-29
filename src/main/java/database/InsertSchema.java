@@ -2,7 +2,7 @@ package database;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import production.c2sqlV1;
+import production.c2sqlV2;
 import schemaConversion.SchemaTranslate;
 
 import java.io.*;
@@ -19,19 +19,24 @@ public class InsertSchema {
         String sqlInsertNodes = insertNodes();
         String sqlInsertEdges = insertEdges();
         String createMappingQuery = "create table query_mapping (cypher TEXT, sql TEXT, object BYTEA);";
+        String createTClosure = "CREATE VIEW tclosure AS(WITH RECURSIVE search_graph(idl, idr, depth, path, cycle) " +
+                "AS (SELECT e.idl, e.idr, 1, ARRAY[e.idl], false FROM edges e UNION ALL SELECT sg.idl, e.idr, " +
+                "sg.depth + 1, path || e.idl, e.idl = ANY(sg.path) FROM edges e, search_graph sg WHERE e.idl = " +
+                "sg.idr AND NOT cycle) SELECT * FROM search_graph where (not cycle OR not idr = ANY(path)));";
 
         try {
             DbUtil.createInsert(createAdditonalNodeTables);
             DbUtil.createInsert(sqlInsertNodes);
             DbUtil.createInsert(sqlInsertEdges);
             DbUtil.createInsert(createMappingQuery);
+            DbUtil.createInsert(createTClosure);
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
         FileOutputStream fos;
         try {
-            fos = new FileOutputStream(c2sqlV1.workspaceArea + "/meta.txt");
+            fos = new FileOutputStream(c2sqlV2.workspaceArea + "/meta.txt");
 
             //Construct BufferedReader from InputStreamReader
             BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos));
@@ -51,14 +56,26 @@ public class InsertSchema {
     private static String insertEachLabel() {
         StringBuilder sb = new StringBuilder();
         FileOutputStream fos;
+        FileOutputStream fos2;
         try {
-            fos = new FileOutputStream(c2sqlV1.workspaceArea + "/meta_tables.txt");
+            fos = new FileOutputStream(c2sqlV2.workspaceArea + "/meta_tables.txt");
+            fos2 = new FileOutputStream(c2sqlV2.workspaceArea + "/meta_labels.txt");
+
             BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos));
+            BufferedWriter bw2 = new BufferedWriter(new OutputStreamWriter(fos2));
+
             for (String label : SchemaTranslate.labelMappings.keySet()) {
                 String tableLabel = label.replace(", ", "_");
                 sb.append("CREATE TABLE ").append(tableLabel).append("(");
                 sb.append(SchemaTranslate.labelMappings.get(label));
                 sb.append("); ");
+                bw2.write("*" + tableLabel + "*");
+                bw2.newLine();
+                for (String y : SchemaTranslate.labelMappings.get(label).replace(" TEXT", "")
+                        .replace(" INT", "").split(", ")) {
+                    bw2.write(y);
+                    bw2.newLine();
+                }
                 bw.write(tableLabel);
                 bw.newLine();
             }
@@ -69,6 +86,7 @@ public class InsertSchema {
         }
         return sb.toString();
     }
+
 
     private static StringBuilder insertDataForLabels(StringBuilder sb, String label, JsonObject o) {
         String tableLabel = label.replace(", ", "_");

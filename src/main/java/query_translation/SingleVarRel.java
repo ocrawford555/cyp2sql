@@ -1,6 +1,5 @@
 package query_translation;
 
-
 import clauseObjects.*;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -10,8 +9,6 @@ import java.util.Set;
 
 class SingleVarRel {
     static StringBuilder translate(StringBuilder sql, DecodedQuery decodedQuery) {
-        sql.append(getTClosureQuery()).append(" ");
-
         MatchClause matchC = decodedQuery.getMc();
 
         String direction = "none";
@@ -104,31 +101,14 @@ class SingleVarRel {
             }
         }
 
+        String table = TranslateUtils.getTable(returnC);
+
         if (sql.toString().endsWith(", ")) {
             sql.setLength(sql.length() - 2);
         }
         sql.append(" ");
-        sql.append("FROM nodes n JOIN step on x = n.id");
+        sql.append("FROM ").append(table).append(" n JOIN step on x = n.id");
         return sql;
-    }
-
-    /**
-     * @return
-     */
-    private static String getTClosureQuery() {
-        return "CREATE TEMP VIEW tclosure AS(WITH RECURSIVE search_graph(idl, idr, depth, path, cycle) AS (" +
-                "SELECT e.idl, e.idr, 1," +
-                " ARRAY[e.idl]," +
-                " false" +
-                " FROM edges e" +
-                " UNION ALL" +
-                " SELECT sg.idl, e.idr, sg.depth + 1," +
-                " path || e.idl," +
-                " e.idl = ANY(sg.path)" +
-                " FROM edges e, search_graph sg" +
-                " WHERE e.idl = sg.idr AND NOT cycle" +
-                ") " +
-                "SELECT * FROM search_graph where (not cycle OR not idr = ANY(path)));";
     }
 
     /**

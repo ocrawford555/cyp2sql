@@ -13,7 +13,7 @@ class C2SProperties {
     private String nun = null;
     private String npw = null;
 
-    String[] setLocalProperties() {
+    String[] getLocalProperties() {
         try {
             Properties prop = new Properties();
             String propFileName = "configC2S.properties";

@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 class CypherTranslator {
-    private static JsonParser parser = new JsonParser();
+    private static final JsonParser parser = new JsonParser();
 
     static DecodedQuery generateDecodedQuery(ArrayList<String> tokenList, CypherWalker cypherQ) throws Exception {
         // find positions of the tokens in the query (-1 means not found)
@@ -442,7 +442,7 @@ class CypherTranslator {
         throw new Exception("WHERE CLAUSE MALFORMED");
     }
 
-    private static CypRel extractVarRel(List<String> varRel, MatchClause m, String varD) throws Exception {
+    private static CypRel extractVarRel(List<String> varRel, MatchClause m, String varD) {
         String direction;
 
         if (varRel.size() == 1 && varRel.get(0).equals("*")) {

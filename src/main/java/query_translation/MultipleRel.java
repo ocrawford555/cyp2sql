@@ -40,19 +40,17 @@ class MultipleRel {
             sql.append("n2.id AS ").append(withAlias).append(2);
             sql.append(", e").append(indexRel + 1).append(".*");
 
-            //int posInClause = cR.getPosInClause();
-            //CypNode c1 = matchC.getNodes().get(posInClause - 1);
-            //CypNode c2 = matchC.getNodes().get(posInClause);
-            //String labelC1 = TranslateUtils.getLabelType(c1.getType());
-            //String labelC2 = TranslateUtils.getLabelType(c2.getType());
-            String labelC1 = "nodes";
-            String labelC2 = "nodes";
+            int posInClause = cR.getPosInClause();
+            CypNode c1 = matchC.getNodes().get(posInClause - 1);
+            CypNode c2 = matchC.getNodes().get(posInClause);
+            String labelC1 = TranslateUtils.getLabelType(c1.getType());
+            String labelC2 = TranslateUtils.getLabelType(c2.getType());
 
             switch (cR.getDirection()) {
                 case "right":
-                    sql.append(" FROM ").append(labelC2).append(" n1 " + "INNER JOIN edges e").append(indexRel + 1)
+                    sql.append(" FROM ").append(labelC1).append(" n1 " + "INNER JOIN edges e").append(indexRel + 1)
                             .append(" on n1.id = e").append(indexRel + 1).append(".idl ")
-                            .append("INNER JOIN ").append(labelC1).append(" n2 on e").append(indexRel + 1)
+                            .append("INNER JOIN ").append(labelC2).append(" n2 on e").append(indexRel + 1)
                             .append(".idr = n2.id");
                     sql = obtainWhereInWithClause(cR, matchC, sql, false, indexRel);
                     break;
@@ -64,9 +62,9 @@ class MultipleRel {
                     sql = obtainWhereInWithClause(cR, matchC, sql, false, indexRel);
                     break;
                 case "none":
-                    sql.append(" FROM ").append(labelC2).append(" n1 " + "INNER JOIN edges e").append(indexRel + 1)
+                    sql.append(" FROM ").append(labelC1).append(" n1 " + "INNER JOIN edges e").append(indexRel + 1)
                             .append(" on n1.id = e").append(indexRel + 1).append(".idl ")
-                            .append("INNER JOIN ").append(labelC1).append(" n2 on e").append(indexRel + 1)
+                            .append("INNER JOIN ").append(labelC2).append(" n2 on e").append(indexRel + 1)
                             .append(".idr = n2.id");
                     sql = obtainWhereInWithClause(cR, matchC, sql, true, indexRel);
                     sql.append("SELECT n1.id AS ").append(withAlias).append(1).append(", ");
@@ -209,8 +207,7 @@ class MultipleRel {
      */
     private static StringBuilder obtainSelectAndFromClause(ReturnClause returnC, MatchClause matchC,
                                                            StringBuilder sql, boolean hasDistinct,
-                                                           Map<String, String> alias)
-            throws Exception {
+                                                           Map<String, String> alias) {
         sql.append("SELECT ");
         if (hasDistinct) sql.append("DISTINCT ");
 
@@ -266,7 +263,9 @@ class MultipleRel {
 
         sql.setLength(sql.length() - 2);
 
-        sql.append(" FROM nodes n, ");
+        String table = TranslateUtils.getTable(returnC);
+
+        sql.append(" FROM ").append(table).append(" n, ");
 
         int numRels = matchC.getRels().size();
         for (int i = 0; i < numRels; i++)
@@ -304,7 +303,7 @@ class MultipleRel {
      * @throws Exception
      */
     private static StringBuilder obtainWhereClause(StringBuilder sql,
-                                                   ReturnClause returnC, MatchClause matchC) throws Exception {
+                                                   ReturnClause returnC, MatchClause matchC) {
         sql.append(" WHERE ");
         int numRels = matchC.getRels().size();
 

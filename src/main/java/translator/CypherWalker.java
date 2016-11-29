@@ -66,10 +66,6 @@ public class CypherWalker extends CypherBaseListener {
         returnClause = ctx.getText();
     }
 
-    public void enterReturnItem(CypherParser.ReturnItemContext ctx) {
-        //System.out.println(ctx.getText());
-    }
-
     public void enterVariable(CypherParser.VariableContext ctx) {
         if (ctx.getParent().getRuleIndex() == 21) {
             String returnC = ctx.getParent().getText();

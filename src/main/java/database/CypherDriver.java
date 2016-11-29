@@ -2,7 +2,7 @@ package database;
 
 import org.neo4j.driver.v1.*;
 import org.neo4j.driver.v1.exceptions.ClientException;
-import production.c2sqlV1;
+import production.c2sqlV2;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -20,13 +20,12 @@ public class CypherDriver {
      *
      * @param query          Cypher to execute.
      * @param cypher_results File to store the results.
-     * @param lastDQ         Decoded query containing useful information for the Neo4J driver.
      * @throws Exception Cypher database driver failed to perform some action.
      */
-    public static void run(String query, String cypher_results, String[] returnItems) throws Exception {
+    public static void run(String query, String cypher_results, String[] returnItems) {
         // database essentials
         Driver driver = GraphDatabase.driver("bolt://localhost",
-                AuthTokens.basic(c2sqlV1.neoUN, c2sqlV1.neoPW));
+                AuthTokens.basic(c2sqlV2.neoUN, c2sqlV2.neoPW));
         Session session = driver.session();
         StatementResult result = session.run(query);
 
@@ -75,7 +74,7 @@ public class CypherDriver {
             writer.println();
             writer.println("NUM RECORDS : " + countRecords);
             writer.close();
-            c2sqlV1.numResultsNeo = countRecords;
+            c2sqlV2.numResultsNeo = countRecords;
         } catch (FileNotFoundException | UnsupportedEncodingException e) {
             e.printStackTrace();
         }
@@ -92,7 +91,7 @@ public class CypherDriver {
     private static List<String> getAllFieldsNodes() {
         List<String> toReturn = new ArrayList<>();
         try {
-            FileInputStream fis = new FileInputStream(c2sqlV1.workspaceArea + "/meta.txt");
+            FileInputStream fis = new FileInputStream(c2sqlV2.workspaceArea + "/meta.txt");
             BufferedReader br = new BufferedReader(new InputStreamReader(fis));
             String line;
             while ((line = br.readLine()) != null) {

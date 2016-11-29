@@ -9,7 +9,7 @@ public class MatchClause {
     private ArrayList<CypNode> nodes = new ArrayList<>();
     private ArrayList<CypRel> rels = new ArrayList<>();
 
-    // varRel indicates that a relationshiop of the type -[*a..b]- is being used.
+    // varRel indicates that a relationship of the type -[*a..b]- is being used.
     private boolean varRel = false;
 
     private int internalID;

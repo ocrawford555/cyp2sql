@@ -1,7 +1,7 @@
 package schemaConversion;
 
 import com.google.gson.JsonParser;
-import production.c2sqlV1;
+import production.c2sqlV2;
 
 import java.io.*;
 import java.util.*;
@@ -16,8 +16,8 @@ public class SchemaTranslate {
     public static Map<String, String> labelMappings = Collections.synchronizedMap(new HashMap<>());
 
     // workspace area for both nodes and edges
-    public static String nodesFile = c2sqlV1.workspaceArea + "/nodes.txt";
-    public static String edgesFile = c2sqlV1.workspaceArea + "/edges.txt";
+    public static String nodesFile = c2sqlV2.workspaceArea + "/nodes.txt";
+    public static String edgesFile = c2sqlV2.workspaceArea + "/edges.txt";
 
     // JSON Parser for creating JSON objects from the text file.
     // passed to all of the threads

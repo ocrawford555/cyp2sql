@@ -1,6 +1,6 @@
 package database;
 
-import production.c2sqlV1;
+import production.c2sqlV2;
 
 import java.io.*;
 import java.sql.*;
@@ -23,7 +23,8 @@ public class DbUtil {
         try {
             Class.forName("org.postgresql.Driver");
             c = DriverManager
-                    .getConnection("jdbc:postgresql://localhost:5432/" + dbName, c2sqlV1.postUN, c2sqlV1.postPW);
+                    .getConnection("jdbc:postgresql://localhost:5432/"
+                            + dbName, c2sqlV2.postUN, c2sqlV2.postPW);
             DB_OPEN = true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -94,7 +95,7 @@ public class DbUtil {
             writer.println();
             writer.println("NUM RECORDS : " + numRecords);
             writer.close();
-            c2sqlV1.numResultsPost = numRecords;
+            c2sqlV2.numResultsPost = numRecords;
         } catch (FileNotFoundException | UnsupportedEncodingException e) {
             e.printStackTrace();
         }

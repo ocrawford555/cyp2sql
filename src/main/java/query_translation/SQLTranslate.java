@@ -1,7 +1,7 @@
 package query_translation;
 
 import clauseObjects.*;
-import production.c2sqlV1;
+import production.c2sqlV2;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -91,7 +91,7 @@ public class SQLTranslate {
                     sql.append("n").append(".").append(prop).append(", ");
                 }
             } else {
-                FileInputStream fis = new FileInputStream(c2sqlV1.workspaceArea + "/meta.txt");
+                FileInputStream fis = new FileInputStream(c2sqlV2.workspaceArea + "/meta.txt");
                 BufferedReader br = new BufferedReader(new InputStreamReader(fis));
                 String line;
                 while ((line = br.readLine()) != null) {

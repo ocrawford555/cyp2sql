@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class TestAntlr {
+class TestAntlr {
     public static void main(String args[]) throws Exception {
         String query = "MATCH (t:Match) RETURN t.h_score LIMIT 10";
         // for ease of working with
@@ -18,10 +18,10 @@ public class TestAntlr {
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         tokens.fill();
 
-        ArrayList<String> tokenList = new ArrayList<String>();
+        ArrayList<String> tokenList = new ArrayList<>();
 
         Map<String, Integer> m = lexer.getRuleIndexMap();
-        Map<Integer, String> ruleIndexes = new HashMap<Integer, String>();
+        Map<Integer, String> ruleIndexes = new HashMap<>();
         for (Map.Entry<String, Integer> entry : m.entrySet()) {
             ruleIndexes.put(entry.getValue(), entry.getKey());
         }

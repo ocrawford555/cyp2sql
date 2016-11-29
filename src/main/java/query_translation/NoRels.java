@@ -3,21 +3,20 @@ package query_translation;
 import clauseObjects.*;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import production.c2sqlV1;
+import production.c2sqlV2;
 
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.Map;
 import java.util.Set;
 
 class NoRels {
+    private static boolean useOptimalTable = false;
+
     static StringBuilder translate(StringBuilder sql, DecodedQuery decodedQuery) {
+        useOptimalTable = false;
         sql = getSelect(decodedQuery.getRc(), decodedQuery.getMc(), sql,
                 decodedQuery.getCypherAdditionalInfo().hasDistinct(),
                 decodedQuery.getCypherAdditionalInfo().getAliasMap());
-        sql = getFrom(sql, decodedQuery.getMc());
+        sql = getFrom(sql, decodedQuery.getMc(), decodedQuery.getRc());
         sql = getWhere(sql, decodedQuery.getRc(), decodedQuery.getMc());
         return sql;
     }
@@ -78,9 +77,33 @@ class NoRels {
         return "";
     }
 
-    private static StringBuilder getFrom(StringBuilder sql, MatchClause mc) {
+    private static StringBuilder getFrom(StringBuilder sql, MatchClause mc, ReturnClause rc) {
         sql.append("FROM ");
-        sql.append(TranslateUtils.getLabelType(mc.getNodes().get(0).getType()));
+        String table = TranslateUtils.getLabelType(mc.getNodes().get(0).getType());
+        if (!table.equals("nodes")) {
+            useOptimalTable = true;
+        } else {
+            boolean possibleOpti = true;
+            String possTable = "nodes";
+
+            for (CypReturn cR : rc.getItems()) {
+                if (!c2sqlV2.mapLabels.containsKey(cR.getField())) {
+                    possibleOpti = false;
+                    break;
+                } else {
+                    String newTable = c2sqlV2.mapLabels.get(cR.getField());
+                    if (!possTable.equals(newTable) && !possTable.equals("nodes")) {
+                        possibleOpti = false;
+                        break;
+                    }
+                    possTable = newTable;
+                }
+            }
+
+            if (possibleOpti) table = possTable;
+            else table = "nodes";
+        }
+        sql.append(table);
         sql.append(" n");
         return sql;
     }
@@ -119,7 +142,7 @@ class NoRels {
             }
 
             if (cN != null) {
-                if (cN.getType() != null) {
+                if (cN.getType() != null && !useOptimalTable) {
                     if (!hasWhere) {
                         sql.append(" WHERE ");
                         hasWhere = true;
