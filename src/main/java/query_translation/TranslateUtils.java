@@ -1,6 +1,5 @@
 package query_translation;
 
-
 import clauseObjects.CypNode;
 import clauseObjects.CypReturn;
 import clauseObjects.ReturnClause;
@@ -27,10 +26,27 @@ class TranslateUtils {
         if (value.startsWith("<#") && value.endsWith("#>")) {
             sql.append(" <> ");
             value = value.substring(2, value.length() - 2);
+            sql.append("'").append(value.replace("'", ""));
+        } else if ((value.startsWith("lt#") && value.endsWith("#tl"))) {
+            sql.append(" < ");
+            value = value.substring(3, value.length() - 3);
+            sql.append("'").append(value.replace("'", ""));
+        } else if ((value.startsWith("gt#") && value.endsWith("#tg"))) {
+            sql.append(" > ");
+            value = value.substring(3, value.length() - 3);
+            sql.append("'").append(value.replace("'", ""));
+        } else if ((value.startsWith("lt#") && value.endsWith("#tg"))) {
+            String prop = sql.toString().substring(sql.toString().lastIndexOf(" ") + 1);
+            sql.append(" < '").append(value.substring(3, value.indexOf("#tl"))).append("' AND ");
+            sql.append(prop).append(" > '").append(value.substring(value.indexOf("gt#") + 3, value.length() - 3));
+        } else if ((value.startsWith("gt#") && value.endsWith("#tl"))) {
+            String prop = sql.toString().substring(sql.toString().lastIndexOf(" ") + 1);
+            sql.append(" > '").append(value.substring(3, value.indexOf("#tg"))).append("' AND ");
+            sql.append(prop).append(" < '").append(value.substring(value.indexOf("lt#") + 3, value.length() - 3));
         } else {
             sql.append(" = ");
+            sql.append("'").append(value.replace("'", ""));
         }
-        sql.append("'").append(value.replace("'", ""));
         sql.append("' AND ");
         return sql;
     }

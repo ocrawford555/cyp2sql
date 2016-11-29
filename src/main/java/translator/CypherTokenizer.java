@@ -11,6 +11,9 @@ import parsing_lexing.CypherParser;
 
 import java.util.ArrayList;
 
+/**
+ * Generates tokens from the Cypher input. Uses ANTLRv4 tool.
+ */
 public class CypherTokenizer {
     private static CypherWalker cypherWalker;
 
@@ -38,6 +41,8 @@ public class CypherTokenizer {
             CommonToken tok = (CommonToken) t;
             String s = tok.getText().toLowerCase();
 
+            // exclude some tokens from the list of tokens. This includes the EOF pointer,
+            // semi-colons, and alias artifacts.
             if (!" ".equals(s) && !"<eof>".equals(s) && !";".equals(s) && !"as".equals(s) &&
                     !cypherWalker.getAlias().contains(s))
                 tokenList.add(s);

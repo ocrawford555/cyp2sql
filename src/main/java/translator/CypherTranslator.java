@@ -9,6 +9,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Main class for translating the Cypher input to its internal representation.
+ * The representation includes extracting the nodes and relationships, finding
+ * out what needs to be returned, seeing if they have any important constraints
+ * etc. A DecodedQuery object is returned containing all the relevant information
+ * for the SQL generation module.
+ */
 class CypherTranslator {
     private static final JsonParser parser = new JsonParser();
 
@@ -21,7 +28,7 @@ class CypherTranslator {
         int posOfSkip = tokenList.indexOf("skip");
         int posOfLimit = tokenList.indexOf("limit");
 
-        // for time being (v1), MATCH and RETURN always present
+        // for time being (v2), MATCH and RETURN always present
         List<String> matchClause;
         List<String> returnClause;
         List<String> orderClause = null;
@@ -74,7 +81,13 @@ class CypherTranslator {
         return new DecodedQuery(matchC, returnC, orderC, skipAmount, limitAmount, cypherQ);
     }
 
-    // current status: unsure, test
+    /**
+     * Translate MATCH part of the Cypher input.
+     *
+     * @param matchClause The tokens comprising the MATCH clause of Cypher.
+     * @return MatchClause object with all the important information inside it.
+     * @throws Exception
+     */
     private static MatchClause matchDecode(List<String> matchClause) throws Exception {
         MatchClause m = new MatchClause();
 
@@ -87,18 +100,23 @@ class CypherTranslator {
         // extract any relationships from the match clause
         m.setRels(extractRels(matchClause, m));
 
-        for (CypNode c : m.getNodes()) {
-            //System.out.println(c.toString());
-        }
-
-        for (CypRel c : m.getRels()) {
-            //System.out.println(c.toString());
-        }
+//        for (CypNode c : m.getNodes()) {
+//            System.out.println(c.toString());
+//        }
+//
+//        for (CypRel c : m.getRels()) {
+//            System.out.println(c.toString());
+//        }
 
         return m;
     }
 
-    // tested and working
+    /**
+     * Extract nodes from the MATCH clause.
+     * @param clause Tokens that formed original MATCH part of Cypher.
+     * @param m Needed for the internal ID representation.
+     * @return List of internal node objects extracted.
+     */
     private static ArrayList<CypNode> extractNodes(List<String> clause, MatchClause m) {
         // nodes to return at the end of the function.
         ArrayList<CypNode> nodes = new ArrayList<>();
@@ -168,6 +186,13 @@ class CypherTranslator {
         return nodes;
     }
 
+    /**
+     * Extract the relationships from the MATCH clause.
+     * @param clause
+     * @param m
+     * @return
+     * @throws Exception
+     */
     private static ArrayList<CypRel> extractRels(List<String> clause, MatchClause m) throws Exception {
         ArrayList<CypRel> rels = new ArrayList<>();
 
@@ -410,6 +435,12 @@ class CypherTranslator {
             } else if (clause.contains(" <> ")) {
                 String[] idAndValue = clause.split(" <> ");
                 addCondition(idAndValue, matchC, "nequals");
+            } else if (clause.contains(" < ")) {
+                String[] idAndValue = clause.split(" < ");
+                addCondition(idAndValue, matchC, "lt");
+            } else if (clause.contains(" > ")) {
+                String[] idAndValue = clause.split(" > ");
+                addCondition(idAndValue, matchC, "gt");
             }
         }
         return wc;
@@ -422,8 +453,31 @@ class CypherTranslator {
             if (cN.getId().equals(idAndProp[0])) {
                 JsonObject obj = cN.getProps();
                 if (obj == null) obj = new JsonObject();
-                if (op.equals("equals")) obj.addProperty(idAndProp[1], idAndValue[1].replace("\"", "").toLowerCase());
-                else obj.addProperty(idAndProp[1], "<#" + idAndValue[1].replace("\"", "").toLowerCase() + "#>");
+                String valueToAdd = "";
+                switch (op) {
+                    case "equals":
+                        obj.addProperty(idAndProp[1], idAndValue[1].replace("\"", "").toLowerCase());
+                        break;
+                    case "nequals":
+                        obj.addProperty(idAndProp[1],
+                                "<#" + idAndValue[1].replace("\"", "").toLowerCase() + "#>");
+                        break;
+                    case "lt":
+                        if (obj.has(idAndProp[1])) {
+                            valueToAdd = obj.get(idAndProp[1]).getAsString();
+                        }
+                        valueToAdd += "lt#" + idAndValue[1].replace("\"", "").toLowerCase() + "#tl";
+                        obj.addProperty(idAndProp[1], valueToAdd);
+                        break;
+                    case "gt":
+                        if (obj.has(idAndProp[1])) {
+                            valueToAdd = obj.get(idAndProp[1]).getAsString();
+                        }
+                        valueToAdd += "gt#" + idAndValue[1].replace("\"", "").toLowerCase() + "#tg";
+                        obj.addProperty(idAndProp[1], valueToAdd);
+                        break;
+                }
+
                 cN.setProps(obj);
                 return;
             }
@@ -433,8 +487,23 @@ class CypherTranslator {
             if (cR.getId() != null && cR.getId().equals(idAndProp[0])) {
                 JsonObject obj = cR.getProps();
                 if (obj == null) obj = new JsonObject();
-                if (op.equals("equals")) obj.addProperty(idAndProp[1], idAndValue[1].replace("\"", "").toLowerCase());
-                else obj.addProperty(idAndProp[1], "<#" + idAndValue[1].replace("\"", "").toLowerCase() + "#>");
+                switch (op) {
+                    case "equals":
+                        obj.addProperty(idAndProp[1], idAndValue[1].replace("\"", "").toLowerCase());
+                        break;
+                    case "nequals":
+                        obj.addProperty(idAndProp[1],
+                                "<#" + idAndValue[1].replace("\"", "").toLowerCase() + "#>");
+                        break;
+                    case "lt":
+                        obj.addProperty(idAndProp[1],
+                                "lt#" + idAndValue[1].replace("\"", "").toLowerCase() + "#lt");
+                        break;
+                    case "gt":
+                        obj.addProperty(idAndProp[1],
+                                "gt#" + idAndValue[1].replace("\"", "").toLowerCase() + "#gt");
+                        break;
+                }
                 cR.setProps(obj);
                 return;
             }

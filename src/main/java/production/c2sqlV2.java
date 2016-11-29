@@ -144,7 +144,7 @@ public class c2sqlV2 {
                     System.out.println("\n**********\nCypher Input : " + line);
                     System.out.println("SQL Output: " + sql + "\nExact Result: " +
                             FileUtils.contentEquals(f_cypher, f_pg) + "\nNumber of records from Neo4J: " +
-                            numResultsNeo + "\nNumber of results from PostG: " + numResultsNeo +
+                            numResultsNeo + "\nNumber of results from PostG: " + numResultsPost +
                             "\nTime to generate SQL: " + (endTimeMillis - startTimeMillis) +
                             "\n**********\n");
                 }

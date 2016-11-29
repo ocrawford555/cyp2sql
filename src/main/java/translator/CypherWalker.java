@@ -7,6 +7,11 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Class that walks the parse tree of the Cypher input, as parsed
+ * by the ANTLRv4 tool. This class records important information
+ * about the query.
+ */
 public class CypherWalker extends CypherBaseListener {
     private boolean hasOptional = false;
     private boolean hasDistinct = false;
@@ -102,19 +107,19 @@ public class CypherWalker extends CypherBaseListener {
         return returnClause;
     }
 
-    public int getSkipAmount() {
+    int getSkipAmount() {
         return skipAmount;
     }
 
-    public int getLimitAmount() {
+    int getLimitAmount() {
         return limitAmount;
     }
 
-    public boolean doesCluaseHaveWhere() {
+    boolean doesCluaseHaveWhere() {
         return (whereClause != null);
     }
 
-    public String getWhereClause() {
+    String getWhereClause() {
         return whereClause;
     }
 
@@ -130,11 +135,7 @@ public class CypherWalker extends CypherBaseListener {
         return returnAlias;
     }
 
-    public Collection<String> getAlias() {
+    Collection<String> getAlias() {
         return returnAlias.values();
-    }
-
-    public String getWithClause() {
-        return withClause;
     }
 }
