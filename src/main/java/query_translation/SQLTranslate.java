@@ -7,6 +7,7 @@ import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Arrays;
 
 /**
  * MAIN TRANSLATION UNIT FROM INTERMEDIATE TRANSLATION TO SQL.
@@ -24,6 +25,14 @@ public class SQLTranslate {
     public static String translate(DecodedQuery decodedQuery) throws Exception {
         // SQL built up from a StringBuilder object.
         StringBuilder sql = new StringBuilder();
+
+        for (CypNode c : decodedQuery.getMc().getNodes()) {
+            System.out.println(c.getId() + " --> " + c.getProps());
+            System.out.println("OR Clauses : " + ((decodedQuery.getWc() != null && decodedQuery.getWc().getOrClauses().size() != 0) ?
+                    Arrays.toString(decodedQuery.getWc().getOrClauses().get(0)) : "N/A"));
+            System.out.println("AND Clauses : " + ((decodedQuery.getWc() != null && decodedQuery.getWc().getAndClauses().size() != 0) ?
+                    Arrays.toString(decodedQuery.getWc().getAndClauses().get(0)) : "N/A"));
+        }
 
         if (decodedQuery.getMc().getNodes().isEmpty()) throw new Exception("MATCH CLAUSE INVALID");
         if (decodedQuery.getRc().getItems() == null) throw new Exception("RETURN CLAUSE INVALID");

@@ -74,11 +74,13 @@ class CypherTranslator {
         int skipAmount = (posOfSkip != -1) ? cypherQ.getSkipAmount() : -1;
         int limitAmount = (posOfLimit != -1) ? cypherQ.getLimitAmount() : -1;
 
+        WhereClause wc = null;
+
         if (cypherQ.doesCluaseHaveWhere()) {
-            whereDecode(matchC, cypherQ);
+            wc = whereDecode(matchC, cypherQ);
         }
 
-        return new DecodedQuery(matchC, returnC, orderC, skipAmount, limitAmount, cypherQ);
+        return new DecodedQuery(matchC, returnC, orderC, wc, skipAmount, limitAmount, cypherQ);
     }
 
     /**
@@ -113,8 +115,9 @@ class CypherTranslator {
 
     /**
      * Extract nodes from the MATCH clause.
+     *
      * @param clause Tokens that formed original MATCH part of Cypher.
-     * @param m Needed for the internal ID representation.
+     * @param m      Needed for the internal ID representation.
      * @return List of internal node objects extracted.
      */
     private static ArrayList<CypNode> extractNodes(List<String> clause, MatchClause m) {
@@ -188,6 +191,7 @@ class CypherTranslator {
 
     /**
      * Extract the relationships from the MATCH clause.
+     *
      * @param clause
      * @param m
      * @return
@@ -405,48 +409,62 @@ class CypherTranslator {
         }
     }
 
-    private static void whereDecode(MatchClause matchC, CypherWalker cypherQ) throws Exception {
+    private static WhereClause whereDecode(MatchClause matchC, CypherWalker cypherQ) throws Exception {
         WhereClause wc = new WhereClause(cypherQ.getWhereClause());
         while (!wc.getClause().isEmpty()) {
-            extractWhere(wc.getClause(), matchC, wc);
+            extractWhere(wc.getClause(), matchC, wc, null);
         }
+        return wc;
     }
 
-    private static WhereClause extractWhere(String clause, MatchClause matchC, WhereClause wc) throws Exception {
-        if (clause.toLowerCase().contains(" or ")) {
-            String[] items = clause.toLowerCase().split(" or ");
-            wc.setHasOr(true);
-            wc.addToOr(items);
-            for (String item : items) {
-                extractWhere(item, matchC, wc);
-            }
-        } else if (clause.toLowerCase().contains(" and ")) {
-            String[] items = clause.toLowerCase().split(" and ");
-            wc.setHasAnd(true);
-            wc.addToAnd(items);
-            for (String item : items) {
-                extractWhere(item, matchC, wc);
-            }
-        } else {
+    private static WhereClause extractWhere(String clause, MatchClause matchC, WhereClause wc,
+                                            String typeBoolean) throws Exception {
+        if (!clause.contains(".")) {
             wc.setClause(wc.getClause().substring(clause.length()));
-            if (clause.contains(" = ")) {
-                String[] idAndValue = clause.split(" = ");
-                addCondition(idAndValue, matchC, "equals");
-            } else if (clause.contains(" <> ")) {
-                String[] idAndValue = clause.split(" <> ");
-                addCondition(idAndValue, matchC, "nequals");
-            } else if (clause.contains(" < ")) {
-                String[] idAndValue = clause.split(" < ");
-                addCondition(idAndValue, matchC, "lt");
-            } else if (clause.contains(" > ")) {
-                String[] idAndValue = clause.split(" > ");
-                addCondition(idAndValue, matchC, "gt");
+        } else {
+            if (clause.toLowerCase().contains(" or ")) {
+                String[] items = clause.toLowerCase().split(" or ");
+                wc.setHasOr(true);
+                wc.addToOr(items);
+                for (String item : items) {
+                    extractWhere(item, matchC, wc, "or");
+                }
+            } else if (clause.toLowerCase().contains(" and ")) {
+                String[] items = clause.toLowerCase().split(" and ");
+                wc.setHasAnd(true);
+                wc.addToAnd(items);
+                for (String item : items) {
+                    extractWhere(item, matchC, wc, "and");
+                }
+            } else {
+                wc.setClause(wc.getClause().substring(clause.length()));
+
+                if (clause.contains(" = ")) {
+                    String[] idAndValue = clause.split(" = ");
+                    addCondition(idAndValue, matchC, "equals", typeBoolean);
+                } else if (clause.contains(" <> ")) {
+                    String[] idAndValue = clause.split(" <> ");
+                    addCondition(idAndValue, matchC, "nequals", typeBoolean);
+                } else if (clause.contains(" < ")) {
+                    String[] idAndValue = clause.split(" < ");
+                    addCondition(idAndValue, matchC, "lt", typeBoolean);
+                } else if (clause.contains(" > ")) {
+                    String[] idAndValue = clause.split(" > ");
+                    addCondition(idAndValue, matchC, "gt", typeBoolean);
+                } else if (clause.contains(" <= ")) {
+                    String[] idAndValue = clause.split(" <= ");
+                    addCondition(idAndValue, matchC, "le", typeBoolean);
+                } else if (clause.contains(" >= ")) {
+                    String[] idAndValue = clause.split(" >= ");
+                    addCondition(idAndValue, matchC, "ge", typeBoolean);
+                }
             }
         }
         return wc;
     }
 
-    private static void addCondition(String[] idAndValue, MatchClause matchC, String op) throws Exception {
+    private static void addCondition(String[] idAndValue, MatchClause matchC, String op,
+                                     String typeBoolean) throws Exception {
         String[] idAndProp = idAndValue[0].split("\\.");
 
         for (CypNode cN : matchC.getNodes()) {
@@ -454,26 +472,32 @@ class CypherTranslator {
                 JsonObject obj = cN.getProps();
                 if (obj == null) obj = new JsonObject();
                 String valueToAdd = "";
+                if (obj.has(idAndProp[1])) {
+                    valueToAdd = obj.get(idAndProp[1]).getAsString() + "~" + typeBoolean + "~";
+                }
                 switch (op) {
                     case "equals":
-                        obj.addProperty(idAndProp[1], idAndValue[1].replace("\"", "").toLowerCase());
+                        valueToAdd += "eq#" + idAndValue[1].replace("\"", "").toLowerCase() + "#qe";
+                        obj.addProperty(idAndProp[1], valueToAdd);
                         break;
                     case "nequals":
-                        obj.addProperty(idAndProp[1],
-                                "<#" + idAndValue[1].replace("\"", "").toLowerCase() + "#>");
+                        valueToAdd += "ne#" + idAndValue[1].replace("\"", "").toLowerCase() + "#en";
+                        obj.addProperty(idAndProp[1], valueToAdd);
                         break;
                     case "lt":
-                        if (obj.has(idAndProp[1])) {
-                            valueToAdd = obj.get(idAndProp[1]).getAsString();
-                        }
                         valueToAdd += "lt#" + idAndValue[1].replace("\"", "").toLowerCase() + "#tl";
                         obj.addProperty(idAndProp[1], valueToAdd);
                         break;
                     case "gt":
-                        if (obj.has(idAndProp[1])) {
-                            valueToAdd = obj.get(idAndProp[1]).getAsString();
-                        }
                         valueToAdd += "gt#" + idAndValue[1].replace("\"", "").toLowerCase() + "#tg";
+                        obj.addProperty(idAndProp[1], valueToAdd);
+                        break;
+                    case "le":
+                        valueToAdd += "le#" + idAndValue[1].replace("\"", "").toLowerCase() + "#el";
+                        obj.addProperty(idAndProp[1], valueToAdd);
+                        break;
+                    case "ge":
+                        valueToAdd += "ge#" + idAndValue[1].replace("\"", "").toLowerCase() + "#eg";
                         obj.addProperty(idAndProp[1], valueToAdd);
                         break;
                 }

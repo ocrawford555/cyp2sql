@@ -30,11 +30,11 @@ class SingleVarRel {
         if (direction.equals("left")) {
             cN1 = matchC.getNodes().get(1);
             cN2 = matchC.getNodes().get(0);
-            sql.append(getZeroStep(cN1));
+            sql.append(getZeroStep(cN1, decodedQuery.getWc()));
         } else if (direction.equals("right")) {
             cN1 = matchC.getNodes().get(0);
             cN2 = matchC.getNodes().get(1);
-            sql.append(getZeroStep(cN1));
+            sql.append(getZeroStep(cN1, decodedQuery.getWc()));
         }
 
         sql.append(" ");
@@ -42,7 +42,7 @@ class SingleVarRel {
 
         if (cN2 != null) {
             if (cN2.getType() != null || cN2.getProps() != null) {
-                sql = addWhereToSelectForVarRels(sql, cN2);
+                sql = addWhereToSelectForVarRels(sql, cN2, decodedQuery.getWc());
             }
         }
 
@@ -54,22 +54,18 @@ class SingleVarRel {
      *
      * @param sql  Existing SQL statement.
      * @param node If node being queried has additional properties, add these to the clause.
+     * @param wc
      * @return New SQL.
      */
-    private static StringBuilder addWhereToSelectForVarRels(StringBuilder sql, CypNode node) {
+    private static StringBuilder addWhereToSelectForVarRels(StringBuilder sql, CypNode node, WhereClause wc) {
         sql.append(" WHERE ");
         if (node.getType() != null) {
-            sql.append("n.label LIKE ").append(TranslateUtils.genLabelLike(node)).append(" AND ");
+            sql.append("n.label LIKE ").append(TranslateUtils.genLabelLike(node));
         }
         if (node.getProps() != null) {
-            JsonObject obj = node.getProps();
-            Set<Map.Entry<String, JsonElement>> entries = obj.entrySet();
-            for (Map.Entry<String, JsonElement> entry : entries) {
-                sql.append("n.").append(entry.getKey());
-                sql = TranslateUtils.addWhereClause(sql, entry);
-            }
+            sql.append(" AND ");
+            sql = TranslateUtils.getWholeWhereClause(sql, node, wc);
         }
-        sql.setLength(sql.length() - 5);
         return sql;
     }
 
@@ -113,9 +109,10 @@ class SingleVarRel {
 
     /**
      * @param cN Node of the variable query that is being included in the first step query.
+     * @param wc
      * @return SQL view of this first step in the variable relationship.
      */
-    private static String getZeroStep(CypNode cN) {
+    private static String getZeroStep(CypNode cN, WhereClause wc) {
         StringBuilder getZStep = new StringBuilder();
         getZStep.append("CREATE TEMP VIEW zerostep AS SELECT id from nodes");
 
@@ -129,9 +126,10 @@ class SingleVarRel {
 
             for (Map.Entry<String, JsonElement> entry : entries) {
                 getZStep.append(entry.getKey());
-                getZStep = TranslateUtils.addWhereClause(getZStep, entry);
+                String booleanOp = "";
+                getZStep = TranslateUtils.addWhereClause(getZStep, entry, booleanOp);
             }
-            getZStep.setLength(getZStep.length() - 5);
+
         }
 
         if (cN.getType() != null) {

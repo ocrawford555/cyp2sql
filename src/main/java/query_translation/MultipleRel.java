@@ -14,7 +14,7 @@ class MultipleRel {
     private static final char[] alphabet = "abcdefghijklmnopqrstuvwxyz".toCharArray();
 
     static StringBuilder translate(StringBuilder sql, DecodedQuery decodedQuery) throws Exception {
-        sql = obtainWithClause(sql, decodedQuery.getMc());
+        sql = obtainWithClause(sql, decodedQuery.getMc(), decodedQuery.getWc());
         sql = obtainSelectAndFromClause(decodedQuery.getRc(), decodedQuery.getMc(), sql,
                 decodedQuery.getCypherAdditionalInfo().hasDistinct(),
                 decodedQuery.getCypherAdditionalInfo().getAliasMap());
@@ -27,9 +27,10 @@ class MultipleRel {
      *
      * @param sql    Existing SQL
      * @param matchC Match Clause of the original Cypher query.
+     * @param wc
      * @return New SQL.
      */
-    private static StringBuilder obtainWithClause(StringBuilder sql, MatchClause matchC) {
+    private static StringBuilder obtainWithClause(StringBuilder sql, MatchClause matchC, WhereClause wc) {
         sql.append("WITH ");
         int indexRel = 0;
 
@@ -52,21 +53,21 @@ class MultipleRel {
                             .append(" on n1.id = e").append(indexRel + 1).append(".idl ")
                             .append("INNER JOIN ").append(labelC2).append(" n2 on e").append(indexRel + 1)
                             .append(".idr = n2.id");
-                    sql = obtainWhereInWithClause(cR, matchC, sql, false, indexRel);
+                    sql = obtainWhereInWithClause(cR, matchC, sql, false, indexRel, wc);
                     break;
                 case "left":
                     sql.append(" FROM ").append(labelC1).append(" n1 " + "INNER JOIN edges e").append(indexRel + 1)
                             .append(" on n1.id = e").append(indexRel + 1).append(".idr ")
                             .append("INNER JOIN ").append(labelC2).append(" n2 on e").append(indexRel + 1)
                             .append(".idl = n2.id");
-                    sql = obtainWhereInWithClause(cR, matchC, sql, false, indexRel);
+                    sql = obtainWhereInWithClause(cR, matchC, sql, false, indexRel, wc);
                     break;
                 case "none":
                     sql.append(" FROM ").append(labelC1).append(" n1 " + "INNER JOIN edges e").append(indexRel + 1)
                             .append(" on n1.id = e").append(indexRel + 1).append(".idl ")
                             .append("INNER JOIN ").append(labelC2).append(" n2 on e").append(indexRel + 1)
                             .append(".idr = n2.id");
-                    sql = obtainWhereInWithClause(cR, matchC, sql, true, indexRel);
+                    sql = obtainWhereInWithClause(cR, matchC, sql, true, indexRel, wc);
                     sql.append("SELECT n1.id AS ").append(withAlias).append(1).append(", ");
                     sql.append("n2.id AS ").append(withAlias).append(2);
                     sql.append(", e").append(indexRel + 1).append(".*");
@@ -74,7 +75,7 @@ class MultipleRel {
                             .append(" on n1.id = e").append(indexRel + 1).append(".idr ")
                             .append("INNER JOIN ").append(labelC2).append(" n2 on e").append(indexRel + 1)
                             .append(".idl = n2.id");
-                    sql = obtainWhereInWithClause(cR, matchC, sql, false, indexRel);
+                    sql = obtainWhereInWithClause(cR, matchC, sql, false, indexRel, wc);
                     break;
             }
 
@@ -94,10 +95,11 @@ class MultipleRel {
      * @param sql             Existing SQL.
      * @param isBiDirectional Does the Cypher relationship map both directions (i.e. -[]-)
      * @param indexRel        Where is the relationship in the whole context of the match clause (index starts at 1)
+     * @param wc
      * @return New SQL.
      */
     private static StringBuilder obtainWhereInWithClause(CypRel cR, MatchClause matchC, StringBuilder sql,
-                                                         boolean isBiDirectional, int indexRel) {
+                                                         boolean isBiDirectional, int indexRel, WhereClause wc) {
         boolean includesWhere = false;
         int posOfRel = cR.getPosInClause();
 
@@ -115,8 +117,10 @@ class MultipleRel {
             Set<Map.Entry<String, JsonElement>> entrySet = leftProps.entrySet();
             for (Map.Entry<String, JsonElement> entry : entrySet) {
                 sql.append("n1").append(".").append(entry.getKey());
-                sql = TranslateUtils.addWhereClause(sql, entry);
+                String booleanOp = (wc == null) ? "" : (wc.isHasOr()) ? "or" : (wc.isHasAnd()) ? "and" : "";
+                sql = TranslateUtils.addWhereClause(sql, entry, booleanOp);
             }
+            sql.append(" AND ");
         }
 
         if (rightProps != null) {
@@ -128,8 +132,10 @@ class MultipleRel {
             Set<Map.Entry<String, JsonElement>> entrySet = rightProps.entrySet();
             for (Map.Entry<String, JsonElement> entry : entrySet) {
                 sql.append("n2").append(".").append(entry.getKey());
-                sql = TranslateUtils.addWhereClause(sql, entry);
+                String booleanOp = (wc == null) ? "" : (wc.isHasOr()) ? "or" : (wc.isHasAnd()) ? "and" : "";
+                sql = TranslateUtils.addWhereClause(sql, entry, booleanOp);
             }
+            sql.append(" AND ");
         }
 
         if (leftNode.getType() != null) {

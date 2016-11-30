@@ -9,15 +9,18 @@ public class DecodedQuery {
     private MatchClause mc;
     private ReturnClause rc;
     private OrderClause oc;
+    private WhereClause wc;
     private int skipAmount;
     private int limitAmount;
     private CypherWalker cypherAdditionalInfo;
     private String sqlEquiv;
 
-    public DecodedQuery(MatchClause m, ReturnClause r, OrderClause o, int skip, int limit, CypherWalker c) {
+    public DecodedQuery(MatchClause m, ReturnClause r, OrderClause o, WhereClause wc,
+                        int skip, int limit, CypherWalker c) {
         this.mc = m;
         this.rc = r;
         this.oc = o;
+        this.wc = wc;
         this.skipAmount = skip;
         this.limitAmount = limit;
         this.cypherAdditionalInfo = c;
@@ -33,6 +36,10 @@ public class DecodedQuery {
 
     public OrderClause getOc() {
         return oc;
+    }
+
+    public WhereClause getWc() {
+        return wc;
     }
 
     public int getSkipAmount() {

@@ -1,12 +1,9 @@
 package query_translation;
 
 import clauseObjects.*;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import production.c2sqlV2;
 
 import java.util.Map;
-import java.util.Set;
 
 class NoRels {
     private static boolean useOptimalTable = false;
@@ -17,7 +14,7 @@ class NoRels {
                 decodedQuery.getCypherAdditionalInfo().hasDistinct(),
                 decodedQuery.getCypherAdditionalInfo().getAliasMap());
         sql = getFrom(sql, decodedQuery.getMc(), decodedQuery.getRc());
-        sql = getWhere(sql, decodedQuery.getRc(), decodedQuery.getMc());
+        sql = getWhere(sql, decodedQuery.getRc(), decodedQuery.getMc(), decodedQuery.getWc());
         return sql;
     }
 
@@ -114,61 +111,51 @@ class NoRels {
      * @param sql     Existing SQL.
      * @param returnC Return Clause of original Cypher query.
      * @param matchC  Match Clause of original Cypher query.
+     * @param wc
      * @return New SQL.
      */
-    private static StringBuilder getWhere(StringBuilder sql, ReturnClause returnC, MatchClause matchC) {
+    private static StringBuilder getWhere(StringBuilder sql, ReturnClause returnC,
+                                          MatchClause matchC, WhereClause wc) {
         boolean hasWhere = false;
 
         for (CypReturn cR : returnC.getItems()) {
             if (cR.getNodeID() == null && cR.getField().equals("*")) {
                 CypNode cN = matchC.getNodes().get(0);
-                hasWhere = true;
-                sql.append(" WHERE n.label LIKE ").append(TranslateUtils.genLabelLike(cN)).append(" AND ");
+                sql.append(" WHERE n.label LIKE ").append(TranslateUtils.genLabelLike(cN));
                 if (cN.getProps() != null) {
-                    JsonObject obj = cN.getProps();
-                    Set<Map.Entry<String, JsonElement>> entries = obj.entrySet();
-                    for (Map.Entry<String, JsonElement> entry : entries) {
-                        sql.append("n.").append(entry.getKey());
-                        sql = TranslateUtils.addWhereClause(sql, entry);
-                    }
+                    sql.append(" AND ");
+                    sql = TranslateUtils.getWholeWhereClause(sql, cN, wc);
                 }
-                break;
-            }
+            } else {
+                CypNode cN = null;
 
-            CypNode cN = null;
-            for (CypNode c : matchC.getNodes()) {
-                if (c.getId().equals(cR.getNodeID()))
-                    cN = c;
-            }
-
-            if (cN != null) {
-                if (cN.getType() != null && !useOptimalTable) {
-                    if (!hasWhere) {
-                        sql.append(" WHERE ");
-                        hasWhere = true;
-                    }
-                    sql.append("n.label LIKE ").append(TranslateUtils.genLabelLike(cN)).append(" AND ");
+                for (CypNode c : matchC.getNodes()) {
+                    if (c.getId().equals(cR.getNodeID()))
+                        cN = c;
                 }
 
-                if (cN.getProps() != null) {
-                    if (!hasWhere) {
-                        sql.append(" WHERE ");
-                        hasWhere = true;
+                if (cN != null) {
+                    if (cN.getProps() != null) {
+                        if (!hasWhere) {
+                            sql.append(" WHERE ");
+                            hasWhere = true;
+                        }
+                        sql = TranslateUtils.getWholeWhereClause(sql, cN, wc);
                     }
-                    JsonObject obj = cN.getProps();
-                    Set<Map.Entry<String, JsonElement>> entries = obj.entrySet();
-                    for (Map.Entry<String, JsonElement> entry : entries) {
-                        sql.append("n.").append(entry.getKey());
-                        sql = TranslateUtils.addWhereClause(sql, entry);
+
+                    if (cN.getType() != null && !useOptimalTable) {
+                        if (!hasWhere) {
+                            sql.append(" WHERE n.label LIKE");
+                            hasWhere = true;
+                        } else sql.append(" n.label LIKE");
+                        sql.append(" ").append(TranslateUtils.genLabelLike(cN));
                     }
                 }
-
             }
+            sql.append(" AND ");
         }
 
-        if (hasWhere) {
-            sql.setLength(sql.length() - 5);
-        }
+        sql.setLength(sql.length() - 5);
         return sql;
     }
 }
