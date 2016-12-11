@@ -44,8 +44,7 @@ public class SQLTranslate {
         } else {
             sql = MultipleRel.translate(sql, decodedQuery);
 
-            if (decodedQuery.getCypherAdditionalInfo().hasCount())
-                sql = obtainGroupByClause(decodedQuery.getRc(), sql);
+            // if (decodedQuery.getCypherAdditionalInfo().hasCount()) sql = obtainGroupByClause(decodedQuery.getRc(), sql);
         }
 
         if (decodedQuery.getOc() != null)

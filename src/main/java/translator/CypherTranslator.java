@@ -577,7 +577,7 @@ class CypherTranslator {
         r.setItems(items);
 
         for (CypReturn c : r.getItems()) {
-            //System.out.println(c.toString());
+            System.out.println(c.toString());
         }
 
         return r;
@@ -586,16 +586,19 @@ class CypherTranslator {
     private static CypReturn extractReturn(List<String> clause, MatchClause matchC, CypherWalker cypherQ)
             throws Exception {
         if (clause.size() == 3 && clause.contains(".")) {
-            return new CypReturn(clause.get(0), clause.get(2), false, matchC);
+            return new CypReturn(clause.get(0), clause.get(2), false, false, matchC);
         } else if (clause.size() == 1)
             if (clause.get(0).equals("*"))
-                return new CypReturn(null, "*", false, matchC);
+                return new CypReturn(null, "*", false, false, matchC);
             else
-                return new CypReturn(clause.get(0), null, false, matchC);
-        else if (cypherQ.hasCount())
-            return new CypReturn(clause.get(2), null, true, matchC);
-
-        else throw new Exception("RETURN CLAUSE MALFORMED");
+                return new CypReturn(clause.get(0), null, false, false, matchC);
+        else if (cypherQ.hasCount()) {
+            String field = (clause.size() == 6) ? clause.get(4) : null;
+            return new CypReturn(clause.get(2), field, true, false, matchC);
+        } else if (cypherQ.hasCollect()) {
+            String field = (clause.size() == 6) ? clause.get(4) : null;
+            return new CypReturn(clause.get(2), field, false, true, matchC);
+        } else throw new Exception("RETURN CLAUSE MALFORMED");
     }
 
     private static OrderClause orderDecode(List<String> orderClause) throws Exception {

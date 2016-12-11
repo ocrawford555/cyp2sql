@@ -16,6 +16,7 @@ public class CypherWalker extends CypherBaseListener {
     private boolean hasOptional = false;
     private boolean hasDistinct = false;
     private boolean hasCount = false;
+    private boolean hasCollect = false;
     private String matchClause = null;
     private String whereClause = null;
     private String returnClause = null;
@@ -65,6 +66,9 @@ public class CypherWalker extends CypherBaseListener {
         // is the return query looking at a count
         if (ctx.getText().toLowerCase().contains("count"))
             hasCount = true;
+        // is the return query looking at a count
+        if (ctx.getText().toLowerCase().contains("collect"))
+            hasCollect = true;
     }
 
     public void enterReturnItems(CypherParser.ReturnItemsContext ctx) {
@@ -129,6 +133,10 @@ public class CypherWalker extends CypherBaseListener {
 
     public boolean hasCount() {
         return hasCount;
+    }
+
+    public boolean hasCollect() {
+        return hasCollect;
     }
 
     public Map<String, String> getAliasMap() {

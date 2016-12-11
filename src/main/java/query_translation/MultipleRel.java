@@ -235,13 +235,29 @@ class MultipleRel {
                 break;
             }
 
+            if (cR.getField() != null && cR.getField().startsWith("collect")) {
+                String toAdd;
+                int posInCluase = cR.getPosInClause();
+                if (posInCluase == 1) toAdd = "a1";
+                else toAdd = "a2";
+                sql.append("array_agg(").append(toAdd).append(")");
+                sql.append(useAlias(cR.getField(), alias)).append(", ");
+                break;
+            }
+
             for (CypNode cN : matchC.getNodes()) {
                 if (cR.getNodeID().equals(cN.getId())) {
                     String prop = cR.getField();
+                    if (cR.getCollect()) sql.append("array_agg(");
+                    if (cR.getCount()) sql.append("count(");
                     if (prop != null) {
                         sql.append("n").append(".").append(prop).append(useAlias(cR.getNodeID(), alias)).append(", ");
                     } else {
                         sql.append("n.*").append(useAlias(cR.getNodeID(), alias)).append(", ");
+                    }
+                    if (cR.getCollect() || cR.getCount()) {
+                        sql.setLength(sql.length() - 2);
+                        sql.append("), ");
                     }
                     isNode = true;
                     break;

@@ -106,8 +106,8 @@ public class c2sqlV2 {
                 // if line is commented out in the read queries file, then do not attempt to convert it
                 if (!line.startsWith("//")) {
                     long startTimeMillis = System.currentTimeMillis();
-                    Object[] mapping = DbUtil.getMapping(line, dbName);
-                    //Object[] mapping = {null, null};
+                    //Object[] mapping = DbUtil.getMapping(line, dbName);
+                    Object[] mapping = {null, null};
 
                     String[] returnItemsForCypher;
                     if (mapping[0] != null) {

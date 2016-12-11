@@ -32,17 +32,24 @@ class NoRels {
                 for (CypNode cN : mc.getNodes()) {
                     if (r.getNodeID().equals(cN.getId())) {
                         String prop = r.getField();
+                        if (r.getCollect()) sql.append("array_agg(");
+                        if (r.getCount()) sql.append("count(");
                         if (prop != null) {
                             sql.append("n").append(".").append(prop)
                                     .append(useAlias(r.getNodeID(), r.getField(), alias)).append(", ");
                         } else {
                             sql.append("n.*").append(useAlias(r.getNodeID(), r.getField(), alias)).append(", ");
                         }
+                        if (r.getCollect() || r.getCount()) {
+                            sql.setLength(sql.length() - 2);
+                            sql.append("), ");
+                        }
                         break;
                     }
                 }
             }
         }
+
 
         if (sql.toString().endsWith(", ")) sql.setLength(sql.length() - 2);
         sql.append(" ");

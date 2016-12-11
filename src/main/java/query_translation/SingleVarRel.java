@@ -90,10 +90,16 @@ class SingleVarRel {
 
         // return only the correct things
         for (CypReturn cR : returnC.getItems()) {
+            if (cR.getCollect()) sql.append("array_agg(");
+            if (cR.getCount()) sql.append("count(");
             if (cR.getField() == null) {
                 sql.append("*");
             } else {
                 sql.append("n.").append(cR.getField()).append(", ");
+            }
+            if (cR.getCollect() || cR.getCount()) {
+                sql.setLength(sql.length() - 2);
+                sql.append("), ");
             }
         }
 
