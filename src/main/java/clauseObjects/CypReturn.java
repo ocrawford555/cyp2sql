@@ -9,13 +9,15 @@ public class CypReturn {
     private String type;
     private boolean count;
     private boolean collect;
+    private String caseString;
     private int posInClause;
 
-    public CypReturn(String id, String f, boolean count_x, boolean collect_x, MatchClause matchC) {
+    public CypReturn(String id, String f, boolean count_x, boolean collect_x, String caseS, MatchClause matchC) {
         this.nodeID = id;
         this.field = f;
         this.count = count_x;
         this.collect = collect_x;
+        this.caseString = caseS;
         if (this.nodeID != null) {
             // discoverType finds out whether we are returning a node or a
             // relationship.
@@ -65,11 +67,15 @@ public class CypReturn {
         return collect;
     }
 
+    public String getCaseString() {
+        return caseString;
+    }
+
     @Override
     public String toString() {
         return "(ID:" + this.nodeID +
                 ",FIELD:" + this.field + ",TYPE:" + this.type + ",COUNT:" + this.count +
-                ",COLLECT:" + this.collect + ")";
+                ",COLLECT:" + this.collect + ",CASE:" + this.caseString + ")";
     }
 
     public String getType() {

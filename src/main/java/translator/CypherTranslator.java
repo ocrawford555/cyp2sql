@@ -586,18 +586,31 @@ class CypherTranslator {
     private static CypReturn extractReturn(List<String> clause, MatchClause matchC, CypherWalker cypherQ)
             throws Exception {
         if (clause.size() == 3 && clause.contains(".")) {
-            return new CypReturn(clause.get(0), clause.get(2), false, false, matchC);
+            return new CypReturn(clause.get(0), clause.get(2), false, false, null, matchC);
         } else if (clause.size() == 1)
             if (clause.get(0).equals("*"))
-                return new CypReturn(null, "*", false, false, matchC);
+                return new CypReturn(null, "*", false, false, null, matchC);
             else
-                return new CypReturn(clause.get(0), null, false, false, matchC);
+                return new CypReturn(clause.get(0), null, false, false, null, matchC);
         else if (cypherQ.hasCount()) {
             String field = (clause.size() == 6) ? clause.get(4) : null;
-            return new CypReturn(clause.get(2), field, true, false, matchC);
+            return new CypReturn(clause.get(2), field, true, false, null, matchC);
         } else if (cypherQ.hasCollect()) {
             String field = (clause.size() == 6) ? clause.get(4) : null;
-            return new CypReturn(clause.get(2), field, false, true, matchC);
+            return new CypReturn(clause.get(2), field, false, true, null, matchC);
+        } else if (cypherQ.hasCase()) {
+            StringBuilder caseString = new StringBuilder();
+            for (String s : clause) {
+                if (s.equals(".")) {
+                    caseString.setLength(caseString.length() - 1);
+                    caseString.append(".");
+                } else {
+                    caseString.append(s).append(" ");
+                }
+            }
+            System.out.println(caseString);
+            return new CypReturn(clause.get(2), clause.get(4),
+                    false, false, caseString.toString(), matchC);
         } else throw new Exception("RETURN CLAUSE MALFORMED");
     }
 

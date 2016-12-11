@@ -48,7 +48,12 @@ public class CypherDriver {
                                 t = bits[1];
                             }
 
-                            writer.println(bits[1].toLowerCase() + " : " + record.get(t).asString().toLowerCase());
+                            try {
+                                writer.println(bits[1].toLowerCase() + " : " + record.get(t).asString().toLowerCase());
+                            } catch (ClientException ce) {
+                                // failed to cast int to string, so write as int.
+                                writer.println(bits[1].toLowerCase() + " : " + record.get(t).asInt());
+                            }
                         } else {
                             // currently only deals with returning nodes
                             List<String> fields = getAllFieldsNodes();
@@ -66,7 +71,7 @@ public class CypherDriver {
                         }
                     } catch (ClientException ce) {
                         // silently throw away error message.
-                        // System.out.println("Error thrown in CypherDriver." + ce.toString());
+                        // System.err.println("Error thrown in CypherDriver." + ce.toString());
                     }
                 }
                 countRecords++;

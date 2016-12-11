@@ -216,12 +216,15 @@ class MultipleRel {
                                                            Map<String, String> alias) {
         sql.append("SELECT ");
         if (hasDistinct) sql.append("DISTINCT ");
+        boolean needNodeTable = false;
+        String relsNeeded = "";
 
         for (CypReturn cR : returnC.getItems()) {
             boolean isNode = false;
 
             if (cR.getNodeID() == null && cR.getField().equals("*")) {
                 sql.append("*  ");
+                needNodeTable = true;
                 break;
             }
 
@@ -232,6 +235,7 @@ class MultipleRel {
                 else toAdd = "a2";
                 sql.append("count(").append(toAdd).append(")");
                 sql.append(useAlias(cR.getField(), alias)).append(", ");
+                needNodeTable = true;
                 break;
             }
 
@@ -242,18 +246,27 @@ class MultipleRel {
                 else toAdd = "a2";
                 sql.append("array_agg(").append(toAdd).append(")");
                 sql.append(useAlias(cR.getField(), alias)).append(", ");
+                needNodeTable = true;
                 break;
             }
 
             for (CypNode cN : matchC.getNodes()) {
                 if (cR.getNodeID().equals(cN.getId())) {
                     String prop = cR.getField();
+                    needNodeTable = true;
                     if (cR.getCollect()) sql.append("array_agg(");
                     if (cR.getCount()) sql.append("count(");
-                    if (prop != null) {
-                        sql.append("n").append(".").append(prop).append(useAlias(cR.getNodeID(), alias)).append(", ");
+
+                    if (cR.getCaseString() != null) {
+                        String caseString = cR.getCaseString().replace(cR.getNodeID() + "." + cR.getField(),
+                                "n." + cR.getField());
+                        sql.append(caseString).append(", ");
                     } else {
-                        sql.append("n.*").append(useAlias(cR.getNodeID(), alias)).append(", ");
+                        if (prop != null) {
+                            sql.append("n").append(".").append(prop).append(useAlias(cR.getNodeID(), alias)).append(", ");
+                        } else {
+                            sql.append("n.*").append(useAlias(cR.getNodeID(), alias)).append(", ");
+                        }
                     }
                     if (cR.getCollect() || cR.getCount()) {
                         sql.setLength(sql.length() - 2);
@@ -270,12 +283,20 @@ class MultipleRel {
                         String prop = cR.getField();
                         int relPos = cRel.getPosInClause();
                         String idRel = (relPos == 1) ? "a" : (relPos == 2) ? "b" : (relPos == 3) ? "c" : "a";
-                        if (prop != null) {
-                            sql.append(idRel).append(".").append(prop)
-                                    .append(useAlias(cR.getNodeID(), alias)).append(", ");
+                        relsNeeded = TranslateUtils.addToRelsNeeded(relsNeeded, idRel);
+
+                        if (cR.getCaseString() != null) {
+                            String caseString = cR.getCaseString().replace(cR.getNodeID() + "." + cR.getField(),
+                                    idRel + "." + cR.getField());
+                            sql.append(caseString).append(", ");
                         } else {
-                            sql.append(idRel).append(".*")
-                                    .append(useAlias(cR.getNodeID(), alias)).append(", ");
+                            if (prop != null) {
+                                sql.append(idRel).append(".").append(prop)
+                                        .append(useAlias(cR.getNodeID(), alias)).append(", ");
+                            } else {
+                                sql.append(idRel).append(".*")
+                                        .append(useAlias(cR.getNodeID(), alias)).append(", ");
+                            }
                         }
                         break;
                     }
@@ -287,11 +308,13 @@ class MultipleRel {
 
         String table = TranslateUtils.getTable(returnC);
 
-        sql.append(" FROM ").append(table).append(" n, ");
+        if (needNodeTable) sql.append(" FROM ").append(table).append(" n, ");
+        else sql.append(" FROM ").append(relsNeeded);
 
         int numRels = matchC.getRels().size();
         for (int i = 0; i < numRels; i++)
-            sql.append(alphabet[i]).append(", ");
+            if (!relsNeeded.contains(String.valueOf(alphabet[i])))
+                sql.append(alphabet[i]).append(", ");
 
         sql.setLength(sql.length() - 2);
         sql.append(" ");
@@ -337,14 +360,7 @@ class MultipleRel {
         }
 
         if ((numRels == 1)) {
-            if (returnC.getItems().size() == 1 && returnC.getItems().get(0).getType().equals("rel")) {
-                if (matchC.getRels().get(0).getDirection().equals("left")) {
-                    sql.append(" a.a1 = n.idr AND a.a2 = n.idl ");
-                } else if (matchC.getRels().get(0).getDirection().equals("right")) {
-                    sql.append(" a.a1 = n.idl AND a.a2 = n.idr ");
-                } else
-                    sql.append(" (a.a1 = n.idl AND a.a2 = n.idr) OR (a.a1 = n.idr AND a.a2 = n.idl) ");
-            } else if (matchC.getRels().get(0).getDirection().equals("none")) {
+            if (matchC.getRels().get(0).getDirection().equals("none")) {
                 int posInCl = returnC.getItems().get(0).getPosInClause();
                 if (posInCl == 1) return sql.append(" n.id = a.a1");
                 else return sql.append("n.id = a.a2");
@@ -415,6 +431,7 @@ class MultipleRel {
 
         if (sql.toString().endsWith(" AND ")) sql.setLength(sql.length() - 5);
 
+        if (sql.toString().endsWith(" WHERE ")) sql.setLength(sql.length() - 7);
         return sql;
     }
 

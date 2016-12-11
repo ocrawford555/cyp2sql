@@ -168,4 +168,9 @@ class TranslateUtils {
 
         return table;
     }
+
+    static String addToRelsNeeded(String relsNeeded, String idRel) {
+        if (relsNeeded.contains(idRel)) return relsNeeded;
+        else return idRel + ", " + relsNeeded;
+    }
 }

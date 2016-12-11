@@ -28,6 +28,9 @@ class NoRels {
                 sql.append("*");
             } else if (r.getCount()) {
                 sql.append("count(n)");
+            } else if (r.getCaseString() != null) {
+                String caseString = r.getCaseString().replace(r.getNodeID() + "." + r.getField(), "n." + r.getField());
+                sql.append(caseString);
             } else {
                 for (CypNode cN : mc.getNodes()) {
                     if (r.getNodeID().equals(cN.getId())) {

@@ -17,6 +17,7 @@ public class CypherWalker extends CypherBaseListener {
     private boolean hasDistinct = false;
     private boolean hasCount = false;
     private boolean hasCollect = false;
+    private boolean hasCase = false;
     private String matchClause = null;
     private String whereClause = null;
     private String returnClause = null;
@@ -66,9 +67,14 @@ public class CypherWalker extends CypherBaseListener {
         // is the return query looking at a count
         if (ctx.getText().toLowerCase().contains("count"))
             hasCount = true;
-        // is the return query looking at a count
+        // is the return query looking at a collect
         if (ctx.getText().toLowerCase().contains("collect"))
             hasCollect = true;
+        // is the return query looking at a case expression
+        // note case not part of the current openCypher grammar.
+        if (ctx.getText().toLowerCase().contains("case"))
+            hasCase = true;
+
     }
 
     public void enterReturnItems(CypherParser.ReturnItemsContext ctx) {
@@ -92,7 +98,7 @@ public class CypherWalker extends CypherBaseListener {
         } else latestOrderDirection = "";
     }
 
-    public void printInformation() {
+    void printInformation() {
         System.out.println("\n--- QUERY INFORMATION ---");
         if (matchClause != null) System.out.println("Match Clause: " + matchClause + " -- OPTIONAL = " + hasOptional);
         if (whereClause != null) System.out.println("Where Clause: " + whereClause);
@@ -133,6 +139,10 @@ public class CypherWalker extends CypherBaseListener {
 
     public boolean hasCount() {
         return hasCount;
+    }
+
+    public boolean hasCase() {
+        return hasCase;
     }
 
     public boolean hasCollect() {
