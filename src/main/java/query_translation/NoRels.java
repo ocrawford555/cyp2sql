@@ -157,7 +157,10 @@ class NoRels {
                         if (!hasWhere) {
                             sql.append(" WHERE n.label LIKE");
                             hasWhere = true;
-                        } else sql.append(" n.label LIKE");
+                        } else {
+                            if (!sql.toString().endsWith("AND ")) sql.append(" AND ");
+                            sql.append("n.label LIKE");
+                        }
                         sql.append(" ").append(TranslateUtils.genLabelLike(cN));
                     }
                 }

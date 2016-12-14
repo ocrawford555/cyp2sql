@@ -10,6 +10,8 @@ import java.util.ArrayList;
  * Database driver for Postgres. Runs SQL, and parses result into appropriate text file.
  */
 public class DbUtil {
+    public static long lastExecTimeRead = 0;
+    public static long lastExecTimeCreate = 0;
     private static Connection c = null;
     private static int numRecords = 0;
     private static boolean DB_OPEN = false;
@@ -56,19 +58,24 @@ public class DbUtil {
     public static void executeCreateView(String query, String dbName) throws SQLException {
         if (!DB_OPEN) DbUtil.createConnection(dbName);
         Statement stmt = c.createStatement();
+        long startNanoCreate = System.nanoTime();
         stmt.executeUpdate(query);
+        long endNanoCreate = System.nanoTime();
+        lastExecTimeCreate = endNanoCreate - startNanoCreate;
         stmt.close();
     }
 
     /**
      * Execute standard read SQL statement.
      *
-     * @param query      SQL statement
-     * @param database   Database to execute statement on.
-     * @param pg_results File to store the results.
+     * @param query       SQL statement
+     * @param database    Database to execute statement on.
+     * @param pg_results  File to store the results.
+     * @param printOutput
      * @throws SQLException
      */
-    public static void select(String query, String database, String pg_results) throws SQLException {
+    public static void select(String query, String database, String pg_results, boolean printOutput)
+            throws SQLException {
         if (!DB_OPEN) DbUtil.createConnection(database);
         Statement stmt;
         stmt = c.createStatement();
@@ -78,27 +85,30 @@ public class DbUtil {
         ArrayList<String> colNames = results.get(0);
         results.remove(0);
 
-        PrintWriter writer;
-        try {
-            writer = new PrintWriter(pg_results, "UTF-8");
+        if (printOutput) {
+            PrintWriter writer;
+            try {
+                writer = new PrintWriter(pg_results, "UTF-8");
 
-            for (ArrayList<String> as : results) {
-                int i = 0;
-                for (String column : colNames) {
-                    if (!column.equals("id") && !column.equals("x") && !column.equals("label")) {
-                        writer.println(column + " : " + as.get(i));
+                for (ArrayList<String> as : results) {
+                    int i = 0;
+                    for (String column : colNames) {
+                        if (!column.equals("id") && !column.equals("x") && !column.equals("label")) {
+                            writer.println(column + " : " + as.get(i));
+                        }
+                        i++;
                     }
-                    i++;
                 }
-            }
 
-            writer.println();
-            writer.println("NUM RECORDS : " + numRecords);
-            writer.close();
-            c2sqlV2.numResultsPost = numRecords;
-        } catch (FileNotFoundException | UnsupportedEncodingException e) {
-            e.printStackTrace();
+                writer.println();
+                writer.println("NUM RECORDS : " + numRecords);
+                writer.close();
+            } catch (FileNotFoundException | UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
         }
+
+        c2sqlV2.numResultsPost = numRecords;
         DbUtil.closeConnection();
     }
 
@@ -142,7 +152,13 @@ public class DbUtil {
         ArrayList<ArrayList<String>> feedback = new ArrayList<>();
         ArrayList<String> feed;
 
+        // timing unit
+        long startNanoReadQuery = System.nanoTime();
+        stm.executeQuery(query);
+        long endNanoReadQuery = System.nanoTime();
+
         ResultSet rs = stm.executeQuery(query);
+        lastExecTimeRead = endNanoReadQuery - startNanoReadQuery;
         ResultSetMetaData rsm = rs.getMetaData();
 
         feed = new ArrayList<>();

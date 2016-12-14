@@ -105,7 +105,6 @@ public class c2sqlV2 {
             while ((line = br.readLine()) != null) {
                 // if line is commented out in the read queries file, then do not attempt to convert it
                 if (!line.startsWith("//")) {
-                    long startTimeMillis = System.currentTimeMillis();
                     //Object[] mapping = DbUtil.getMapping(line, dbName);
                     Object[] mapping = {null, null};
 
@@ -134,19 +133,24 @@ public class c2sqlV2 {
                                 getReturnClause().replace(" ", "").split(",");
                         DbUtil.insertMapping(line, sql, returnItemsForCypher, dbName);
                     }
-                    long endTimeMillis = System.currentTimeMillis();
 
                     if (sql != null) {
-                        executeSQL(sql, pg_results);
+                        executeSQL(sql, pg_results, false);
                     } else throw new Exception("Conversion of SQL failed");
 
-                    CypherDriver.run(line, cypher_results, returnItemsForCypher);
+                    CypherDriver.run(line, cypher_results, returnItemsForCypher, false);
                     System.out.println("\n**********\nCypher Input : " + line);
                     System.out.println("SQL Output: " + sql + "\nExact Result: " +
                             FileUtils.contentEquals(f_cypher, f_pg) + "\nNumber of records from Neo4J: " +
                             numResultsNeo + "\nNumber of results from PostG: " + numResultsPost +
-                            "\nTime to generate SQL: " + (endTimeMillis - startTimeMillis) +
-                            "\n**********\n");
+                            "\nTime on Neo4J: " + (CypherDriver.lastExecTime / 1000000.0) +
+                            " ms.\nTime on Postgres: " + ((DbUtil.lastExecTimeRead + DbUtil.lastExecTimeCreate)
+                            / 1000000.0) +
+                            " ms.\n**********\n");
+
+                    CypherDriver.lastExecTime = 0;
+                    DbUtil.lastExecTimeCreate = 0;
+                    DbUtil.lastExecTimeRead = 0;
                 }
             }
             br.close();
@@ -162,18 +166,18 @@ public class c2sqlV2 {
      * one by one in order that was passed to the method.
      * Type of method call depends on whether or not query begins with CREATE
      * or not.
-     *
-     * @param sql        SQL to execute.
+     *  @param sql        SQL to execute.
      * @param pg_results File to store the results.
+     * @param printOutput Write the results to a file for viewing.
      */
-    private static void executeSQL(String sql, String pg_results) {
+    private static void executeSQL(String sql, String pg_results, boolean printOutput) {
         try {
             String indivSQL[] = sql.split(";");
             for (String q : indivSQL) {
                 if (q.trim().startsWith("CREATE")) {
                     DbUtil.executeCreateView(q + ";", dbName);
                 } else
-                    DbUtil.select(q + ";", dbName, pg_results);
+                    DbUtil.select(q + ";", dbName, pg_results, printOutput);
             }
         } catch (SQLException e) {
             e.printStackTrace();

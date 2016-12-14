@@ -309,9 +309,10 @@ class MultipleRel {
         String table = TranslateUtils.getTable(returnC);
 
         if (needNodeTable) sql.append(" FROM ").append(table).append(" n, ");
-        else sql.append(" FROM ").append(relsNeeded);
+        else sql.append(" FROM ").append(relsNeeded).append(" nodes n, ");
 
         int numRels = matchC.getRels().size();
+
         for (int i = 0; i < numRels; i++)
             if (!relsNeeded.contains(String.valueOf(alphabet[i])))
                 sql.append(alphabet[i]).append(", ");

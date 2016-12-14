@@ -28,9 +28,10 @@ class CypherTranslator {
         int posOfSkip = tokenList.indexOf("skip");
         int posOfLimit = tokenList.indexOf("limit");
 
-        // for time being (v2), MATCH and RETURN always present
+        // MATCH and RETURN always present
         List<String> matchClause;
         List<String> returnClause;
+
         List<String> orderClause = null;
 
         if (cypherQ.doesCluaseHaveWhere())
@@ -608,7 +609,6 @@ class CypherTranslator {
                     caseString.append(s).append(" ");
                 }
             }
-            System.out.println(caseString);
             return new CypReturn(clause.get(2), clause.get(4),
                     false, false, caseString.toString(), matchC);
         } else throw new Exception("RETURN CLAUSE MALFORMED");

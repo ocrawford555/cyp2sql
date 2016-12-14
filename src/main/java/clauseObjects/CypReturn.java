@@ -12,24 +12,27 @@ public class CypReturn {
     private String caseString;
     private int posInClause;
 
-    public CypReturn(String id, String f, boolean count_x, boolean collect_x, String caseS, MatchClause matchC) {
+    public CypReturn(String id, String f, boolean count_x, boolean collect_x, String caseS, MatchClause matchC)
+            throws Exception {
         this.nodeID = id;
         this.field = f;
         this.count = count_x;
         this.collect = collect_x;
         this.caseString = caseS;
+
         if (this.nodeID != null) {
             // discoverType finds out whether we are returning a node or a
             // relationship.
             this.type = discoverType(this.nodeID, matchC);
         } else {
-            // TODO: is this needed still?
+            // only case of null id is when returning *
+            // for v2 this involves only returning nodes.
             this.type = "node";
             this.posInClause = 1;
         }
     }
 
-    private String discoverType(String nodeID, MatchClause matchC) {
+    private String discoverType(String nodeID, MatchClause matchC) throws Exception {
         //check the nodes first
         for (CypNode cN : matchC.getNodes()) {
             if (cN.getId() != null && cN.getId().equals(nodeID)) {
@@ -46,9 +49,7 @@ public class CypReturn {
             }
         }
 
-        //TODO: is this needed?
-        posInClause = -1;
-        return null;
+        throw new Exception("RETURN DISCOVER TYPE INCORRECT - NOT AN NODE OR REL");
     }
 
     public String getNodeID() {
