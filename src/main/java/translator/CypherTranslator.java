@@ -472,6 +472,8 @@ class CypherTranslator {
             }
         }
 
+        System.out.println(wc.getComponents());
+
         return wc;
     }
 

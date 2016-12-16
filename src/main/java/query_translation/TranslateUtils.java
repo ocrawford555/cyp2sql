@@ -19,13 +19,29 @@ class TranslateUtils {
     static StringBuilder getWholeWhereClause(StringBuilder sql, CypNode cN, WhereClause wc) {
         JsonObject obj = cN.getProps();
         Set<Map.Entry<String, JsonElement>> entries = obj.entrySet();
+        String boolToAppend = "and";
+
         for (Map.Entry<String, JsonElement> entry : entries) {
             sql.append("n.").append(entry.getKey());
             // TODO: fix for more advanced WHERE clauses. Currently only working for one AND or OR clause
-            sql = TranslateUtils.addWhereClause(sql, entry);
-            sql.append(" and ");
+            String value = entry.getValue().getAsString();
+            sql = TranslateUtils.addWhereClause(sql, value);
+            String i = null;
+            int index = 0;
+            int j = 0;
+            if (wc != null) {
+                for (String x : wc.getComponents()) {
+                    if (x.contains(entry.getKey())) {
+                        i = x;
+                        index = j;
+                    }
+                    j++;
+                }
+                boolToAppend = (index < wc.getWhereMappings().size()) ? wc.getWhereMappings().get(i) : "and";
+            }
+            sql.append(" ").append(boolToAppend).append(" ");
         }
-        sql.setLength(sql.length() - 4);
+        sql.setLength(sql.length() - (boolToAppend.length() + 1));
         return sql;
     }
 
@@ -35,30 +51,28 @@ class TranslateUtils {
      * in the original Cypher WHERE clause.
      *
      * @param sql
-     * @param entry
      * @return
      */
-    static StringBuilder addWhereClause(StringBuilder sql, Map.Entry<String, JsonElement> entry) {
-        String value = entry.getValue().getAsString();
-
+    static StringBuilder addWhereClause(StringBuilder sql, String value) {
         System.out.println(value);
 
         // format part of the where clause correctly for further parsing.
         if (!value.contains("#")) value = "eq#" + value + "#qe";
 
         String prop = sql.toString().substring(sql.toString().lastIndexOf(" ") + 1);
-        if (value.contains("~")) {
-            sql.setLength(sql.length() - prop.length());
-            sql.append("(");
-            sql.append(prop);
-        }
+
+//        if (value.contains("~")) {
+//            sql.setLength(sql.length() - prop.length());
+//            sql.append("(");
+//            sql.append(prop);
+//        }
 
         sql = getProperWhereValue(value, sql);
 
-        boolean addClosingParen = false;
+        // boolean addClosingParen = false;
 
         while (value.contains("~")) {
-            addClosingParen = true;
+            //addClosingParen = true;
             sql.append(value.split("~")[1]).append(" ").append(prop);
             String[] valueSplit = value.split("~");
             value = "";
@@ -69,7 +83,7 @@ class TranslateUtils {
             sql = getProperWhereValue(value, sql);
         }
 
-        if (addClosingParen) sql.append(")");
+        //if (addClosingParen) sql.append(")");
         return sql;
     }
 

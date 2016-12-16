@@ -154,7 +154,7 @@ class SingleVarRel {
 
             for (Map.Entry<String, JsonElement> entry : entries) {
                 getZStep.append(entry.getKey());
-                getZStep = TranslateUtils.addWhereClause(getZStep, entry);
+                getZStep = TranslateUtils.addWhereClause(getZStep, entry.getValue().getAsString());
             }
 
         }

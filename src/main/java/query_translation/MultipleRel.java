@@ -119,7 +119,7 @@ class MultipleRel {
                 sql.append("n1").append(".").append(entry.getKey());
                 //String booleanOp = (wc == null) ? "" : (wc.isHasOr()) ? "or" : (wc.isHasAnd()) ? "and" : "";
                 //sql = TranslateUtils.addWhereClause(sql, entry, booleanOp);
-                sql = TranslateUtils.addWhereClause(sql, entry);
+                sql = TranslateUtils.addWhereClause(sql, entry.getValue().getAsString());
                 sql.append(" ").append("and").append(" ");
             }
             sql.append(" AND ");
@@ -136,7 +136,7 @@ class MultipleRel {
                 sql.append("n2").append(".").append(entry.getKey());
                 //String booleanOp = (wc == null) ? "" : (wc.isHasOr()) ? "or" : (wc.isHasAnd()) ? "and" : "";
                 //sql = TranslateUtils.addWhereClause(sql, entry, booleanOp);
-                sql = TranslateUtils.addWhereClause(sql, entry);
+                sql = TranslateUtils.addWhereClause(sql, entry.getValue().getAsString());
                 sql.append(" ").append("and").append(" ");
             }
             sql.append(" AND ");

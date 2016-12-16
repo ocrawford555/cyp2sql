@@ -142,10 +142,7 @@ class NoRels {
                     }
                 }
             }
-            sql.append(" AND ");
         }
-
-        sql.setLength(sql.length() - 5);
         return sql;
     }
 }
