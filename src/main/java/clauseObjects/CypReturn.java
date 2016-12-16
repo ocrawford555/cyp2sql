@@ -75,7 +75,8 @@ public class CypReturn {
     @Override
     public String toString() {
         return "(ID:" + this.nodeID +
-                ",FIELD:" + this.field + ",TYPE:" + this.type + ",COUNT:" + this.count +
+                ",FIELD:" + this.field + ",TYPE:" + this.type + ",POS:" + this.getPosInClause() +
+                ",COUNT:" + this.count +
                 ",COLLECT:" + this.collect + ",CASE:" + this.caseString + ")";
     }
 

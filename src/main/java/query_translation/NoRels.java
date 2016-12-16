@@ -39,9 +39,10 @@ class NoRels {
                         if (r.getCount()) sql.append("count(");
                         if (prop != null) {
                             sql.append("n").append(".").append(prop)
-                                    .append(useAlias(r.getNodeID(), r.getField(), alias)).append(", ");
+                                    .append(TranslateUtils.useAlias(r.getNodeID(), r.getField(), alias)).append(", ");
                         } else {
-                            sql.append("n.*").append(useAlias(r.getNodeID(), r.getField(), alias)).append(", ");
+                            sql.append("n.*")
+                                    .append(TranslateUtils.useAlias(r.getNodeID(), r.getField(), alias)).append(", ");
                         }
                         if (r.getCollect() || r.getCount()) {
                             sql.setLength(sql.length() - 2);
@@ -59,30 +60,6 @@ class NoRels {
         return sql;
     }
 
-    /**
-     * @param nodeID
-     * @param field
-     * @param alias  @return
-     */
-    private static String useAlias(String nodeID, String field, Map<String, String> alias) {
-        if (alias.isEmpty()) {
-            return "";
-        } else {
-            for (String s : alias.keySet()) {
-                String key = s.split(" AS ")[0];
-                if (field != null) {
-                    if (key.equals((nodeID) + "." + (field))) {
-                        return (" AS " + alias.get(s));
-                    }
-                } else {
-                    if (key.equals(nodeID)) {
-                        return (" AS " + alias.get(s));
-                    }
-                }
-            }
-        }
-        return "";
-    }
 
     private static StringBuilder getFrom(StringBuilder sql, MatchClause mc, ReturnClause rc) {
         sql.append("FROM ");

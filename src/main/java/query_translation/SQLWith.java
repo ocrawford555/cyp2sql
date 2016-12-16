@@ -22,7 +22,7 @@ public class SQLWith {
     public static String createSelect(String query, DecodedQuery dQ) {
         StringBuilder sWith = new StringBuilder();
         ArrayList<String> tokens = CypherTokenizer.getTokenList(query, false);
-        System.out.println(tokens);
+        //System.out.println(tokens);
 
         // get SELECT
         sWith = getSelectForWith(sWith, tokens, dQ);
@@ -127,7 +127,7 @@ public class SQLWith {
         sWith.setLength(sWith.length() - 2);
         sWith.append(" FROM wA");
 
-        System.out.println(sWith.toString());
+        //System.out.println(sWith.toString());
         return sWith;
     }
 }

@@ -19,14 +19,13 @@ class TranslateUtils {
     static StringBuilder getWholeWhereClause(StringBuilder sql, CypNode cN, WhereClause wc) {
         JsonObject obj = cN.getProps();
         Set<Map.Entry<String, JsonElement>> entries = obj.entrySet();
-        String booleanOp = "";
         for (Map.Entry<String, JsonElement> entry : entries) {
             sql.append("n.").append(entry.getKey());
-            // TODO: fix for more advanced WHERE clauses. Currently only working for one AND or OR clause.
-            booleanOp = (wc == null) ? "and" : (wc.isHasOr()) ? "and" : (wc.isHasAnd()) ? "and" : "and";
-            sql = TranslateUtils.addWhereClause(sql, entry, booleanOp);
+            // TODO: fix for more advanced WHERE clauses. Currently only working for one AND or OR clause
+            sql = TranslateUtils.addWhereClause(sql, entry);
+            sql.append(" and ");
         }
-        sql.setLength(sql.length() - (booleanOp.length() + 1));
+        sql.setLength(sql.length() - 4);
         return sql;
     }
 
@@ -37,16 +36,17 @@ class TranslateUtils {
      *
      * @param sql
      * @param entry
-     * @param booleanOp
      * @return
      */
-    static StringBuilder addWhereClause(StringBuilder sql, Map.Entry<String, JsonElement> entry, String booleanOp) {
+    static StringBuilder addWhereClause(StringBuilder sql, Map.Entry<String, JsonElement> entry) {
         String value = entry.getValue().getAsString();
 
+        System.out.println(value);
+
+        // format part of the where clause correctly for further parsing.
         if (!value.contains("#")) value = "eq#" + value + "#qe";
 
         String prop = sql.toString().substring(sql.toString().lastIndexOf(" ") + 1);
-
         if (value.contains("~")) {
             sql.setLength(sql.length() - prop.length());
             sql.append("(");
@@ -55,19 +55,21 @@ class TranslateUtils {
 
         sql = getProperWhereValue(value, sql);
 
-        if (!value.contains("~")) {
-            sql.append(booleanOp).append(" ");
-            return sql;
-        } else {
+        boolean addClosingParen = false;
+
+        while (value.contains("~")) {
+            addClosingParen = true;
             sql.append(value.split("~")[1]).append(" ").append(prop);
-
-            value = value.split("~")[2];
-
+            String[] valueSplit = value.split("~");
+            value = "";
+            for (int i = 2; i < valueSplit.length; i++) {
+                value += valueSplit[i] + "~";
+            }
+            value = value.substring(0, value.length() - 1);
             sql = getProperWhereValue(value, sql);
-            sql.append(")");
         }
 
-        sql.append(booleanOp).append(" ");
+        if (addClosingParen) sql.append(")");
         return sql;
     }
 
@@ -172,5 +174,31 @@ class TranslateUtils {
     static String addToRelsNeeded(String relsNeeded, String idRel) {
         if (relsNeeded.contains(idRel)) return relsNeeded;
         else return idRel + ", " + relsNeeded;
+    }
+
+    /**
+     * @param nodeID
+     * @param field
+     * @param alias  @return
+     */
+    static String useAlias(String nodeID, String field, Map<String, String> alias) {
+        if (alias.isEmpty()) {
+            return "";
+        } else {
+            for (String s : alias.keySet()) {
+                String key = s.split(" AS ")[0];
+                if (key.startsWith("collect")) key = key.substring(8, key.length() - 1);
+                if (field != null) {
+                    if (key.equals((nodeID) + "." + (field))) {
+                        return (" AS " + alias.get(s));
+                    }
+                } else {
+                    if (key.equals(nodeID)) {
+                        return (" AS " + alias.get(s));
+                    }
+                }
+            }
+        }
+        return "";
     }
 }

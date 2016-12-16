@@ -30,15 +30,16 @@ class SingleVarRel {
         if (direction.equals("left")) {
             cN1 = matchC.getNodes().get(1);
             cN2 = matchC.getNodes().get(0);
-            sql.append(getZeroStep(cN1, decodedQuery.getWc()));
+            sql.append(getZeroStep(cN1, decodedQuery.getRc()));
         } else if (direction.equals("right")) {
             cN1 = matchC.getNodes().get(0);
             cN2 = matchC.getNodes().get(1);
-            sql.append(getZeroStep(cN1, decodedQuery.getWc()));
+            sql.append(getZeroStep(cN1, decodedQuery.getRc()));
         }
 
         sql.append(" ");
-        sql = createStepView(sql, amountLow, amountHigh, decodedQuery.getRc());
+        sql = createStepView(sql, amountLow, amountHigh, decodedQuery.getRc(),
+                decodedQuery.getCypherAdditionalInfo().getAliasMap());
 
         if (cN2 != null) {
             if (cN2.getType() != null || cN2.getProps() != null) {
@@ -54,16 +55,18 @@ class SingleVarRel {
      *
      * @param sql  Existing SQL statement.
      * @param node If node being queried has additional properties, add these to the clause.
-     * @param wc
+     * @param wc   Where Clause to examine and add.
      * @return New SQL.
      */
     private static StringBuilder addWhereToSelectForVarRels(StringBuilder sql, CypNode node, WhereClause wc) {
-        sql.append(" WHERE ");
+        boolean usedWhere = false;
         if (node.getType() != null) {
-            sql.append("n.label LIKE ").append(TranslateUtils.genLabelLike(node));
+            sql.append(" WHERE n.label LIKE ").append(TranslateUtils.genLabelLike(node));
+            usedWhere = true;
         }
         if (node.getProps() != null) {
-            sql.append(" AND ");
+            if (!usedWhere) sql.append(" WHERE ");
+            else sql.append(" AND ");
             sql = TranslateUtils.getWholeWhereClause(sql, node, wc);
         }
         return sql;
@@ -77,16 +80,19 @@ class SingleVarRel {
      * @param amountLow  Lower bound on depth of links to search.
      * @param amountHigh Upper bound on depth of links to search.
      * @param returnC    @return New SQL.
+     * @param alias
      */
     private static StringBuilder createStepView(StringBuilder sql, int amountLow,
-                                                int amountHigh, ReturnClause returnC) {
-        sql.append("CREATE TEMP VIEW step AS (WITH graphT AS (SELECT idr as x");
+                                                int amountHigh, ReturnClause returnC, Map<String, String> alias) {
+        sql.append("CREATE TEMP VIEW step AS (WITH graphT AS (SELECT idr as x, idl as y");
         sql.append(" FROM tClosure JOIN zerostep on idl = zerostep.id");
         sql.append(" JOIN nodes as n on idr = n.id where depth <= ");
         sql.append(amountHigh).append(" AND depth >= ").append(amountLow);
         sql.append(") SELECT * from graphT); ");
 
         sql.append("SELECT ");
+
+        boolean joinZeroStep = false;
 
         // return only the correct things
         for (CypReturn cR : returnC.getItems()) {
@@ -95,11 +101,17 @@ class SingleVarRel {
             if (cR.getField() == null) {
                 sql.append("*");
             } else {
-                sql.append("n.").append(cR.getField()).append(", ");
+                if (cR.getPosInClause() == 1) {
+                    sql.append("z.").append(cR.getField());
+                    joinZeroStep = true;
+                } else {
+                    sql.append("n.").append(cR.getField());
+                }
             }
             if (cR.getCollect() || cR.getCount()) {
-                sql.setLength(sql.length() - 2);
-                sql.append("), ");
+                sql.append(") ").append(TranslateUtils.useAlias(cR.getNodeID(), cR.getField(), alias)).append(", ");
+            } else {
+                sql.append(TranslateUtils.useAlias(cR.getNodeID(), cR.getField(), alias)).append(", ");
             }
         }
 
@@ -110,17 +122,27 @@ class SingleVarRel {
         }
         sql.append(" ");
         sql.append("FROM ").append(table).append(" n JOIN step on x = n.id");
+        if (joinZeroStep) sql.append(" JOIN zerostep z on z.id = y");
         return sql;
     }
 
     /**
      * @param cN Node of the variable query that is being included in the first step query.
-     * @param wc
+     * @param rc Return clause of the original query - if need to return values from the node that
+     *           is being searched from, then need to include those fields in the initial zerostep.
      * @return SQL view of this first step in the variable relationship.
      */
-    private static String getZeroStep(CypNode cN, WhereClause wc) {
+    private static String getZeroStep(CypNode cN, ReturnClause rc) {
         StringBuilder getZStep = new StringBuilder();
-        getZStep.append("CREATE TEMP VIEW zerostep AS SELECT id from nodes");
+        getZStep.append("CREATE TEMP VIEW zerostep AS SELECT id");
+
+        for (CypReturn cR : rc.getItems()) {
+            if (cR.getPosInClause() == 1) {
+                getZStep.append(", ").append(cR.getField());
+            }
+        }
+
+        getZStep.append(" from nodes");
 
         boolean hasWhere = false;
         JsonObject obj = cN.getProps();
@@ -132,8 +154,7 @@ class SingleVarRel {
 
             for (Map.Entry<String, JsonElement> entry : entries) {
                 getZStep.append(entry.getKey());
-                String booleanOp = "";
-                getZStep = TranslateUtils.addWhereClause(getZStep, entry, booleanOp);
+                getZStep = TranslateUtils.addWhereClause(getZStep, entry);
             }
 
         }

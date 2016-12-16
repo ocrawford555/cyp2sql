@@ -1,36 +1,19 @@
 package clauseObjects;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Stores the where clause.
  */
 public class WhereClause {
-    private boolean hasOr = false;
-    private boolean hasAnd = false;
-    private ArrayList<String[]> orClauses = new ArrayList<>();
-    private ArrayList<String[]> andClauses = new ArrayList<>();
+    private ArrayList<String> components;
+    private Map<String, String> whereMappings = new HashMap<>();
     private String clause;
 
     public WhereClause(String c) {
         this.clause = c;
-    }
-
-    // OR functionality and other boolean operations in the where clause not tested yet.
-    public boolean isHasOr() {
-        return hasOr;
-    }
-
-    public void setHasOr(boolean hasOr) {
-        this.hasOr = hasOr;
-    }
-
-    public void addToOr(String[] orClause) {
-        orClauses.add(orClause);
-    }
-
-    public ArrayList<String[]> getOrClauses() {
-        return this.orClauses;
     }
 
     public String getClause() {
@@ -41,19 +24,19 @@ public class WhereClause {
         this.clause = clause;
     }
 
-    public boolean isHasAnd() {
-        return hasAnd;
+    public ArrayList<String> getComponents() {
+        return components;
     }
 
-    public void setHasAnd(boolean hasAnd) {
-        this.hasAnd = hasAnd;
+    public void setComponents(ArrayList<String> co) {
+        this.components = co;
     }
 
-    public void addToAnd(String[] andClause) {
-        andClauses.add(andClause);
+    public Map<String, String> getWhereMappings() {
+        return whereMappings;
     }
 
-    public ArrayList<String[]> getAndClauses() {
-        return this.andClauses;
+    public void setWhereMappings(Map<String, String> map) {
+        this.whereMappings = map;
     }
 }

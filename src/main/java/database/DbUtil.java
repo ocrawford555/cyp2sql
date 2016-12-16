@@ -94,7 +94,8 @@ public class DbUtil {
                     int i = 0;
                     for (String column : colNames) {
                         if (!column.equals("id") && !column.equals("x") && !column.equals("label")) {
-                            writer.println(column + " : " + as.get(i));
+                            String result = as.get(i);
+                            if (result != null) writer.println(column + " : " + result);
                         }
                         i++;
                     }

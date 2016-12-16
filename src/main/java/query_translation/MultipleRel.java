@@ -117,8 +117,10 @@ class MultipleRel {
             Set<Map.Entry<String, JsonElement>> entrySet = leftProps.entrySet();
             for (Map.Entry<String, JsonElement> entry : entrySet) {
                 sql.append("n1").append(".").append(entry.getKey());
-                String booleanOp = (wc == null) ? "" : (wc.isHasOr()) ? "or" : (wc.isHasAnd()) ? "and" : "";
-                sql = TranslateUtils.addWhereClause(sql, entry, booleanOp);
+                //String booleanOp = (wc == null) ? "" : (wc.isHasOr()) ? "or" : (wc.isHasAnd()) ? "and" : "";
+                //sql = TranslateUtils.addWhereClause(sql, entry, booleanOp);
+                sql = TranslateUtils.addWhereClause(sql, entry);
+                sql.append(" ").append("and").append(" ");
             }
             sql.append(" AND ");
         }
@@ -132,8 +134,10 @@ class MultipleRel {
             Set<Map.Entry<String, JsonElement>> entrySet = rightProps.entrySet();
             for (Map.Entry<String, JsonElement> entry : entrySet) {
                 sql.append("n2").append(".").append(entry.getKey());
-                String booleanOp = (wc == null) ? "" : (wc.isHasOr()) ? "or" : (wc.isHasAnd()) ? "and" : "";
-                sql = TranslateUtils.addWhereClause(sql, entry, booleanOp);
+                //String booleanOp = (wc == null) ? "" : (wc.isHasOr()) ? "or" : (wc.isHasAnd()) ? "and" : "";
+                //sql = TranslateUtils.addWhereClause(sql, entry, booleanOp);
+                sql = TranslateUtils.addWhereClause(sql, entry);
+                sql.append(" ").append("and").append(" ");
             }
             sql.append(" AND ");
         }

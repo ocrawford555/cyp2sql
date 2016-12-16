@@ -60,11 +60,13 @@ public class CypherDriver {
                                 }
 
                                 try {
-                                    writer.println(bits[1].toLowerCase() + " : " +
-                                            record.get(t).asString().toLowerCase());
+                                    String resultStr = record.get(t).asString().toLowerCase();
+                                    if (!resultStr.equals("null"))
+                                        writer.println(bits[1].toLowerCase() + " : " + resultStr);
                                 } catch (ClientException ce) {
                                     // failed to cast int to string, so write as int.
-                                    writer.println(bits[1].toLowerCase() + " : " + record.get(t).asInt());
+                                    int resultInt = record.get(t).asInt();
+                                    writer.println(bits[1].toLowerCase() + " : " + resultInt);
                                 }
                             } else {
                                 // currently only deals with returning nodes
@@ -72,11 +74,12 @@ public class CypherDriver {
                                 if (fields != null) {
                                     for (String s : fields) {
                                         try {
-                                            writer.println(s + " : " +
-                                                    record.get(t).asNode().get(s).asString().toLowerCase());
+                                            String resultStr = record.get(t).asNode().get(s).asString().toLowerCase();
+                                            if (!resultStr.equals("null")) writer.println(s + " : " + resultStr);
                                         } catch (ClientException ce) {
                                             // failed to cast int to string, so write as int.
-                                            writer.println(s + " : " + record.get(t).asNode().get(s).asInt());
+                                            int resultInt = record.get(t).asNode().get(s).asInt();
+                                            writer.println(s + " : " + resultInt);
                                         }
                                     }
                                 }

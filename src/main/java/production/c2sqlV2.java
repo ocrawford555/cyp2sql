@@ -47,11 +47,13 @@ public class c2sqlV2 {
     // , without having to rerun computation.
     private static DecodedQuery lastDQ = null;
 
+    private static boolean printBool = false;
+
     /**
      * Main method when application is launched.
      *
      * @param args arguments to the application.
-     *             <-schema|-translate|-s|-t> <schemaFile|queriesFile> <databaseName>
+     *             <-schema|-translate|-s|-t> <schemaFile|queriesFile> <databaseName> <-p>
      */
     public static void main(String args[]) {
         C2SProperties props = new C2SProperties();
@@ -65,7 +67,7 @@ public class c2sqlV2 {
         neoUN = fileLocations[5];
         neoPW = fileLocations[6];
 
-        if (args.length != 3) {
+        if (args.length != 3 && args.length != 4) {
             System.err.println("Incorrect usage of Cyp2SQL v1 : <schema|translate> " +
                     "<schemaFile|queriesFile> <databaseName>");
             System.exit(1);
@@ -74,6 +76,12 @@ public class c2sqlV2 {
             File f_pg = new File(pg_results);
 
             dbName = args[2];
+
+            if (args.length == 4 && args[3].equals("-p")) {
+                printBool = true;
+            }
+
+            System.out.println("PRINT TO FILE : " + ((printBool) ? "enabled" : "disabled"));
 
             switch (args[0]) {
                 case "-schema":
@@ -87,15 +95,15 @@ public class c2sqlV2 {
                     translateCypherToSQL(args[1], f_cypher, f_pg, cypher_results, pg_results);
                     break;
                 default:
-                    System.err.println("Incorrect usage of Cyp2SQL v1 : <schema|translate> " +
+                    System.err.println("Incorrect usage of Cyp2SQL v2 : <schema|translate> " +
                             "<schemaFile|queriesFile> <databaseName>");
                     System.exit(1);
             }
         }
     }
 
-    private static void translateCypherToSQL(String translateFile, File f_cypher, File f_pg,
-                                             String cypher_results, String pg_results) {
+    private static void translateCypherToSQL(String translateFile, File f_cypher, File f_pg, String cypher_results,
+                                             String pg_results) {
         try {
             FileInputStream fis = new FileInputStream(translateFile);
             BufferedReader br = new BufferedReader(new InputStreamReader(fis));
@@ -107,24 +115,14 @@ public class c2sqlV2 {
                 if (!line.startsWith("//")) {
                     //Object[] mapping = DbUtil.getMapping(line, dbName);
                     Object[] mapping = {null, null};
-
                     String[] returnItemsForCypher;
+
                     if (mapping[0] != null) {
                         sql = (String) mapping[0];
                         returnItemsForCypher = (String[]) mapping[1];
                     } else {
                         if (line.toLowerCase().contains(" with ")) {
-                            String changeLine = line.toLowerCase().replace("with", "return");
-                            String[] withParts = changeLine.toLowerCase().split("where");
-                            DecodedQuery dQ = convertCypherToSQL(withParts[0] + ";");
-
-                            String withTemp = null;
-                            if (dQ != null) {
-                                withTemp = SQLWith.genTemp(dQ.getSqlEquiv());
-                            }
-
-                            String sqlSelect = SQLWith.createSelect(withParts[1].trim(), dQ);
-                            sql = withTemp + " " + sqlSelect;
+                            sql = convertCypherWith(line);
                         } else {
                             sql = convertCypherToSQL(line).getSqlEquiv();
                         }
@@ -135,10 +133,11 @@ public class c2sqlV2 {
                     }
 
                     if (sql != null) {
-                        executeSQL(sql, pg_results, false);
+                        executeSQL(sql, pg_results, printBool);
                     } else throw new Exception("Conversion of SQL failed");
 
-                    CypherDriver.run(line, cypher_results, returnItemsForCypher, false);
+                    CypherDriver.run(line, cypher_results, returnItemsForCypher, printBool);
+
                     System.out.println("\n**********\nCypher Input : " + line);
                     System.out.println("SQL Output: " + sql + "\nExact Result: " +
                             FileUtils.contentEquals(f_cypher, f_pg) + "\nNumber of records from Neo4J: " +
@@ -148,9 +147,7 @@ public class c2sqlV2 {
                             / 1000000.0) +
                             " ms.\n**********\n");
 
-                    CypherDriver.lastExecTime = 0;
-                    DbUtil.lastExecTimeCreate = 0;
-                    DbUtil.lastExecTimeRead = 0;
+                    resetExecTimes();
                 }
             }
             br.close();
@@ -160,14 +157,36 @@ public class c2sqlV2 {
         }
     }
 
+    private static void resetExecTimes() {
+        CypherDriver.lastExecTime = 0;
+        DbUtil.lastExecTimeCreate = 0;
+        DbUtil.lastExecTimeRead = 0;
+    }
+
+    private static String convertCypherWith(String line) {
+        String changeLine = line.toLowerCase().replace("with", "return");
+        String[] withParts = changeLine.toLowerCase().split("where");
+        DecodedQuery dQ = convertCypherToSQL(withParts[0] + ";");
+
+        String withTemp = null;
+        if (dQ != null) {
+            withTemp = SQLWith.genTemp(dQ.getSqlEquiv());
+        }
+
+        String sqlSelect = SQLWith.createSelect(withParts[1].trim(), dQ);
+
+        return withTemp + " " + sqlSelect;
+    }
+
     /**
      * Execute the SQL command on the database.
      * If query is a concatenation of multiple queries, then perform then
      * one by one in order that was passed to the method.
      * Type of method call depends on whether or not query begins with CREATE
      * or not.
-     *  @param sql        SQL to execute.
-     * @param pg_results File to store the results.
+     *
+     * @param sql         SQL to execute.
+     * @param pg_results  File to store the results.
      * @param printOutput Write the results to a file for viewing.
      */
     private static void executeSQL(String sql, String pg_results, boolean printOutput) {

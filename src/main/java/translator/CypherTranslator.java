@@ -412,55 +412,66 @@ class CypherTranslator {
 
     private static WhereClause whereDecode(MatchClause matchC, CypherWalker cypherQ) throws Exception {
         WhereClause wc = new WhereClause(cypherQ.getWhereClause());
-        while (!wc.getClause().isEmpty()) {
-            extractWhere(wc.getClause(), matchC, wc, null);
-        }
+        extractWhere(wc.getClause(), matchC, wc);
         return wc;
     }
 
-    private static WhereClause extractWhere(String clause, MatchClause matchC, WhereClause wc,
-                                            String typeBoolean) throws Exception {
-        if (!clause.contains(".")) {
-            wc.setClause(wc.getClause().substring(clause.length()));
-        } else {
-            if (clause.toLowerCase().contains(" or ")) {
-                String[] items = clause.toLowerCase().split(" or ");
-                wc.setHasOr(true);
-                wc.addToOr(items);
-                for (String item : items) {
-                    extractWhere(item, matchC, wc, "or");
-                }
-            } else if (clause.toLowerCase().contains(" and ")) {
-                String[] items = clause.toLowerCase().split(" and ");
-                wc.setHasAnd(true);
-                wc.addToAnd(items);
-                for (String item : items) {
-                    extractWhere(item, matchC, wc, "and");
-                }
-            } else {
-                wc.setClause(wc.getClause().substring(clause.length()));
+    private static WhereClause extractWhere(String allClause, MatchClause matchC, WhereClause wc) throws Exception {
+        allClause = allClause.toLowerCase();
+        System.out.println(allClause);
+        ArrayList<String> whereComponents = new ArrayList<>();
+        Map<String, String> whereMapping = new HashMap<>();
 
-                if (clause.contains(" = ")) {
-                    String[] idAndValue = clause.split(" = ");
-                    addCondition(idAndValue, matchC, "equals", typeBoolean);
-                } else if (clause.contains(" <> ")) {
-                    String[] idAndValue = clause.split(" <> ");
-                    addCondition(idAndValue, matchC, "nequals", typeBoolean);
-                } else if (clause.contains(" < ")) {
-                    String[] idAndValue = clause.split(" < ");
-                    addCondition(idAndValue, matchC, "lt", typeBoolean);
-                } else if (clause.contains(" > ")) {
-                    String[] idAndValue = clause.split(" > ");
-                    addCondition(idAndValue, matchC, "gt", typeBoolean);
-                } else if (clause.contains(" <= ")) {
-                    String[] idAndValue = clause.split(" <= ");
-                    addCondition(idAndValue, matchC, "le", typeBoolean);
-                } else if (clause.contains(" >= ")) {
-                    String[] idAndValue = clause.split(" >= ");
-                    addCondition(idAndValue, matchC, "ge", typeBoolean);
-                }
+        while (!allClause.isEmpty()) {
+            int posOfOr = (!allClause.contains(" or ")) ? 100000 : allClause.indexOf(" or ");
+            int posOfAnd = (!allClause.contains(" and ")) ? 100000 : allClause.indexOf(" and ");
+
+            if ((posOfAnd == 100000) && (posOfOr == 100000)) {
+                whereComponents.add(allClause);
+                allClause = "";
+            } else if (posOfAnd < posOfOr) {
+                String comps[] = allClause.split(" and ");
+                whereComponents.add(comps[0]);
+                whereMapping.put(comps[0], "and");
+                allClause = allClause.substring(comps[0].length() + 5);
+            } else {
+                String comps[] = allClause.split(" or ");
+                whereComponents.add(comps[0]);
+                whereMapping.put(comps[0], "or");
+                allClause = allClause.substring(comps[0].length() + 4);
             }
         }
+
+        wc.setComponents(whereComponents);
+        wc.setWhereMappings(whereMapping);
+
+        for (String clause : wc.getComponents()) {
+            int posInWhere = wc.getComponents().indexOf(clause);
+            String typeBooleanA = null;
+            if (posInWhere > 0) {
+                typeBooleanA = wc.getWhereMappings().get(wc.getComponents().get(posInWhere - 1));
+            }
+            if (clause.contains(" = ")) {
+                String[] idAndValue = clause.split(" = ");
+                addCondition(idAndValue, matchC, "equals", typeBooleanA);
+            } else if (clause.contains(" <> ")) {
+                String[] idAndValue = clause.split(" <> ");
+                addCondition(idAndValue, matchC, "nequals", typeBooleanA);
+            } else if (clause.contains(" < ")) {
+                String[] idAndValue = clause.split(" < ");
+                addCondition(idAndValue, matchC, "lt", typeBooleanA);
+            } else if (clause.contains(" > ")) {
+                String[] idAndValue = clause.split(" > ");
+                addCondition(idAndValue, matchC, "gt", typeBooleanA);
+            } else if (clause.contains(" <= ")) {
+                String[] idAndValue = clause.split(" <= ");
+                addCondition(idAndValue, matchC, "le", typeBooleanA);
+            } else if (clause.contains(" >= ")) {
+                String[] idAndValue = clause.split(" >= ");
+                addCondition(idAndValue, matchC, "ge", typeBooleanA);
+            }
+        }
+
         return wc;
     }
 
@@ -577,9 +588,9 @@ class CypherTranslator {
 
         r.setItems(items);
 
-        for (CypReturn c : r.getItems()) {
-            System.out.println(c.toString());
-        }
+//        for (CypReturn c : r.getItems()) {
+//            System.out.println(c.toString());
+//        }
 
         return r;
     }
@@ -637,9 +648,9 @@ class CypherTranslator {
 
         o.setItems(items);
 
-        for (CypOrder c : o.getItems()) {
-            //System.out.println(c.toString());
-        }
+//        for (CypOrder c : o.getItems()) {
+//            System.out.println(c.toString());
+//        }
 
         return o;
     }

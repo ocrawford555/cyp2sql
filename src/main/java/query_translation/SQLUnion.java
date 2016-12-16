@@ -15,19 +15,12 @@ public class SQLUnion {
      * @return Complete SQL query with UNION/UNION ALL added.
      */
     public static String genUnion(ArrayList<String> queries, String unionType) {
-        int i = 1;
         StringBuilder unionSQL = new StringBuilder();
-        unionSQL.append("WITH ");
         for (String s : queries) {
-            unionSQL.append("u").append(i++).append(" AS (");
-            unionSQL.append(s.substring(0, s.length() - 1)).append("), ");
+            unionSQL.append(s.substring(0, s.length() - 1));
+            unionSQL.append(unionType).append(" ");
         }
-        unionSQL.setLength(unionSQL.length() - 2);
-        for (int j = 1; j < i; j++) {
-            unionSQL.append(" SELECT * FROM u").append(j).append(" ").append(unionType);
-        }
-        if (unionType.equals("UNION")) unionSQL.setLength(unionSQL.length() - 6);
-        else if (unionType.equals("UNION ALL")) unionSQL.setLength(unionSQL.length() - 10);
+        unionSQL.setLength(unionSQL.length() - (1 + unionType.length()));
         unionSQL.append(";");
         return unionSQL.toString();
     }
