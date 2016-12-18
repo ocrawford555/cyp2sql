@@ -15,6 +15,7 @@ import java.util.List;
  * be automatically compared against the results from Postgres.
  */
 public class CypherDriver {
+    // public variable keeping track of how long the Cypher queries take.
     public static long lastExecTime = 0;
 
     /**
@@ -27,8 +28,7 @@ public class CypherDriver {
      */
     public static void run(String query, String cypher_results, String[] returnItems, boolean printOutput) {
         // database essentials
-        Driver driver = GraphDatabase.driver("bolt://localhost",
-                AuthTokens.basic(c2sqlV2.neoUN, c2sqlV2.neoPW));
+        Driver driver = GraphDatabase.driver("bolt://localhost", AuthTokens.basic(c2sqlV2.neoUN, c2sqlV2.neoPW));
         Session session = driver.session();
 
         // timing unit
@@ -95,6 +95,7 @@ public class CypherDriver {
             writer.println();
             writer.println("NUM RECORDS : " + countRecords);
             writer.close();
+
             c2sqlV2.numResultsNeo = countRecords;
         } catch (FileNotFoundException | UnsupportedEncodingException e) {
             e.printStackTrace();

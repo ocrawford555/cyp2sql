@@ -15,17 +15,33 @@ import java.io.InputStreamReader;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Class with useful translation methods that can be used regardless of the type of Cypher query
+ * actually being translated.
+ */
 class TranslateUtils {
-    static StringBuilder getWholeWhereClause(StringBuilder sql, CypNode cN, WhereClause wc) {
+    /**
+     * Takes a CypNode with properties and generates the correct SQL to append to the SQL statement being generated.
+     *
+     * @param sql      Original SQL
+     * @param cN       CypNode with properties.
+     * @param wc       WhereClause containing information about the OR and AND mappings
+     *                 and position of the where clauses.
+     * @param sqlLabel The SQL identifier for which the WHERE statement is being applied to.
+     * @return New SQL with WHERE part added.
+     */
+    static StringBuilder getWholeWhereClause(StringBuilder sql, CypNode cN, WhereClause wc, String sqlLabel) {
         JsonObject obj = cN.getProps();
         Set<Map.Entry<String, JsonElement>> entries = obj.entrySet();
+
+        // default boolean condition to add.
         String boolToAppend = "and";
 
         for (Map.Entry<String, JsonElement> entry : entries) {
-            sql.append("n.").append(entry.getKey());
-            // TODO: fix for more advanced WHERE clauses. Currently only working for one AND or OR clause
+            sql.append(sqlLabel).append(".").append(entry.getKey());
             String value = entry.getValue().getAsString();
             sql = TranslateUtils.addWhereClause(sql, value);
+
             String i = null;
             int index = 0;
             int j = 0;
@@ -39,12 +55,25 @@ class TranslateUtils {
                 }
                 boolToAppend = (index < wc.getWhereMappings().size()) ? wc.getWhereMappings().get(i) : "and";
             }
+
             sql.append(" ").append(boolToAppend).append(" ");
         }
         sql.setLength(sql.length() - (boolToAppend.length() + 1));
         return sql;
     }
 
+    /**
+     * If no label provided as an argument, method just adds the default label which is just 'n' (for node), and
+     * then calls the method getWholeWhereClause.
+     *
+     * @param sql Original SQL statement.
+     * @param cN  CypNode with properties.
+     * @param wc  Where Clause of Cypher query with additional information about the WHERE clause.
+     * @return New SQL with WHERE part added.
+     */
+    static StringBuilder getWholeWhereClause(StringBuilder sql, CypNode cN, WhereClause wc) {
+        return getWholeWhereClause(sql, cN, wc, "n");
+    }
 
     /**
      * Formats the WHERE part of the SQL query, depending on the boolean operator
@@ -61,18 +90,9 @@ class TranslateUtils {
 
         String prop = sql.toString().substring(sql.toString().lastIndexOf(" ") + 1);
 
-//        if (value.contains("~")) {
-//            sql.setLength(sql.length() - prop.length());
-//            sql.append("(");
-//            sql.append(prop);
-//        }
-
         sql = getProperWhereValue(value, sql);
 
-        // boolean addClosingParen = false;
-
         while (value.contains("~")) {
-            //addClosingParen = true;
             sql.append(value.split("~")[1]).append(" ").append(prop);
             String[] valueSplit = value.split("~");
             value = "";
@@ -83,14 +103,12 @@ class TranslateUtils {
             sql = getProperWhereValue(value, sql);
         }
 
-        //if (addClosingParen) sql.append(")");
         return sql;
     }
 
     private static StringBuilder getProperWhereValue(String value, StringBuilder sql) {
         String v = "";
 
-        // presumes only one AND or OR per property.
         if (value.startsWith("eq#")) {
             sql.append(" = ");
             v = value.substring(3, value.indexOf("#qe"));
@@ -117,8 +135,10 @@ class TranslateUtils {
     }
 
     /**
-     * @param cN
-     * @return
+     * Labels in the current schema conversion are stored as strings. Some nodes have multiple labels.
+     * Thus, need to query labels using string comparison, and this methods helps generate that.
+     * @param cN CypNode with labels attached to it.
+     * @return SQL Like statement (such as n.label LIKE '%person$' AND n.label LIKE '%actor%')
      */
     static String genLabelLike(CypNode cN) {
         String label = cN.getType();

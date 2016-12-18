@@ -10,11 +10,21 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Class containing all methods required to store results of schema conversion from Neo4J to
+ * a relational backend database.
+ */
 public class InsertSchema {
     private static List<String> fieldsForMetaFile = new ArrayList<>();
 
+    /**
+     * Executing the various schema parts one by one to the relational backend.
+     *
+     * @param database Name of the database to store the new schema on.
+     */
     public static void executeSchemaChange(String database) {
         DbUtil.createConnection(database);
+
         String createAdditonalNodeTables = insertEachLabel();
         String sqlInsertNodes = insertNodes();
         String sqlInsertEdges = insertEdges();
@@ -53,6 +63,12 @@ public class InsertSchema {
         DbUtil.closeConnection();
     }
 
+    /**
+     * If there is a label which is applied to a node only ever on its own in isolation, then store this as a
+     * relation to remove unnecessary NULLs which slow execution of SQL down.
+     *
+     * @return SQL to execute.
+     */
     private static String insertEachLabel() {
         StringBuilder sb = new StringBuilder();
         FileOutputStream fos;
@@ -88,6 +104,14 @@ public class InsertSchema {
     }
 
 
+    /**
+     * For each 'label' relation, insert the appropriate values.
+     *
+     * @param sb    Original SQL that will be appended to.
+     * @param label Name of relation.
+     * @param o     JSON object containing data to store.
+     * @return New SQL statement with correct INSERT INTO statement.
+     */
     private static StringBuilder insertDataForLabels(StringBuilder sb, String label, JsonObject o) {
         String tableLabel = label.replace(", ", "_");
         sb.append("INSERT INTO ").append(tableLabel).append("(");
@@ -109,6 +133,11 @@ public class InsertSchema {
         return sb;
     }
 
+    /**
+     * Insert all nodes into relational database.
+     *
+     * @return SQL to execute.
+     */
     private static String insertNodes() {
         StringBuilder sb = new StringBuilder();
 
@@ -123,6 +152,12 @@ public class InsertSchema {
         return sb.toString();
     }
 
+    /**
+     * Data/properties of the nodes to store.
+     *
+     * @param sb Original SQL to append data t0.
+     * @return New SQL
+     */
     private static StringBuilder insertTableDataNodes(StringBuilder sb) {
         StringBuilder sbLabels = new StringBuilder();
 
@@ -164,6 +199,11 @@ public class InsertSchema {
         return sb;
     }
 
+    /**
+     * Insert relationships into SQL.
+     *
+     * @return SQL to execute.
+     */
     private static String insertEdges() {
         StringBuilder sb = new StringBuilder();
 
@@ -179,6 +219,12 @@ public class InsertSchema {
     }
 
 
+    /**
+     * Insert properties of the relationships to SQL.
+     *
+     * @param sb Original SQL to append data to.
+     * @return New SQL with data inserted into it.
+     */
     private static StringBuilder insertTableDataEdges(StringBuilder sb) {
         sb.append("INSERT INTO edges (");
 
@@ -214,6 +260,14 @@ public class InsertSchema {
         return sb;
     }
 
+    /**
+     * Get correct insert string based on whether data is INT or TEXT.
+     *
+     * @param z
+     * @param sb
+     * @param o
+     * @return
+     */
     private static StringBuilder getInsertString(String z, StringBuilder sb, JsonObject o) {
         try {
             if (z.endsWith("INT")) {

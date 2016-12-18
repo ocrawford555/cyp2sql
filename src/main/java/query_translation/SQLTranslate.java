@@ -11,7 +11,12 @@ import java.io.InputStreamReader;
 /**
  * MAIN TRANSLATION UNIT FROM INTERMEDIATE TRANSLATION TO SQL.
  * <p>
- * Read individual method documentation for more understanding.
+ * Read individual methods documentation for more understanding.
+ * - MultipleRel
+ * - NoRels
+ * - SingleVarRel
+ * <p>
+ * Agnostic to the methods above is appending the ORDER BY, GROUP BY, LIMIT and SKIP elements.
  */
 public class SQLTranslate {
     /**
@@ -24,14 +29,6 @@ public class SQLTranslate {
     public static String translate(DecodedQuery decodedQuery) throws Exception {
         // SQL built up from a StringBuilder object.
         StringBuilder sql = new StringBuilder();
-
-//        for (CypNode c : decodedQuery.getMc().getNodes()) {
-//            System.out.println(c.getId() + " --> " + c.getProps());
-//            System.out.println("OR Clauses : " + ((decodedQuery.getWc() != null && decodedQuery.getWc().getOrClauses().size() != 0) ?
-//                    Arrays.toString(decodedQuery.getWc().getOrClauses().get(0)) : "N/A"));
-//            System.out.println("AND Clauses : " + ((decodedQuery.getWc() != null && decodedQuery.getWc().getAndClauses().size() != 0) ?
-//                    Arrays.toString(decodedQuery.getWc().getAndClauses().get(0)) : "N/A"));
-//        }
 
         if (decodedQuery.getMc().getNodes().isEmpty()) throw new Exception("MATCH CLAUSE INVALID");
         if (decodedQuery.getRc().getItems() == null) throw new Exception("RETURN CLAUSE INVALID");
@@ -62,13 +59,16 @@ public class SQLTranslate {
 
 
     /**
-     * @param orderC
-     * @param sql
-     * @return
+     * Append ORDER BY clause to the SQL statement.
+     *
+     * @param orderC Order Clause object generated during the translation process.
+     * @param sql    Original SQL built up already.
+     * @return New SQL StringBuilder object with ORDER BY clause appended to the end.
      */
     private static StringBuilder obtainOrderByClause(OrderClause orderC, StringBuilder sql) {
         sql.append(" ");
         sql.append("ORDER BY ");
+
         for (CypOrder cO : orderC.getItems()) {
             if (cO.getField().startsWith("count")) {
                 sql.append("count(n) ").append(cO.getAscOrDesc()).append(", ");
@@ -77,12 +77,14 @@ public class SQLTranslate {
             sql.append("n").append(".").append(cO.getField()).append(" ").append(cO.getAscOrDesc());
             sql.append(", ");
         }
+
         sql.setLength(sql.length() - 2);
         return sql;
     }
 
     /**
      * Appends GROUP BY clause to query. This is needed if COUNT is used.
+     * Note - not entirely sure logic is correct for this method, needs more testing.
      *
      * @param rc  Return Clause of the Cypher query.
      * @param sql Query before GROUP BY

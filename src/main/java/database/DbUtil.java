@@ -21,12 +21,11 @@ public class DbUtil {
      *
      * @param dbName Name of the database to connect to.
      */
-    public static void createConnection(String dbName) {
+    static void createConnection(String dbName) {
         try {
             Class.forName("org.postgresql.Driver");
-            c = DriverManager
-                    .getConnection("jdbc:postgresql://localhost:5432/"
-                            + dbName, c2sqlV2.postUN, c2sqlV2.postPW);
+            c = DriverManager.getConnection("jdbc:postgresql://localhost:5432/" + dbName,
+                    c2sqlV2.postUN, c2sqlV2.postPW);
             DB_OPEN = true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -37,7 +36,7 @@ public class DbUtil {
     /**
      * Close connection to the database.
      */
-    public static void closeConnection() {
+    static void closeConnection() {
         try {
             c.close();
             DB_OPEN = false;
@@ -53,15 +52,18 @@ public class DbUtil {
      *
      * @param query  SQL to execute (beginning with CREATE)
      * @param dbName Database name to execute on.
-     * @throws SQLException
+     * @throws SQLException Error with the SQL query being executed.
      */
     public static void executeCreateView(String query, String dbName) throws SQLException {
         if (!DB_OPEN) DbUtil.createConnection(dbName);
         Statement stmt = c.createStatement();
+
+        // timing unit for creating statements.
         long startNanoCreate = System.nanoTime();
         stmt.executeUpdate(query);
         long endNanoCreate = System.nanoTime();
         lastExecTimeCreate = endNanoCreate - startNanoCreate;
+
         stmt.close();
     }
 
@@ -71,8 +73,8 @@ public class DbUtil {
      * @param query       SQL statement
      * @param database    Database to execute statement on.
      * @param pg_results  File to store the results.
-     * @param printOutput
-     * @throws SQLException
+     * @param printOutput Set to true if the output of the SQL statement should be stored in a local file.
+     * @throws SQLException Thrown if there is an error in the SQL statement.
      */
     public static void select(String query, String database, String pg_results, boolean printOutput)
             throws SQLException {
@@ -114,12 +116,29 @@ public class DbUtil {
     }
 
 
-    public static Object[] getMapping(String line, String database) throws SQLException, IOException,
+    /**
+     * As a possible optimisation for the tool, previously translated queries can be retrieved from the
+     * database, without any need to convert Cypher to SQL. The object array that is returned consists
+     * of the SQL query that is equivalent to the Cypher input, and the Java byte form of the intermediate
+     * return clause object. This needs to be persistently stored with the query, as this object is generated
+     * alongside the conversion between Cypher and SQL, and it is required for the Cypher driver to output
+     * the contents from Neo4J to a local text file correctly.
+     *
+     * @param cypher   Cypher input to search against and see if has already been translated before.
+     * @param database Name of the database to execute the query against.
+     * @return Object array containing either null if no translation if found, or a 2 elements Object[], with
+     * Object[0] containing the SQL mapping to the Cypher input, and Object[1] containing a String[] object
+     * associated with the translation.
+     * @throws SQLException           Error in the SQL query statement being executed on the database.
+     * @throws IOException            Issue in converting the bytes retrieved to a String[]
+     * @throws ClassNotFoundException Error with the conversion from bytes to String[]
+     */
+    public static Object[] getMapping(String cypher, String database) throws SQLException, IOException,
             ClassNotFoundException {
         if (!DB_OPEN) DbUtil.createConnection(database);
         String query = "SELECT sql, object FROM query_mapping WHERE cypher = ?";
         PreparedStatement stmt = c.prepareStatement(query);
-        stmt.setString(1, line);
+        stmt.setString(1, cypher);
         ResultSet rs = stmt.executeQuery();
 
         String sql = null;
@@ -130,7 +149,7 @@ public class DbUtil {
             bytes = rs.getBytes(2);
         }
 
-        ObjectInputStream objectIn = null;
+        ObjectInputStream objectIn;
         String[] toReturn = null;
         if (bytes != null) {
             objectIn = new ObjectInputStream(new ByteArrayInputStream(bytes));
@@ -183,6 +202,19 @@ public class DbUtil {
         return feedback;
     }
 
+    /**
+     * Adding a mapping between Cypher and SQL to the database, so that it can be retrieved quicker when we
+     * wish to run the Cypher again on a relational backend.
+     *
+     * @param cypher Cypher input
+     * @param sql    SQL mapping to the Cypher
+     * @param obj    String[] object with the return values of the Cypher clause. Needs to be stored as it is only
+     *               generated during the conversion process, and it is required to make the Cypher driver write the
+     *               output of Neo4J to a local file correctly.
+     * @param dbName Database name to execute SQL against.
+     * @throws SQLException
+     * @throws IOException
+     */
     public static void insertMapping(String cypher, String sql, Object obj, String dbName)
             throws SQLException, IOException {
         String preparedStatement = "INSERT INTO query_mapping(cypher, sql, object) VALUES (?, ?, ?)";
@@ -201,6 +233,12 @@ public class DbUtil {
         pstmt.close();
     }
 
+    /**
+     * Method for creating an SQL statement object from an SQL argument, and then executing it.
+     *
+     * @param query SQL to run against the database.
+     * @throws SQLException Error in query argument, not valid SQL or database error.
+     */
     static void createInsert(String query) throws SQLException {
         Statement stmt = c.createStatement();
         stmt.executeUpdate(query);

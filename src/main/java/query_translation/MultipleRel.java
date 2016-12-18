@@ -8,6 +8,9 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Translation of Cypher queries with a structure of (a)-[]-(b)-...-(c).
+ */
 class MultipleRel {
     // alphabet allows for a consistent and logical naming approach to the intermediate parts
     // of the queries. Assumption is that # of relationships in a query has an upper bound of 26.
@@ -27,7 +30,7 @@ class MultipleRel {
      *
      * @param sql    Existing SQL
      * @param matchC Match Clause of the original Cypher query.
-     * @param wc
+     * @param wc     Where Clause of the original Cypher query.
      * @return New SQL.
      */
     private static StringBuilder obtainWithClause(StringBuilder sql, MatchClause matchC, WhereClause wc) {
@@ -95,7 +98,7 @@ class MultipleRel {
      * @param sql             Existing SQL.
      * @param isBiDirectional Does the Cypher relationship map both directions (i.e. -[]-)
      * @param indexRel        Where is the relationship in the whole context of the match clause (index starts at 1)
-     * @param wc
+     * @param wc              Where Clause of Cypher.
      * @return New SQL.
      */
     private static StringBuilder obtainWhereInWithClause(CypRel cR, MatchClause matchC, StringBuilder sql,
@@ -111,35 +114,20 @@ class MultipleRel {
         JsonObject o = cR.getProps();
 
         if (leftProps != null) {
-            sql.append(" WHERE ");
+            sql.append(" WHERE ( ");
             includesWhere = true;
-
-            Set<Map.Entry<String, JsonElement>> entrySet = leftProps.entrySet();
-            for (Map.Entry<String, JsonElement> entry : entrySet) {
-                sql.append("n1").append(".").append(entry.getKey());
-                //String booleanOp = (wc == null) ? "" : (wc.isHasOr()) ? "or" : (wc.isHasAnd()) ? "and" : "";
-                //sql = TranslateUtils.addWhereClause(sql, entry, booleanOp);
-                sql = TranslateUtils.addWhereClause(sql, entry.getValue().getAsString());
-                sql.append(" ").append("and").append(" ");
-            }
-            sql.append(" AND ");
+            sql = TranslateUtils.getWholeWhereClause(sql, leftNode, wc, "n1");
+            sql.append(") AND ");
         }
 
         if (rightProps != null) {
             if (!includesWhere) {
-                sql.append(" WHERE ");
+                sql.append(" WHERE ( ");
                 includesWhere = true;
-            }
+            } else sql.append(" ( ");
 
-            Set<Map.Entry<String, JsonElement>> entrySet = rightProps.entrySet();
-            for (Map.Entry<String, JsonElement> entry : entrySet) {
-                sql.append("n2").append(".").append(entry.getKey());
-                //String booleanOp = (wc == null) ? "" : (wc.isHasOr()) ? "or" : (wc.isHasAnd()) ? "and" : "";
-                //sql = TranslateUtils.addWhereClause(sql, entry, booleanOp);
-                sql = TranslateUtils.addWhereClause(sql, entry.getValue().getAsString());
-                sql.append(" ").append("and").append(" ");
-            }
-            sql.append(" AND ");
+            sql = TranslateUtils.getWholeWhereClause(sql, rightNode, wc, "n2");
+            sql.append(") AND ");
         }
 
         if (leftNode.getType() != null) {
@@ -193,9 +181,9 @@ class MultipleRel {
     }
 
     /**
-     * @param matchC
-     * @param i
-     * @return
+     * @param matchC Match Clause of the original Cypher input.
+     * @param i      Index in clause for which we wish to obtain the relevant node.
+     * @return CypNode in ith position of the clause.
      */
     private static CypNode obtainNode(MatchClause matchC, int i) {
         for (CypNode c : matchC.getNodes()) {
@@ -207,12 +195,12 @@ class MultipleRel {
     }
 
     /**
-     * @param returnC
-     * @param matchC
-     * @param sql
-     * @param hasDistinct
-     * @param alias
-     * @return
+     * @param returnC     Return Clause of Cypher
+     * @param matchC      Match Clause of Cypher
+     * @param sql         Original SQL to append more SQL to.
+     * @param hasDistinct Does the return clause of Cypher have the distinct keyword.
+     * @param alias       Mapping of any alias structures present in the Cypher input.
+     * @return New SQL
      * @throws Exception
      */
     private static StringBuilder obtainSelectAndFromClause(ReturnClause returnC, MatchClause matchC,

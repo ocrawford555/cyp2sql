@@ -5,6 +5,10 @@ import production.c2sqlV2;
 
 import java.util.Map;
 
+/**
+ * Translating Cypher queries where there is no relationship structure.
+ * i.e. MATCH (a:Director) return collect(a);
+ */
 class NoRels {
     private static boolean useOptimalTable = false;
 

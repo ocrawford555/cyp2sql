@@ -4,6 +4,9 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.Properties;
 
+/**
+ * Class for obtaining the correct properties of the tool from the associated properties file.
+ */
 class C2SProperties {
     private String cyp = null;
     private String pg = null;
@@ -13,6 +16,18 @@ class C2SProperties {
     private String nun = null;
     private String npw = null;
 
+    /**
+     * Get the properties from the properties file.
+     *
+     * @return String[] with following index structure:
+     * 0. location of the Cypher results text file.
+     * 1. location of the Postgres results text file.
+     * 2. location of the folder where intermediate work is stored (default /workspace).
+     * 3. Postgres username
+     * 4. Postgres password
+     * 5. Neo4J username (usually neo4j)
+     * 6. Neo4J password
+     */
     String[] getLocalProperties() {
         try {
             Properties prop = new Properties();

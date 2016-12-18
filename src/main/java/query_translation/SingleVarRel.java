@@ -7,6 +7,12 @@ import com.google.gson.JsonObject;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Translating Cypher queries where structure is of form (a)-[*b..c]->(d).
+ * Note - only can translate ONE of these types of queries, i.e. cannot string
+ * them together in the case of for example (a)-[*1..2]->(b)-[*3..4]->(c).
+ * Note - direction of relationship must be specified.
+ */
 class SingleVarRel {
     static StringBuilder translate(StringBuilder sql, DecodedQuery decodedQuery) {
         MatchClause matchC = decodedQuery.getMc();
@@ -15,6 +21,8 @@ class SingleVarRel {
         int amountLow = 0;
         int amountHigh = 0;
 
+        // work out direction of query and upper and lower bound on number of edges
+        // the query is allowed to traverse.
         for (CypRel cR : matchC.getRels()) {
             if (cR.getDirection().contains("var")) {
                 String dirAndAmount[] = cR.getDirection().split("#");
@@ -27,6 +35,7 @@ class SingleVarRel {
         CypNode cN1;
         CypNode cN2 = null;
 
+        // build up query in same direction as relationship is going.
         if (direction.equals("left")) {
             cN1 = matchC.getNodes().get(1);
             cN2 = matchC.getNodes().get(0);
@@ -38,9 +47,13 @@ class SingleVarRel {
         }
 
         sql.append(" ");
+        // create the query that goes along all the paths, based on the transitive
+        // closure view in SQL.
         sql = createStepView(sql, amountLow, amountHigh, decodedQuery.getRc(),
                 decodedQuery.getCypherAdditionalInfo().getAliasMap());
 
+        // final part to add to the SQL statement is to select the data that matches
+        // the properties desired (such as a film title or certain director etc.)
         if (cN2 != null) {
             if (cN2.getType() != null || cN2.getProps() != null) {
                 sql = addWhereToSelectForVarRels(sql, cN2, decodedQuery.getWc());
