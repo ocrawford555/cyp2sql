@@ -74,7 +74,7 @@ class SingleVarRel {
     private static StringBuilder addWhereToSelectForVarRels(StringBuilder sql, CypNode node, WhereClause wc) {
         boolean usedWhere = false;
         if (node.getType() != null) {
-            sql.append(" WHERE n.label LIKE ").append(TranslateUtils.genLabelLike(node));
+            sql.append(" WHERE n.label LIKE ").append(TranslateUtils.genLabelLike(node, "n"));
             usedWhere = true;
         }
         if (node.getProps() != null) {
@@ -178,7 +178,7 @@ class SingleVarRel {
             } else {
                 getZStep.append(" AND ");
             }
-            getZStep.append("label LIKE ").append(TranslateUtils.genLabelLike(cN));
+            getZStep.append("label LIKE ").append(TranslateUtils.genLabelLike(cN, null));
         }
 
         getZStep.append(";");

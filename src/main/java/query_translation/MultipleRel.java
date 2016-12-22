@@ -136,7 +136,7 @@ class MultipleRel {
                 includesWhere = true;
             }
             sql.append("n1.label LIKE ");
-            sql.append(TranslateUtils.genLabelLike(leftNode)).append(" AND ");
+            sql.append(TranslateUtils.genLabelLike(leftNode, "n1")).append(" AND ");
         }
 
         if (rightNode.getType() != null) {
@@ -145,7 +145,7 @@ class MultipleRel {
                 includesWhere = true;
             }
             sql.append("n2.label LIKE ");
-            sql.append(TranslateUtils.genLabelLike(rightNode)).append(" AND ");
+            sql.append(TranslateUtils.genLabelLike(rightNode, "n2")).append(" AND ");
         }
 
         if (typeRel != null) {
@@ -226,7 +226,7 @@ class MultipleRel {
                 if (posInCluase == 1) toAdd = "a1";
                 else toAdd = "a2";
                 sql.append("count(").append(toAdd).append(")");
-                sql.append(useAlias(cR.getField(), alias)).append(", ");
+                sql.append(useAlias("count(" + cR.getNodeID() + ")", alias)).append(", ");
                 needNodeTable = true;
                 break;
             }
@@ -246,6 +246,7 @@ class MultipleRel {
                 if (cR.getNodeID().equals(cN.getId())) {
                     String prop = cR.getField();
                     needNodeTable = true;
+
                     if (cR.getCollect()) sql.append("array_agg(");
                     if (cR.getCount()) sql.append("count(");
 
@@ -255,14 +256,16 @@ class MultipleRel {
                         sql.append(caseString).append(", ");
                     } else {
                         if (prop != null) {
-                            sql.append("n").append(".").append(prop).append(useAlias(cR.getNodeID(), alias)).append(", ");
+                            sql.append("n").append(".").append(prop)
+                                    .append(useAlias(cR.getNodeID(), alias)).append(", ");
                         } else {
                             sql.append("n.*").append(useAlias(cR.getNodeID(), alias)).append(", ");
                         }
                     }
                     if (cR.getCollect() || cR.getCount()) {
                         sql.setLength(sql.length() - 2);
-                        sql.append("), ");
+                        sql.append(")");
+                        sql.append(useAlias("count(" + cR.getNodeID() + ")", alias)).append(", ");
                     }
                     isNode = true;
                     break;
@@ -301,7 +304,7 @@ class MultipleRel {
         String table = TranslateUtils.getTable(returnC);
 
         if (needNodeTable) sql.append(" FROM ").append(table).append(" n, ");
-        else sql.append(" FROM ").append(relsNeeded).append(" nodes n, ");
+        else sql.append(" FROM ").append(relsNeeded);
 
         int numRels = matchC.getRels().size();
 
@@ -376,16 +379,18 @@ class MultipleRel {
             if (cR.getType() != null) {
                 switch (cR.getType()) {
                     case "node":
-                        int posInClause = cR.getPosInClause();
-                        sql.append("n.id = ");
+                        if (!(cR.getCount() && returnC.getItems().size() > 1)) {
+                            int posInClause = cR.getPosInClause();
+                            sql.append("n.id = ");
 
-                        if (posInClause == 1) {
-                            sql.append("a.a1");
-                            sql.append(" AND ");
-                        } else {
-                            sql.append(alphabet[posInClause - 2]).append(".").append(alphabet[posInClause - 2])
-                                    .append(2);
-                            sql.append(" AND ");
+                            if (posInClause == 1) {
+                                sql.append("a.a1");
+                                sql.append(" AND ");
+                            } else {
+                                sql.append(alphabet[posInClause - 2]).append(".").append(alphabet[posInClause - 2])
+                                        .append(2);
+                                sql.append(" AND ");
+                            }
                         }
                         break;
                     default:

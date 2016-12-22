@@ -1,9 +1,6 @@
 package query_translation;
 
-import clauseObjects.CypNode;
-import clauseObjects.CypReturn;
-import clauseObjects.ReturnClause;
-import clauseObjects.WhereClause;
+import clauseObjects.*;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import production.c2sqlV2;
@@ -137,17 +134,18 @@ class TranslateUtils {
     /**
      * Labels in the current schema conversion are stored as strings. Some nodes have multiple labels.
      * Thus, need to query labels using string comparison, and this methods helps generate that.
+     *
      * @param cN CypNode with labels attached to it.
      * @return SQL Like statement (such as n.label LIKE '%person$' AND n.label LIKE '%actor%')
      */
-    static String genLabelLike(CypNode cN) {
+    static String genLabelLike(CypNode cN, String id) {
         String label = cN.getType();
         String stmt = "'%";
         String[] labels = label.split(", ");
         for (String l : labels) {
-            stmt = stmt + l + "%' AND n.label LIKE '%";
+            stmt = stmt + l + "%' AND " + id + (id == null ? "" : ".") + "label LIKE '%";
         }
-        stmt = stmt.substring(0, stmt.length() - 19);
+        stmt = stmt.substring(0, stmt.length() - (19 + (id == null ? 0 : 1)));
         return stmt;
     }
 
@@ -234,5 +232,18 @@ class TranslateUtils {
             }
         }
         return "";
+    }
+
+    static String getSQLStmtID(CypNode cN, MatchClause matchC) {
+        // if rel is of type (a)-[]->(b)
+        if (matchC.getNodes().size() == 2) {
+            switch (cN.getPosInClause()) {
+                case 1:
+                    return "n2";
+                case 2:
+                    return "n";
+            }
+        }
+        return "n";
     }
 }

@@ -174,10 +174,9 @@ public class DbUtil {
 
         // timing unit
         long startNanoReadQuery = System.nanoTime();
-        stm.executeQuery(query);
+        ResultSet rs = stm.executeQuery(query);
         long endNanoReadQuery = System.nanoTime();
 
-        ResultSet rs = stm.executeQuery(query);
         lastExecTimeRead = endNanoReadQuery - startNanoReadQuery;
         ResultSetMetaData rsm = rs.getMetaData();
 

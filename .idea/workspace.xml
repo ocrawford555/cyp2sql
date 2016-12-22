@@ -6,16 +6,14 @@
     </artifacts-to-build>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="6c07d57f-61cf-46bd-a98b-dbc0449cd683" name="Default" comment="Major refactor on how WHERE is converted.">
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/clauseObjects/CypWhere.java" afterPath="" />
+    <list default="true" id="6c07d57f-61cf-46bd-a98b-dbc0449cd683" name="Default" comment="Bug fixes with WHERE clauses. Added more documentation. Removed useless code.">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/database/CypherDriver.java" afterPath="$PROJECT_DIR$/src/main/java/database/CypherDriver.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/database/DbUtil.java" afterPath="$PROJECT_DIR$/src/main/java/database/DbUtil.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/database/InsertSchema.java" afterPath="$PROJECT_DIR$/src/main/java/database/InsertSchema.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/production/C2SProperties.java" afterPath="$PROJECT_DIR$/src/main/java/production/C2SProperties.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/production/c2sqlV2.java" afterPath="$PROJECT_DIR$/src/main/java/production/c2sqlV2.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/query_translation/MultipleRel.java" afterPath="$PROJECT_DIR$/src/main/java/query_translation/MultipleRel.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/query_translation/NoRels.java" afterPath="$PROJECT_DIR$/src/main/java/query_translation/NoRels.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/query_translation/SQLTranslate.java" afterPath="$PROJECT_DIR$/src/main/java/query_translation/SQLTranslate.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/query_translation/SQLUnion.java" afterPath="$PROJECT_DIR$/src/main/java/query_translation/SQLUnion.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/query_translation/SQLWith.java" afterPath="$PROJECT_DIR$/src/main/java/query_translation/SQLWith.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/query_translation/SingleVarRel.java" afterPath="$PROJECT_DIR$/src/main/java/query_translation/SingleVarRel.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/query_translation/TranslateUtils.java" afterPath="$PROJECT_DIR$/src/main/java/query_translation/TranslateUtils.java" />
     </list>
@@ -32,6 +30,9 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="CoverageDataManager">
+    <SUITE FILE_PATH="coverage/cyp2sql$c2sqlV2.coverage" NAME="c2sqlV2 Coverage Results" MODIFIED="1482271713180" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false">
+      <FILTER>production.*</FILTER>
+    </SUITE>
     <SUITE FILE_PATH="coverage/cyp2sql$testRunCommand.coverage" NAME="testRunCommand Coverage Results" MODIFIED="1476921108157" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false">
       <FILTER>testing.*</FILTER>
     </SUITE>
@@ -45,21 +46,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="SingleVarRel.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/query_translation/SingleVarRel.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="850">
-              <caret line="55" column="81" lean-forward="false" selection-start-line="55" selection-start-column="81" selection-end-line="55" selection-end-column="81" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="TranslateUtils.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/query_translation/TranslateUtils.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-1389">
-              <caret line="139" column="94" lean-forward="false" selection-start-line="139" selection-start-column="94" selection-end-line="139" selection-end-column="94" />
+            <state relative-caret-position="142">
+              <caret line="182" column="18" lean-forward="false" selection-start-line="182" selection-start-column="18" selection-end-line="182" selection-end-column="18" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -67,22 +58,27 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="PerformWork.java" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/main/java/schemaConversion/PerformWork.java">
+      <file leaf-file-name="DbUtil.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/database/DbUtil.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="119">
-              <caret line="17" column="35" lean-forward="true" selection-start-line="17" selection-start-column="35" selection-end-line="17" selection-end-column="35" />
-              <folding />
+            <state relative-caret-position="110">
+              <caret line="85" column="0" lean-forward="false" selection-start-line="85" selection-start-column="0" selection-end-line="85" selection-end-column="0" />
+              <folding>
+                <marker date="1482256611867" expanded="true" signature="5487:5541" ph="SELECT sql, " />
+                <marker date="1482256611867" expanded="true" signature="8301:8364" ph="INSERT INTO query_mapping... " />
+              </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="SchemaTranslate.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/schemaConversion/SchemaTranslate.java">
+      <file leaf-file-name="c2sqlV2.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/production/c2sqlV2.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="170">
-              <caret line="15" column="60" lean-forward="false" selection-start-line="15" selection-start-column="60" selection-end-line="15" selection-end-column="60" />
-              <folding />
+            <state relative-caret-position="144">
+              <caret line="200" column="0" lean-forward="false" selection-start-line="200" selection-start-column="0" selection-end-line="200" selection-end-column="0" />
+              <folding>
+                <element signature="method#resetExecTimes#0;class#c2sqlV2#0" expanded="false" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -90,38 +86,8 @@
       <file leaf-file-name="CypherTranslator.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/translator/CypherTranslator.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="8772">
-              <caret line="523" column="44" lean-forward="true" selection-start-line="523" selection-start-column="44" selection-end-line="523" selection-end-column="44" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="CypherWalker.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/translator/CypherWalker.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1683">
-              <caret line="108" column="34" lean-forward="false" selection-start-line="108" selection-start-column="34" selection-end-line="108" selection-end-column="34" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="SQLTranslate.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/query_translation/SQLTranslate.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-182">
-              <caret line="86" column="85" lean-forward="false" selection-start-line="86" selection-start-column="85" selection-end-line="86" selection-end-column="85" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="CypherTokenizer.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/translator/CypherTokenizer.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="187">
-              <caret line="20" column="0" lean-forward="false" selection-start-line="20" selection-start-column="0" selection-end-line="20" selection-end-column="0" />
+            <state relative-caret-position="136">
+              <caret line="65" column="0" lean-forward="true" selection-start-line="65" selection-start-column="0" selection-end-line="65" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -130,18 +96,61 @@
       <file leaf-file-name="SQLUnion.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/query_translation/SQLUnion.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="141">
-              <caret line="19" column="60" lean-forward="true" selection-start-line="19" selection-start-column="60" selection-end-line="19" selection-end-column="60" />
+            <state relative-caret-position="85">
+              <caret line="19" column="34" lean-forward="true" selection-start-line="19" selection-start-column="34" selection-end-line="19" selection-end-column="34" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="SQLWith.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/query_translation/SQLWith.java">
+      <file leaf-file-name="pg_results.txt" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/resources/pg_results.txt">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="765">
-              <caret line="49" column="0" lean-forward="false" selection-start-line="49" selection-start-column="0" selection-end-line="49" selection-end-column="0" />
+            <state relative-caret-position="102">
+              <caret line="6" column="0" lean-forward="false" selection-start-line="6" selection-start-column="0" selection-end-line="6" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="DecodedQuery.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/clauseObjects/DecodedQuery.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="102">
+              <caret line="6" column="3" lean-forward="true" selection-start-line="6" selection-start-column="3" selection-end-line="6" selection-end-column="3" />
+              <folding>
+                <element signature="e#1263#1264#0" expanded="true" />
+                <element signature="e#1294#1295#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="MultipleRel.java" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/main/java/query_translation/MultipleRel.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="147">
+              <caret line="300" column="0" lean-forward="true" selection-start-line="300" selection-start-column="0" selection-end-line="300" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="NoRels.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/query_translation/NoRels.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="104">
+              <caret line="144" column="82" lean-forward="false" selection-start-line="144" selection-start-column="82" selection-end-line="144" selection-end-column="82" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="SingleVarRel.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/query_translation/SingleVarRel.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="393">
+              <caret line="183" column="29" lean-forward="true" selection-start-line="183" selection-start-column="29" selection-end-line="183" selection-end-column="29" />
               <folding />
             </state>
           </provider>
@@ -197,7 +206,6 @@
         <option value="$PROJECT_DIR$/src/main/java/schemaConversion/Metadata_Schema.java" />
         <option value="$PROJECT_DIR$/src/main/java/main_area/Cyp2SQL.java" />
         <option value="$PROJECT_DIR$/src/main/java/main_area/ToolV1.java" />
-        <option value="$PROJECT_DIR$/src/main/java/query_translation/SQLWith.java" />
         <option value="$PROJECT_DIR$/resources/configC2S.properties" />
         <option value="$PROJECT_DIR$/src/main/resources/configC2S.properties" />
         <option value="$PROJECT_DIR$/src/main/java/query_translation/InterToSQLNodesEdges.java" />
@@ -218,23 +226,24 @@
         <option value="$PROJECT_DIR$/src/main/java/clauseObjects/DecodedQuery.java" />
         <option value="$PROJECT_DIR$/src/main/java/translator/CypherWalker.java" />
         <option value="$PROJECT_DIR$/src/main/java/clauseObjects/ReturnClause.java" />
-        <option value="$PROJECT_DIR$/src/main/java/query_translation/SQLUnion.java" />
         <option value="$PROJECT_DIR$/src/main/java/clauseObjects/CypReturn.java" />
-        <option value="$PROJECT_DIR$/src/main/java/production/c2sqlV2.java" />
         <option value="$PROJECT_DIR$/src/main/java/clauseObjects/CypWhere.java" />
         <option value="$PROJECT_DIR$/src/main/java/clauseObjects/WhereClause.java" />
-        <option value="$PROJECT_DIR$/src/main/java/translator/CypherTranslator.java" />
-        <option value="$PROJECT_DIR$/src/main/resources/cypher_results.txt" />
-        <option value="$PROJECT_DIR$/src/main/resources/pg_results.txt" />
         <option value="$PROJECT_DIR$/src/main/java/database/CypherDriver.java" />
-        <option value="$PROJECT_DIR$/src/main/java/database/DbUtil.java" />
         <option value="$PROJECT_DIR$/src/main/java/database/InsertSchema.java" />
         <option value="$PROJECT_DIR$/src/main/java/production/C2SProperties.java" />
-        <option value="$PROJECT_DIR$/src/main/java/query_translation/MultipleRel.java" />
+        <option value="$PROJECT_DIR$/src/main/java/query_translation/SQLTranslate.java" />
+        <option value="$PROJECT_DIR$/src/main/java/database/DbUtil.java" />
+        <option value="$PROJECT_DIR$/src/main/resources/cypher_results.txt" />
+        <option value="$PROJECT_DIR$/src/main/java/query_translation/SQLWith.java" />
+        <option value="$PROJECT_DIR$/src/main/resources/pg_results.txt" />
+        <option value="$PROJECT_DIR$/src/main/java/production/c2sqlV2.java" />
+        <option value="$PROJECT_DIR$/src/main/java/query_translation/SQLUnion.java" />
         <option value="$PROJECT_DIR$/src/main/java/query_translation/NoRels.java" />
         <option value="$PROJECT_DIR$/src/main/java/query_translation/SingleVarRel.java" />
-        <option value="$PROJECT_DIR$/src/main/java/query_translation/SQLTranslate.java" />
+        <option value="$PROJECT_DIR$/src/main/java/translator/CypherTranslator.java" />
         <option value="$PROJECT_DIR$/src/main/java/query_translation/TranslateUtils.java" />
+        <option value="$PROJECT_DIR$/src/main/java/query_translation/MultipleRel.java" />
       </list>
     </option>
   </component>
@@ -295,9 +304,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
-      <pane id="PackagesPane" />
-      <pane id="Scratches" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -512,6 +518,9 @@
           </PATH>
         </subPane>
       </pane>
+      <pane id="PackagesPane" />
+      <pane id="Scope" />
+      <pane id="Scratches" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -582,7 +591,7 @@
       </extension>
       <option name="MAIN_CLASS_NAME" value="production.c2sqlV2" />
       <option name="VM_PARAMETERS" value="" />
-      <option name="PROGRAM_PARAMETERS" value="-t &quot;C:\Users\ocraw\Desktop\movies_q_test.txt&quot; testc -p" />
+      <option name="PROGRAM_PARAMETERS" value="-t &quot;C:\Users\ocraw\Desktop\movies_q_test.txt&quot; testc" />
       <option name="WORKING_DIRECTORY" value="file://$PROJECT_DIR$" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
       <option name="ALTERNATIVE_JRE_PATH" />
@@ -1198,14 +1207,11 @@
       <workItem from="1481808366624" duration="17662000" />
       <workItem from="1481847040615" duration="5177000" />
       <workItem from="1481883758045" duration="6194000" />
-      <workItem from="1482072114808" duration="8844000" />
-    </task>
-    <task id="LOCAL-00008" summary="Started new translation to SQL unit.">
-      <created>1476717577156</created>
-      <option name="number" value="00008" />
-      <option name="presentableId" value="LOCAL-00008" />
-      <option name="project" value="LOCAL" />
-      <updated>1476717577156</updated>
+      <workItem from="1482072114808" duration="9940000" />
+      <workItem from="1482256202622" duration="881000" />
+      <workItem from="1482263780429" duration="823000" />
+      <workItem from="1482267356620" duration="4877000" />
+      <workItem from="1482323571300" duration="4211000" />
     </task>
     <task id="LOCAL-00009" summary="Added more functionality to new translator. Still needs bug fixing.">
       <created>1476737283384</created>
@@ -1543,7 +1549,14 @@
       <option name="project" value="LOCAL" />
       <updated>1481906658327</updated>
     </task>
-    <option name="localTasksCounter" value="57" />
+    <task id="LOCAL-00057" summary="Bug fixes with WHERE clauses. Added more documentation. Removed useless code.">
+      <created>1482081942451</created>
+      <option name="number" value="00057" />
+      <option name="presentableId" value="LOCAL-00057" />
+      <option name="project" value="LOCAL" />
+      <updated>1482081942451</updated>
+    </task>
+    <option name="localTasksCounter" value="58" />
     <servers />
   </component>
   <component name="TestHistory">
@@ -1579,7 +1592,7 @@
     </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="538046000" />
+    <option name="totallyTimeSpent" value="549934000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1382" height="744" extended-state="6" />
@@ -1595,12 +1608,12 @@
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3286026" sideWeight="0.5" order="0" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32833022" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.3170347" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.2555205" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Properties" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.21303074" sideWeight="0.5" order="6" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.17789166" sideWeight="0.5" order="6" side_tool="false" content_ui="combo" />
       <window_info id="Statistic" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.49344978" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
@@ -1608,7 +1621,7 @@
       <window_info id="UI Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Theme Preview" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="true" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.5867508" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.48264983" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
@@ -1640,7 +1653,6 @@
     <ignored-roots>
       <path value="$PROJECT_DIR$" />
     </ignored-roots>
-    <MESSAGE value="Bug fixes to schema translator involving new file delimiters. For nodes only." />
     <MESSAGE value="Parallel schema generation implemented, 4 threads fixed. Parse 14MB under 4 secs." />
     <MESSAGE value="Schema to Postgres driver updated to match new schema generation module." />
     <MESSAGE value="Added functionality for multiple labels for nodes. Also fixed database drivers output." />
@@ -1665,17 +1677,26 @@
     <MESSAGE value="Added correct timing features for PG and Neo4J, refactored some of the classes too." />
     <MESSAGE value="Modified translation of WHERE clauses and other bug fixes and improvements." />
     <MESSAGE value="Major refactor on how WHERE is converted." />
-    <option name="LAST_COMMIT_MESSAGE" value="Major refactor on how WHERE is converted." />
+    <MESSAGE value="Bug fixes with WHERE clauses. Added more documentation. Removed useless code." />
+    <option name="LAST_COMMIT_MESSAGE" value="Bug fixes with WHERE clauses. Added more documentation. Removed useless code." />
     <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REARRANGE_BEFORE_PROJECT_COMMIT" value="true" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/query_translation/SQLWith.java</url>
+          <line>85</line>
+          <properties />
+          <option name="timeStamp" value="123" />
+        </line-breakpoint>
+      </breakpoints>
       <breakpoints-dialog>
         <breakpoints-dialog />
       </breakpoints-dialog>
-      <option name="time" value="120" />
+      <option name="time" value="126" />
     </breakpoint-manager>
     <watches-manager>
       <configuration name="Application">
@@ -1735,17 +1756,17 @@
     <entry file="file://$PROJECT_DIR$/src/main/java/translator/GenerateAlias.java" />
     <entry file="file://$PROJECT_DIR$/src/main/java/testing/TestAntlr.java" />
     <entry file="file://$PROJECT_DIR$/README.md">
+      <provider editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
       <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
         <state split_layout="FIRST">
           <first_editor relative-caret-position="327">
             <caret line="73" column="19" lean-forward="true" selection-start-line="73" selection-start-column="19" selection-end-line="73" selection-end-column="19" />
           </first_editor>
           <second_editor />
-        </state>
-      </provider>
-      <provider editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
         </state>
       </provider>
     </entry>
@@ -1803,54 +1824,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/clauseObjects/DecodedQuery.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="595">
-          <caret line="41" column="0" lean-forward="false" selection-start-line="41" selection-start-column="0" selection-end-line="41" selection-end-column="0" />
-          <folding>
-            <element signature="e#793#794#0" expanded="false" />
-            <element signature="e#818#819#0" expanded="false" />
-            <element signature="e#853#854#0" expanded="false" />
-            <element signature="e#878#879#0" expanded="false" />
-            <element signature="e#912#913#0" expanded="false" />
-            <element signature="e#937#938#0" expanded="false" />
-            <element signature="e#1030#1031#0" expanded="false" />
-            <element signature="e#1063#1064#0" expanded="false" />
-            <element signature="e#1098#1099#0" expanded="false" />
-            <element signature="e#1132#1133#0" expanded="false" />
-            <element signature="e#1185#1186#0" expanded="false" />
-            <element signature="e#1228#1229#0" expanded="false" />
-            <element signature="e#1263#1264#0" expanded="false" />
-            <element signature="e#1294#1295#0" expanded="false" />
-            <element signature="e#1342#1343#0" expanded="false" />
-            <element signature="e#1382#1383#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/AppData/Local/Temp/Temp1_ojc37_scatter_entry.zip/ScatterEx.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/resources/pg_results.txt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="17">
-          <caret line="1" column="11" lean-forward="false" selection-start-line="1" selection-start-column="11" selection-end-line="1" selection-end-column="11" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/resources/cypher_results.txt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="68">
-          <caret line="4" column="23" lean-forward="false" selection-start-line="4" selection-start-column="23" selection-end-line="4" selection-end-column="23" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$USER_HOME$/AppData/Local/Temp/Temp1_ojc37_scatter_entry.zip/ScatterEx.java" />
     <entry file="file://$PROJECT_DIR$/src/main/java/clauseObjects/CypNode.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="34">
@@ -1885,14 +1859,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/clauseObjects/CypWhere.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="153">
-          <caret line="9" column="5" lean-forward="false" selection-start-line="9" selection-start-column="5" selection-end-line="9" selection-end-column="5" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/clauseObjects/CypWhere.java" />
     <entry file="file://$PROJECT_DIR$/src/main/java/clauseObjects/MatchClause.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-46">
@@ -1941,17 +1908,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/database/DbUtil.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3995">
-          <caret line="239" column="78" lean-forward="false" selection-start-line="239" selection-start-column="78" selection-end-line="239" selection-end-column="78" />
-          <folding>
-            <marker date="1482079280414" expanded="true" signature="5487:5541" ph="SELECT sql, " />
-            <marker date="1482079280414" expanded="true" signature="8334:8397" ph="INSERT INTO query_mapping... " />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/database/InsertSchema.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="56">
@@ -1965,75 +1921,6 @@
         <state relative-caret-position="379">
           <caret line="28" column="24" lean-forward="false" selection-start-line="28" selection-start-column="24" selection-end-line="28" selection-end-column="24" />
           <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/production/c2sqlV2.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2193">
-          <caret line="129" column="35" lean-forward="false" selection-start-line="129" selection-start-column="35" selection-end-line="129" selection-end-column="35" />
-          <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="method#resetExecTimes#0;class#c2sqlV2#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/query_translation/MultipleRel.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-3667">
-          <caret line="199" column="58" lean-forward="false" selection-start-line="199" selection-start-column="58" selection-end-line="199" selection-end-column="58" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/query_translation/NoRels.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-1134">
-          <caret line="13" column="0" lean-forward="true" selection-start-line="13" selection-start-column="0" selection-end-line="13" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/query_translation/SingleVarRel.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="850">
-          <caret line="55" column="81" lean-forward="false" selection-start-line="55" selection-start-column="81" selection-end-line="55" selection-end-column="81" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/query_translation/SQLTranslate.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-182">
-          <caret line="86" column="85" lean-forward="false" selection-start-line="86" selection-start-column="85" selection-end-line="86" selection-end-column="85" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/query_translation/SQLUnion.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="141">
-          <caret line="19" column="60" lean-forward="true" selection-start-line="19" selection-start-column="60" selection-end-line="19" selection-end-column="60" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/query_translation/SQLWith.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="765">
-          <caret line="49" column="0" lean-forward="false" selection-start-line="49" selection-start-column="0" selection-end-line="49" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/query_translation/TranslateUtils.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-1389">
-          <caret line="139" column="94" lean-forward="false" selection-start-line="139" selection-start-column="94" selection-end-line="139" selection-end-column="94" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -2053,14 +1940,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/translator/CypherTranslator.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="8772">
-          <caret line="523" column="44" lean-forward="true" selection-start-line="523" selection-start-column="44" selection-end-line="523" selection-end-column="44" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/translator/CypherWalker.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1683">
@@ -2071,8 +1950,124 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/schemaConversion/PerformWork.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="119">
-          <caret line="17" column="35" lean-forward="true" selection-start-line="17" selection-start-column="35" selection-end-line="17" selection-end-column="35" />
+        <state relative-caret-position="306">
+          <caret line="28" column="80" lean-forward="false" selection-start-line="28" selection-start-column="80" selection-end-line="28" selection-end-column="80" />
+          <folding>
+            <element signature="imports" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/query_translation/SQLWith.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1989">
+          <caret line="121" column="61" lean-forward="false" selection-start-line="121" selection-start-column="61" selection-end-line="121" selection-end-column="61" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/query_translation/SQLTranslate.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="124">
+          <caret line="40" column="0" lean-forward="false" selection-start-line="40" selection-start-column="0" selection-end-line="40" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/resources/cypher_results.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="34">
+          <caret line="2" column="0" lean-forward="false" selection-start-line="2" selection-start-column="0" selection-end-line="2" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/database/DbUtil.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="110">
+          <caret line="85" column="0" lean-forward="false" selection-start-line="85" selection-start-column="0" selection-end-line="85" selection-end-column="0" />
+          <folding>
+            <marker date="1482256611867" expanded="true" signature="5487:5541" ph="SELECT sql, " />
+            <marker date="1482256611867" expanded="true" signature="8301:8364" ph="INSERT INTO query_mapping... " />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/query_translation/NoRels.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="104">
+          <caret line="144" column="82" lean-forward="false" selection-start-line="144" selection-start-column="82" selection-end-line="144" selection-end-column="82" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/query_translation/SingleVarRel.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="393">
+          <caret line="183" column="29" lean-forward="true" selection-start-line="183" selection-start-column="29" selection-end-line="183" selection-end-column="29" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/production/c2sqlV2.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="144">
+          <caret line="200" column="0" lean-forward="false" selection-start-line="200" selection-start-column="0" selection-end-line="200" selection-end-column="0" />
+          <folding>
+            <element signature="method#resetExecTimes#0;class#c2sqlV2#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/resources/pg_results.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="102">
+          <caret line="6" column="0" lean-forward="false" selection-start-line="6" selection-start-column="0" selection-end-line="6" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/clauseObjects/DecodedQuery.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="102">
+          <caret line="6" column="3" lean-forward="true" selection-start-line="6" selection-start-column="3" selection-end-line="6" selection-end-column="3" />
+          <folding>
+            <element signature="e#1263#1264#0" expanded="true" />
+            <element signature="e#1294#1295#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/translator/CypherTranslator.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="136">
+          <caret line="65" column="0" lean-forward="true" selection-start-line="65" selection-start-column="0" selection-end-line="65" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/query_translation/SQLUnion.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="85">
+          <caret line="19" column="34" lean-forward="true" selection-start-line="19" selection-start-column="34" selection-end-line="19" selection-end-column="34" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/query_translation/TranslateUtils.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="142">
+          <caret line="182" column="18" lean-forward="false" selection-start-line="182" selection-start-column="18" selection-end-line="182" selection-end-column="18" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/query_translation/MultipleRel.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="147">
+          <caret line="300" column="0" lean-forward="true" selection-start-line="300" selection-start-column="0" selection-end-line="300" selection-end-column="0" />
           <folding />
         </state>
       </provider>

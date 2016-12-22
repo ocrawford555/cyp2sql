@@ -173,6 +173,8 @@ public class c2sqlV2 {
             withTemp = SQLWith.genTemp(dQ.getSqlEquiv());
         }
 
+        System.out.println(withTemp);
+
         String sqlSelect = SQLWith.createSelect(withParts[1].trim(), dQ);
 
         return withTemp + " " + sqlSelect;

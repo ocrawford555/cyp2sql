@@ -16,11 +16,14 @@ public class SQLUnion {
      */
     public static String genUnion(ArrayList<String> queries, String unionType) {
         StringBuilder unionSQL = new StringBuilder();
+        boolean insertCloseParenth = false;
         for (String s : queries) {
             unionSQL.append(s.substring(0, s.length() - 1));
-            unionSQL.append(unionType).append(" ");
+            if (insertCloseParenth) unionSQL.append(")");
+            unionSQL.append(" ").append(unionType).append("( ");
+            insertCloseParenth = true;
         }
-        unionSQL.setLength(unionSQL.length() - (1 + unionType.length()));
+        unionSQL.setLength(unionSQL.length() - (2 + unionType.length()));
         unionSQL.append(";");
         return unionSQL.toString();
     }

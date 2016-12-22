@@ -22,7 +22,7 @@ public class SQLWith {
     public static String createSelect(String query, DecodedQuery dQ) {
         StringBuilder sWith = new StringBuilder();
         ArrayList<String> tokens = CypherTokenizer.getTokenList(query, false);
-        //System.out.println(tokens);
+        System.out.println(tokens);
 
         // get SELECT
         sWith = getSelectForWith(sWith, tokens, dQ);
@@ -95,8 +95,12 @@ public class SQLWith {
 
                 while (i + 1 < tokens.size()) {
                     if (!tokens.get(i + 1).equals(",") && !tokens.get(i + 1).equals("order") &&
-                            !tokens.get(i + 1).equals("skip") && !tokens.get(i + 1).equals("limit")) {
+                            !tokens.get(i + 1).equals("skip") && !tokens.get(i + 1).equals("limit")
+                            && !tokens.get(i + 1).equals(".")) {
                         returnStmt = returnStmt + " " + tokens.get(i++);
+                    } else if (tokens.get(i + 1).equals(".")) {
+                        returnStmt = returnStmt + "." + tokens.get(i + 2);
+                        i += 2;
                     } else {
                         i++;
                         break;
@@ -110,10 +114,11 @@ public class SQLWith {
                         sWith.append(idAndProp[0]).append(", ");
                         break;
                     } else if (cR.getNodeID().equals(idAndProp[0])) {
-                        if (cR.getField() == null) {
+                        if (cR.getField() == null && idAndProp[1] == null) {
                             sWith.append("*, ");
                         } else {
-                            sWith.append(cR.getNodeID()).append(".").append(cR.getField()).append(", ");
+                            String field = (idAndProp[1] == null) ? cR.getField() : idAndProp[1];
+                            sWith.append(field).append(", ");
                         }
                         break;
                     }
@@ -127,7 +132,7 @@ public class SQLWith {
         sWith.setLength(sWith.length() - 2);
         sWith.append(" FROM wA");
 
-        //System.out.println(sWith.toString());
+        System.out.println(sWith.toString());
         return sWith;
     }
 }

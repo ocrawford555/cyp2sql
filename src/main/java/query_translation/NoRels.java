@@ -112,7 +112,7 @@ class NoRels {
         for (CypReturn cR : returnC.getItems()) {
             if (cR.getNodeID() == null && cR.getField().equals("*")) {
                 CypNode cN = matchC.getNodes().get(0);
-                sql.append(" WHERE n.label LIKE ").append(TranslateUtils.genLabelLike(cN));
+                sql.append(" WHERE n.label LIKE ").append(TranslateUtils.genLabelLike(cN, "n"));
                 if (cN.getProps() != null) {
                     sql.append(" AND ");
                     sql = TranslateUtils.getWholeWhereClause(sql, cN, wc);
@@ -142,7 +142,7 @@ class NoRels {
                             if (!sql.toString().endsWith("AND ")) sql.append(" AND ");
                             sql.append("n.label LIKE");
                         }
-                        sql.append(" ").append(TranslateUtils.genLabelLike(cN));
+                        sql.append(" ").append(TranslateUtils.genLabelLike(cN, "n"));
                     }
                 }
             }
