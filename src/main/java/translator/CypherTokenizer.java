@@ -44,9 +44,13 @@ public class CypherTokenizer {
             // exclude some tokens from the list of tokens. This includes the EOF pointer,
             // semi-colons, and alias artifacts.
             if (!" ".equals(s) && !"<eof>".equals(s) && !";".equals(s) && !"as".equals(s) &&
-                    !cypherWalker.getAlias().contains(s))
+                    !cypherWalker.getAlias().contains(s) && !"detach".equals(s)) {
+                if (s.equals("merge")) s = "create";
                 tokenList.add(s);
+            }
         }
+
+        System.out.println(tokenList);
 
         return tokenList;
     }

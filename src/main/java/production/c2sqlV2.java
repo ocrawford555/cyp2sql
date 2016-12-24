@@ -124,12 +124,16 @@ public class c2sqlV2 {
                         if (line.toLowerCase().contains(" with ")) {
                             sql = convertCypherWith(line);
                         } else {
+                            if (line.contains("match") && line.contains("create")) line = line.replace(",", "-[]-");
                             sql = convertCypherToSQL(line).getSqlEquiv();
                         }
 
-                        returnItemsForCypher = lastDQ.getCypherAdditionalInfo().
-                                getReturnClause().replace(" ", "").split(",");
-                        DbUtil.insertMapping(line, sql, returnItemsForCypher, dbName);
+                        returnItemsForCypher = null;
+                        if (sql != null && !sql.startsWith("INSERT") && !sql.startsWith("DELETE")) {
+                            returnItemsForCypher = lastDQ.getCypherAdditionalInfo().
+                                    getReturnClause().replace(" ", "").split(",");
+                            DbUtil.insertMapping(line, sql, returnItemsForCypher, dbName);
+                        }
                     }
 
                     if (sql != null) {
@@ -143,7 +147,8 @@ public class c2sqlV2 {
                             FileUtils.contentEquals(f_cypher, f_pg) + "\nNumber of records from Neo4J: " +
                             numResultsNeo + "\nNumber of results from PostG: " + numResultsPost +
                             "\nTime on Neo4J: " + (CypherDriver.lastExecTime / 1000000.0) +
-                            " ms.\nTime on Postgres: " + ((DbUtil.lastExecTimeRead + DbUtil.lastExecTimeCreate)
+                            " ms.\nTime on Postgres: " + ((DbUtil.lastExecTimeRead + DbUtil.lastExecTimeCreate +
+                            DbUtil.lastExecTimeInsert)
                             / 1000000.0) +
                             " ms.\n**********\n");
 
@@ -161,6 +166,7 @@ public class c2sqlV2 {
         CypherDriver.lastExecTime = 0;
         DbUtil.lastExecTimeCreate = 0;
         DbUtil.lastExecTimeRead = 0;
+        DbUtil.lastExecTimeInsert = 0;
     }
 
     private static String convertCypherWith(String line) {
@@ -197,6 +203,10 @@ public class c2sqlV2 {
             for (String q : indivSQL) {
                 if (q.trim().startsWith("CREATE")) {
                     DbUtil.executeCreateView(q + ";", dbName);
+                } else if (q.trim().startsWith("INSERT")) {
+                    DbUtil.insertOrDelete(q + ";", dbName);
+                } else if (q.trim().startsWith("DELETE")) {
+                    DbUtil.insertOrDelete(q + ";", dbName);
                 } else
                     DbUtil.select(q + ";", dbName, pg_results, printOutput);
             }
@@ -219,7 +229,7 @@ public class c2sqlV2 {
                 DecodedQuery dQ = null;
                 for (String s : queries) {
                     dQ = CypherTokenizer.decode(s, false);
-                    unionSQL.add(SQLTranslate.translate(dQ));
+                    unionSQL.add(SQLTranslate.translateRead(dQ));
                 }
                 dQ.setSqlEquiv(SQLUnion.genUnion(unionSQL, "UNION ALL"));
                 lastDQ = dQ;
@@ -230,14 +240,27 @@ public class c2sqlV2 {
                 DecodedQuery dQ = null;
                 for (String s : queries) {
                     dQ = CypherTokenizer.decode(s, false);
-                    unionSQL.add(SQLTranslate.translate(dQ));
+                    unionSQL.add(SQLTranslate.translateRead(dQ));
                 }
                 dQ.setSqlEquiv(SQLUnion.genUnion(unionSQL, "UNION"));
                 lastDQ = dQ;
                 return dQ;
             } else {
                 DecodedQuery dQ = CypherTokenizer.decode(cypher, false);
-                dQ.setSqlEquiv(SQLTranslate.translate(dQ));
+                if (dQ.getRc() != null) {
+                    // the translation is for a read query.
+                    dQ.setSqlEquiv(SQLTranslate.translateRead(dQ));
+                } else {
+                    if (dQ.getCypherAdditionalInfo().hasDelete()) {
+                        // the translation is a delete query.
+                        dQ.setSqlEquiv(SQLTranslate.translateDelete(dQ));
+                    } else {
+                        // the translation is for an insert query.
+                        if (dQ.getCypherAdditionalInfo().getCreateClauseRel() != null) {
+                            dQ.setSqlEquiv(SQLTranslate.translateInsertRels(dQ));
+                        } else dQ.setSqlEquiv(SQLTranslate.translateInsertNodes(dQ));
+                    }
+                }
                 lastDQ = dQ;
                 return dQ;
             }

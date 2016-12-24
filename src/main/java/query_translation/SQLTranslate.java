@@ -26,7 +26,7 @@ public class SQLTranslate {
      * @return SQL string that maps to the original Cypher command.
      * @throws Exception
      */
-    public static String translate(DecodedQuery decodedQuery) throws Exception {
+    public static String translateRead(DecodedQuery decodedQuery) throws Exception {
         // SQL built up from a StringBuilder object.
         StringBuilder sql = new StringBuilder();
 
@@ -57,6 +57,113 @@ public class SQLTranslate {
         return sql.toString();
     }
 
+    public static String translateInsertNodes(DecodedQuery decodedQuery) throws Exception {
+        StringBuilder sql = new StringBuilder();
+        MatchClause createC = decodedQuery.getMc();
+        String relation = InsertUtils.findRelation(createC, 0);
+        String[] colsAndValues = InsertUtils.findColsAndValues(createC, 0);
+
+        sql.append("INSERT INTO nodes");
+        sql.append("(");
+        sql.append(colsAndValues[0]).append(", label) ");
+        sql.append("VALUES (");
+        sql.append(colsAndValues[1]).append(", '").append(relation.replace("_", ", ")).append("');");
+
+        sql.append("INSERT INTO ");
+        sql.append(relation).append("(");
+        sql.append(colsAndValues[0]).append(", id, label) ");
+        sql.append("VALUES (");
+        sql.append(colsAndValues[1]).append(", (SELECT id FROM nodes WHERE ");
+
+        String[] values = colsAndValues[1].split(", ");
+        int i = 0;
+        for (String col : colsAndValues[0].split(", ")) {
+            sql.append(col).append(" = ").append(values[i++]).append(" AND ");
+        }
+        sql.setLength(sql.length() - 5);
+        sql.append("), '").append(relation.replace("_", ", ")).append("');");
+
+        System.out.println(sql.toString());
+        return sql.toString();
+    }
+
+    public static String translateInsertRels(DecodedQuery decodedQuery) {
+        StringBuilder sql = new StringBuilder();
+        MatchClause createC = decodedQuery.getMc();
+        String[] colsAndValues = InsertUtils.findColsAndValuesRels(
+                decodedQuery.getCypherAdditionalInfo().getCreateClauseRel());
+        sql.append("INSERT INTO edges (");
+
+        if (!colsAndValues[0].equals("")) sql.append(colsAndValues[0]).append(", idl, idr, type) ");
+        else sql.append("idl, idr, type) ");
+
+        sql.append("VALUES ((");
+        if (!colsAndValues[1].equals("")) sql.append(colsAndValues[1]).append(", ");
+
+        String selectA = "SELECT id FROM " + InsertUtils.findRelation(createC, 0) + " WHERE ";
+        String[] selectAColsAndValues = InsertUtils.findColsAndValues(createC, 0);
+        String[] values = selectAColsAndValues[1].split(", ");
+        int i = 0;
+
+        for (String col : selectAColsAndValues[0].split(", ")) {
+            selectA = selectA + col + " = " + values[i++].replace("eq#", "").replace("#qe", "") + " AND ";
+        }
+        selectA = selectA.substring(0, selectA.length() - 5);
+        selectA = selectA + ")";
+
+
+        String selectB = "SELECT id FROM " + InsertUtils.findRelation(createC, 1) + " WHERE ";
+        String[] selectBColsAndValues = InsertUtils.findColsAndValues(createC, 1);
+        values = selectBColsAndValues[1].split(", ");
+        i = 0;
+        for (String col : selectBColsAndValues[0].split(", ")) {
+            selectB = selectB + col + " = " + values[i++].replace("eq#", "").replace("#qe", "") + " AND ";
+        }
+        selectB = selectB.substring(0, selectB.length() - 5);
+        selectB = selectB + ")";
+
+        sql.append(selectA).append(", (").append(selectB).append(", '").append(
+                decodedQuery.getCypherAdditionalInfo().getCreateClauseRel().getRels().get(0).getType()).append("'");
+
+        sql.append(");");
+        System.out.println(sql.toString());
+        return sql.toString();
+    }
+
+
+    public static String translateDelete(DecodedQuery decodedQuery) {
+        StringBuilder sql = new StringBuilder();
+        MatchClause deleteC = decodedQuery.getMc();
+        String relation = InsertUtils.findRelation(deleteC, 0);
+        String[] colsAndValues = InsertUtils.findColsAndValues(deleteC, 0);
+
+        sql.append("DELETE FROM nodes");
+        sql.append(" WHERE ");
+
+        String[] values = colsAndValues[1].split(", ");
+        int i = 0;
+        for (String col : colsAndValues[0].split(", ")) {
+            sql.append(col).append(" = ").append(values[i++]).append(" AND ");
+        }
+
+        if (sql.toString().endsWith(" AND ")) sql.setLength(sql.length() - 5);
+
+        sql.append(";");
+
+        sql.append("DELETE FROM ");
+        sql.append(relation).append(" WHERE ");
+        i = 0;
+        for (String col : colsAndValues[0].split(", ")) {
+            sql.append(col).append(" = ").append(values[i++]).append(" AND ");
+        }
+
+        if (sql.toString().endsWith(" AND ")) sql.setLength(sql.length() - 5);
+
+        sql.append(";");
+
+        System.out.println(sql.toString());
+        return sql.toString();
+    }
 
     /**
      * Append ORDER BY clause to the SQL statement.

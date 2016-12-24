@@ -12,6 +12,7 @@ import java.util.ArrayList;
 public class DbUtil {
     public static long lastExecTimeRead = 0;
     public static long lastExecTimeCreate = 0;
+    public static long lastExecTimeInsert = 0;
     private static Connection c = null;
     private static int numRecords = 0;
     private static boolean DB_OPEN = false;
@@ -243,4 +244,16 @@ public class DbUtil {
         stmt.executeUpdate(query);
         stmt.close();
     }
+
+    public static void insertOrDelete(String query, String dbName) throws SQLException {
+        if (!DB_OPEN) createConnection(dbName);
+        Statement stmt = c.createStatement();
+        // timing unit for creating statements.
+        long startNanoInsert = System.nanoTime();
+        stmt.executeUpdate(query);
+        long endNanoInsert = System.nanoTime();
+        lastExecTimeInsert = endNanoInsert - startNanoInsert;
+        stmt.close();
+    }
+
 }

@@ -1,5 +1,6 @@
 package translator;
 
+import clauseObjects.MatchClause;
 import parsing_lexing.CypherBaseListener;
 import parsing_lexing.CypherParser;
 
@@ -18,6 +19,7 @@ public class CypherWalker extends CypherBaseListener {
     private boolean hasCount = false;
     private boolean hasCollect = false;
     private boolean hasCase = false;
+    private boolean hasDelete = false;
     private String matchClause = null;
     private String whereClause = null;
     private String returnClause = null;
@@ -27,6 +29,9 @@ public class CypherWalker extends CypherBaseListener {
     private String latestOrderDirection = "";
     private int skipAmount = -1;
     private int limitAmount = -1;
+
+    // used for adding relationships to the database
+    private MatchClause createClauseRel;
 
     public void enterMatch(CypherParser.MatchContext ctx) {
         //optional keyword attached or not
@@ -98,6 +103,10 @@ public class CypherWalker extends CypherBaseListener {
         } else latestOrderDirection = "";
     }
 
+    public void enterDelete(CypherParser.DeleteContext ctx) {
+        hasDelete = true;
+    }
+
     void printInformation() {
         System.out.println("\n--- QUERY INFORMATION ---");
         if (matchClause != null) System.out.println("Match Clause: " + matchClause + " -- OPTIONAL = " + hasOptional);
@@ -155,5 +164,17 @@ public class CypherWalker extends CypherBaseListener {
 
     Collection<String> getAlias() {
         return returnAlias.values();
+    }
+
+    public boolean hasDelete() {
+        return hasDelete;
+    }
+
+    public MatchClause getCreateClauseRel() {
+        return createClauseRel;
+    }
+
+    public void setCreateClauseRel(MatchClause createClauseRel) {
+        this.createClauseRel = createClauseRel;
     }
 }

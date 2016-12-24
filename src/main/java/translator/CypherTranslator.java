@@ -22,66 +22,101 @@ class CypherTranslator {
     static DecodedQuery generateDecodedQuery(ArrayList<String> tokenList, CypherWalker cypherQ) throws Exception {
         // find positions of the tokens in the query (-1 means not found)
         int posOfMatch = tokenList.indexOf("match");
-        int posOfWhere = tokenList.indexOf("where");
         int posOfReturn = tokenList.indexOf("return");
-        int posOfOrder = tokenList.indexOf("order");
-        int posOfSkip = tokenList.indexOf("skip");
-        int posOfLimit = tokenList.indexOf("limit");
+        int posOfWhere = tokenList.indexOf("where");
 
-        // MATCH and RETURN always present
-        List<String> matchClause;
-        List<String> returnClause;
+        // if no MATCH keyword is present then is a CREATE statement
+        if (posOfReturn == -1) {
+            int posOfCreate = tokenList.indexOf("create");
+            int posOfDelete = tokenList.indexOf("delete");
 
-        List<String> orderClause = null;
+            MatchClause createOrDelete;
 
-        if (cypherQ.doesCluaseHaveWhere())
-            matchClause = tokenList.subList(posOfMatch + 1, posOfWhere);
-        else
-            matchClause = tokenList.subList(posOfMatch + 1, posOfReturn);
-
-        if (posOfOrder == -1) {
-            if (posOfSkip == -1 && posOfLimit == -1) {
-                returnClause = tokenList.subList(posOfReturn + 1 +
-                        ((cypherQ.hasDistinct()) ? 1 : 0), tokenList.size());
-            } else if (posOfLimit == -1) {
-                returnClause = tokenList.subList(posOfReturn + 1 + ((cypherQ.hasDistinct()) ? 1 : 0), posOfSkip);
-            } else if (posOfSkip == -1) {
-                returnClause = tokenList.subList(posOfReturn + 1 + ((cypherQ.hasDistinct()) ? 1 : 0), posOfLimit);
+            if (posOfCreate == -1) {
+                List<String> deleteClause;
+                deleteClause = tokenList.subList(posOfMatch + 1, posOfDelete);
+                createOrDelete = matchDecode(deleteClause);
             } else {
-                returnClause = tokenList.subList(posOfReturn + 1 + ((cypherQ.hasDistinct()) ? 1 : 0), posOfSkip);
+                if (posOfMatch == -1) {
+                    List<String> createClause;
+                    createClause = tokenList.subList(posOfCreate + 1, tokenList.size());
+                    createOrDelete = matchDecode(createClause);
+                } else {
+                    List<String> matchCreate;
+                    List<String> createClause;
+
+                    if (cypherQ.doesCluaseHaveWhere())
+                        matchCreate = tokenList.subList(posOfMatch + 1, posOfWhere);
+                    else
+                        matchCreate = tokenList.subList(posOfMatch + 1, posOfCreate);
+
+                    createClause = tokenList.subList(posOfCreate + 1, tokenList.size());
+
+                    createOrDelete = matchDecode(matchCreate);
+                    whereDecode(createOrDelete, cypherQ);
+                    cypherQ.setCreateClauseRel(matchDecode(createClause));
+                }
             }
+            return new DecodedQuery(createOrDelete, null, null, null, -1, -1, cypherQ);
         } else {
-            returnClause = tokenList.subList(posOfReturn + 1 + ((cypherQ.hasDistinct()) ? 1 : 0), posOfOrder);
+            int posOfOrder = tokenList.indexOf("order");
+            int posOfSkip = tokenList.indexOf("skip");
+            int posOfLimit = tokenList.indexOf("limit");
 
-            if (posOfSkip == -1 && posOfLimit == -1) {
-                orderClause = tokenList.subList(posOfOrder + 2, tokenList.size());
-            } else if (posOfLimit == -1) {
-                orderClause = tokenList.subList(posOfOrder + 2, posOfSkip);
-            } else if (posOfSkip == -1) {
-                orderClause = tokenList.subList(posOfOrder + 2, posOfLimit);
+            // MATCH and RETURN always present
+            List<String> matchClause;
+            List<String> returnClause;
+
+            List<String> orderClause = null;
+
+            if (cypherQ.doesCluaseHaveWhere())
+                matchClause = tokenList.subList(posOfMatch + 1, posOfWhere);
+            else
+                matchClause = tokenList.subList(posOfMatch + 1, posOfReturn);
+
+            if (posOfOrder == -1) {
+                if (posOfSkip == -1 && posOfLimit == -1) {
+                    returnClause = tokenList.subList(posOfReturn + 1 +
+                            ((cypherQ.hasDistinct()) ? 1 : 0), tokenList.size());
+                } else if (posOfLimit == -1) {
+                    returnClause = tokenList.subList(posOfReturn + 1 + ((cypherQ.hasDistinct()) ? 1 : 0), posOfSkip);
+                } else if (posOfSkip == -1) {
+                    returnClause = tokenList.subList(posOfReturn + 1 + ((cypherQ.hasDistinct()) ? 1 : 0), posOfLimit);
+                } else {
+                    returnClause = tokenList.subList(posOfReturn + 1 + ((cypherQ.hasDistinct()) ? 1 : 0), posOfSkip);
+                }
             } else {
-                orderClause = tokenList.subList(posOfOrder + 2, posOfSkip);
+                returnClause = tokenList.subList(posOfReturn + 1 + ((cypherQ.hasDistinct()) ? 1 : 0), posOfOrder);
+
+                if (posOfSkip == -1 && posOfLimit == -1) {
+                    orderClause = tokenList.subList(posOfOrder + 2, tokenList.size());
+                } else if (posOfLimit == -1) {
+                    orderClause = tokenList.subList(posOfOrder + 2, posOfSkip);
+                } else if (posOfSkip == -1) {
+                    orderClause = tokenList.subList(posOfOrder + 2, posOfLimit);
+                } else {
+                    orderClause = tokenList.subList(posOfOrder + 2, posOfSkip);
+                }
             }
+
+            MatchClause matchC = matchDecode(matchClause);
+            ReturnClause returnC = returnDecode(returnClause, matchC, cypherQ);
+            OrderClause orderC = null;
+
+            // if ORDER BY is present in the query
+            if (orderClause != null)
+                orderC = orderDecode(orderClause);
+
+            int skipAmount = (posOfSkip != -1) ? cypherQ.getSkipAmount() : -1;
+            int limitAmount = (posOfLimit != -1) ? cypherQ.getLimitAmount() : -1;
+
+            WhereClause wc = null;
+
+            if (cypherQ.doesCluaseHaveWhere()) {
+                wc = whereDecode(matchC, cypherQ);
+            }
+            return new DecodedQuery(matchC, returnC, orderC, wc, skipAmount, limitAmount, cypherQ);
         }
-
-        MatchClause matchC = matchDecode(matchClause);
-        ReturnClause returnC = returnDecode(returnClause, matchC, cypherQ);
-        OrderClause orderC = null;
-
-        // if ORDER BY is present in the query
-        if (orderClause != null)
-            orderC = orderDecode(orderClause);
-
-        int skipAmount = (posOfSkip != -1) ? cypherQ.getSkipAmount() : -1;
-        int limitAmount = (posOfLimit != -1) ? cypherQ.getLimitAmount() : -1;
-
-        WhereClause wc = null;
-
-        if (cypherQ.doesCluaseHaveWhere()) {
-            wc = whereDecode(matchC, cypherQ);
-        }
-
-        return new DecodedQuery(matchC, returnC, orderC, wc, skipAmount, limitAmount, cypherQ);
     }
 
     /**
