@@ -241,13 +241,18 @@ public class DbUtil {
      */
     static void createInsert(String query) throws SQLException {
         Statement stmt = c.createStatement();
+        long startNanoInsert = System.nanoTime();
         stmt.executeUpdate(query);
+        long endNanoInsert = System.nanoTime();
+        System.out.println("TIME OF QUERY : " + query.substring(0, Math.min(query.length(), 50)) + " -- " +
+                ((endNanoInsert - startNanoInsert) / 1000000.0) + "ms.");
         stmt.close();
     }
 
     public static void insertOrDelete(String query, String dbName) throws SQLException {
         if (!DB_OPEN) createConnection(dbName);
         Statement stmt = c.createStatement();
+
         // timing unit for creating statements.
         long startNanoInsert = System.nanoTime();
         stmt.executeUpdate(query);

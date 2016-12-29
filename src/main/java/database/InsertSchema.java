@@ -26,24 +26,51 @@ public class InsertSchema {
         DbUtil.createConnection(database);
 
         String createAdditonalNodeTables = insertEachLabel();
+        String createAdditionalEdgesTables = insertEachRelType();
+
+        long timeStartNodes = System.nanoTime();
         String sqlInsertNodes = insertNodes();
+        long timeEndNodes = System.nanoTime();
+
+        System.out.println("TIME TO CREATE NODES RELATION : " + ((timeEndNodes - timeStartNodes) / 1000000.0) + "ms.");
+
+        long timeStartEdges = System.nanoTime();
         String sqlInsertEdges = insertEdges();
+        long timeEndEdges = System.nanoTime();
+
+        System.out.println("TIME TO CREATE EDGES RELATION : " + ((timeEndEdges - timeStartEdges) / 1000000.0) + "ms.");
+
         String createMappingQuery = "create table query_mapping (cypher TEXT, sql TEXT, object BYTEA);";
-        String createTClosure = "CREATE MATERIALIZED VIEW tclosure AS(WITH RECURSIVE search_graph(idl, idr, depth, path, cycle) " +
+        String createTClosure = "CREATE MATERIALIZED VIEW tclosure AS(WITH RECURSIVE search_graph(idl, idr, depth, " +
+                "path, cycle) " +
                 "AS (SELECT e.idl, e.idr, 1, ARRAY[e.idl], false FROM edges e UNION ALL SELECT sg.idl, e.idr, " +
                 "sg.depth + 1, path || e.idl, e.idl = ANY(sg.path) FROM edges e, search_graph sg WHERE e.idl = " +
                 "sg.idr AND NOT cycle) SELECT * FROM search_graph where (not cycle OR not idr = ANY(path)));";
+        String forEachFunction = "CREATE FUNCTION doForEachFunc(int[], field TEXT, newV TEXT) RETURNS void AS $$ " +
+                "DECLARE x int; r record; l text; BEGIN if array_length($1, 1) > 0 THEN FOREACH x SLICE 0 " +
+                "IN ARRAY $1 LOOP FOR r IN SELECT label from nodes where id = x LOOP " +
+                "EXECUTE 'UPDATE nodes SET ' || field || '=' || quote_literal(newV) || ' WHERE id = ' || x; " +
+                "l := replace(r.label, ', ', '_'); " +
+                "EXECUTE 'UPDATE ' || l || ' SET ' || field || '=' || quote_literal(newV) || ' WHERE id = ' || x; " +
+                "END LOOP; END LOOP; END IF; END; $$ LANGUAGE plpgsql;";
 
         try {
             DbUtil.createInsert(createAdditonalNodeTables);
+            DbUtil.createInsert(createAdditionalEdgesTables);
             DbUtil.createInsert(sqlInsertNodes);
             DbUtil.createInsert(sqlInsertEdges);
             DbUtil.createInsert(createMappingQuery);
             DbUtil.createInsert(createTClosure);
+            DbUtil.createInsert(forEachFunction);
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
+        addFieldsToMetaFile();
+        DbUtil.closeConnection();
+    }
+
+    private static void addFieldsToMetaFile() {
         FileOutputStream fos;
         try {
             fos = new FileOutputStream(c2sqlV2.workspaceArea + "/meta.txt");
@@ -59,8 +86,6 @@ public class InsertSchema {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        DbUtil.closeConnection();
     }
 
     /**
@@ -96,13 +121,34 @@ public class InsertSchema {
                 bw.newLine();
             }
             bw.close();
+            bw2.close();
             fos.close();
+            fos2.close();
         } catch (IOException ioe) {
             ioe.printStackTrace();
         }
         return sb.toString();
     }
 
+    private static String insertEachRelType() {
+        StringBuilder sb = new StringBuilder();
+
+        for (String rel : SchemaTranslate.relTypes) {
+            // specific relationship types will be stored in the following
+            // format, with the name of the relation being e${type of relationship}
+            String relTableName = "e$" + rel;
+
+            sb.append("CREATE TABLE ").append(relTableName).append("(");
+
+            for (String x : SchemaTranslate.edgesRelLabels) {
+                sb.append(x).append(", ");
+            }
+            sb.setLength(sb.length() - 2);
+            sb.append("); ");
+        }
+
+        return sb.toString();
+    }
 
     /**
      * For each 'label' relation, insert the appropriate values.
@@ -124,7 +170,7 @@ public class InsertSchema {
         sb.append(") VALUES(");
 
         for (String z : SchemaTranslate.labelMappings.get(label).split(", ")) {
-            sb = getInsertString(z, sb, o);
+            sb.append(getInsertString(z, o));
         }
 
         sb.setLength(sb.length() - 2);
@@ -183,7 +229,7 @@ public class InsertSchema {
                 sbLabels = insertDataForLabels(sbLabels, label, o);
                 sb.append("(");
                 for (String z : SchemaTranslate.nodeRelLabels) {
-                    sb = getInsertString(z, sb, o);
+                    sb.append(getInsertString(z, o));
                 }
                 sb.setLength(sb.length() - 2);
                 sb.append("), ");
@@ -227,12 +273,16 @@ public class InsertSchema {
      */
     private static StringBuilder insertTableDataEdges(StringBuilder sb) {
         sb.append("INSERT INTO edges (");
+        StringBuilder sbTypes = new StringBuilder();
+
+        String columns = "";
 
         for (String y : SchemaTranslate.edgesRelLabels) {
-            sb.append(y.split(" ")[0]).append(", ");
+            columns = columns + y.split(" ")[0] + ", ";
         }
-        sb.setLength(sb.length() - 2);
-        sb.append(")");
+        columns = columns.substring(0, columns.length() - 2);
+        columns = columns + ")";
+        sb.append(columns);
 
         sb.append(" VALUES ");
 
@@ -244,43 +294,58 @@ public class InsertSchema {
                 JsonParser parser = new JsonParser();
                 JsonObject o = (JsonObject) parser.parse(line);
                 sb.append("(");
+                String values = "";
                 for (String z : SchemaTranslate.edgesRelLabels) {
-                    sb = getInsertString(z, sb, o);
+                    String v = getInsertString(z, o);
+                    values = values + v;
+                    sb.append(v);
                 }
+                values = values.substring(0, values.length() - 2);
+                sbTypes = addType(sbTypes, columns, o, values);
                 sb.setLength(sb.length() - 2);
                 sb.append("), ");
+
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
 
         sb.setLength(sb.length() - 2);
-        sb.append(";");
+        sb.append(";").append(" ").append(sbTypes.toString());
 
         return sb;
+    }
+
+    private static StringBuilder addType(StringBuilder sbTypes, String columns, JsonObject o, String values) {
+        sbTypes.append("INSERT INTO ");
+        sbTypes.append("e$").append(o.get("type").getAsString()).append("(").append(columns);
+        sbTypes.append(" VALUES (");
+        sbTypes.append(values);
+        sbTypes.append(");");
+        return sbTypes;
     }
 
     /**
      * Get correct insert string based on whether data is INT or TEXT.
      *
      * @param z
-     * @param sb
      * @param o
      * @return
      */
-    private static StringBuilder getInsertString(String z, StringBuilder sb, JsonObject o) {
+    private static String getInsertString(String z, JsonObject o) {
+        String temp;
         try {
             if (z.endsWith("INT")) {
                 int value = o.get(z.split(" ")[0]).getAsInt();
-                sb.append(value).append(", ");
+                temp = value + ", ";
             } else {
                 // is text
                 String value = o.get(z.split(" ")[0]).getAsString();
-                sb.append("'").append(value).append("', ");
+                temp = "'" + value + "', ";
             }
         } catch (NullPointerException npe) {
-            sb.append("null, ");
+            temp = "null, ";
         }
-        return sb;
+        return temp;
     }
 }

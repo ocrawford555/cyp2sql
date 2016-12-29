@@ -12,6 +12,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 
+/**
+ * Each dump file is split into chunks which are operated on by individual threads using this
+ * class.
+ */
 class PerformWork implements Runnable {
     private ArrayList<String> lines;
     private BufferedWriter bwNodes;
@@ -22,24 +26,31 @@ class PerformWork implements Runnable {
 
         FileOutputStream fosNodes;
         FileOutputStream fosEdges;
+
         try {
-            fosNodes = new FileOutputStream(
-                    SchemaTranslate.nodesFile.replace(".txt", file + ".txt"));
             //Construct BufferedReader from InputStreamReader
+            fosNodes = new FileOutputStream(SchemaTranslate.nodesFile.replace(".txt", file + ".txt"));
             this.bwNodes = new BufferedWriter(new OutputStreamWriter(fosNodes));
 
-            fosEdges = new FileOutputStream(
-                    SchemaTranslate.edgesFile.replace(".txt", file + ".txt"));
             //Construct BufferedReader from InputStreamReader
+            fosEdges = new FileOutputStream(SchemaTranslate.edgesFile.replace(".txt", file + ".txt"));
             this.bwEdges = new BufferedWriter(new OutputStreamWriter(fosEdges));
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
+    /**
+     * Runnable methods that parses the Neo4J dump into a JSON representation that is used later on
+     * when executing the new relations on Postgres.
+     */
     public void run() {
         Set<Map.Entry<String, JsonElement>> entries;
         Matcher m;
+
+        int totalLines = lines.size();
+        int linesRead = 0;
+        int previousPercent = 0;
 
         for (String s : lines) {
             // remove CREATE characters
@@ -126,6 +137,10 @@ class PerformWork implements Runnable {
                 o.addProperty("idR", idR);
                 o.addProperty("type", relationship);
 
+                if (!SchemaTranslate.relTypes.contains(relationship)) {
+                    SchemaTranslate.relTypes.add(relationship);
+                }
+
                 entries = o.entrySet();
                 for (Map.Entry<String, JsonElement> entry : entries) {
                     if (!SchemaTranslate.edgesRelLabels.contains(entry.getKey() + " TEXT") &&
@@ -146,6 +161,13 @@ class PerformWork implements Runnable {
                     e.printStackTrace();
                 }
             }
+
+            linesRead++;
+            int percent = (linesRead * 100 / totalLines);
+            if (previousPercent < (percent - 5)) {
+                System.out.println(percent + "% read.");
+                previousPercent = percent;
+            }
         }
 
         try {
@@ -156,6 +178,15 @@ class PerformWork implements Runnable {
         }
     }
 
+    /**
+     * The output module of Apoc requires knowledge of all the possible properties of nodes. This method
+     * stores that information in a meta file.
+     *
+     * @param nodeLabel Node label
+     * @param key       Node property
+     * @param testValue An example value of the property, to see if it is an INTEGER or STRING. This can fail,
+     *                  for example if the value is normally a string, but one value is '1'. Need to fix this.
+     */
     private void addToLabelMap(String nodeLabel, String key, String testValue) {
         if (SchemaTranslate.labelMappings.keySet().contains(nodeLabel)) {
             String currentValue = SchemaTranslate.labelMappings.get(nodeLabel);

@@ -7,22 +7,33 @@ import java.io.*;
 import java.util.*;
 import java.util.regex.Pattern;
 
+/**
+ * Class that translates the graph database schema that Neo4J uses, into a set of relations
+ * that can be executed on a relational database. This includes relations for all the nodes
+ * and relationships, as well as more specific ones for each label type and type of
+ * relationship. Additional metafiles are created to help the translator and output module
+ * of Apoc.
+ * <p>
+ * The class makes use of parallel processing on the original dump file to optimise speed up.
+ * The original dump file from Neo4J needs to be parsed beforehand, as it contains unnecessary
+ * line breaks, as well as characters that will not work in SQL. The config.properties file
+ * states the location of the 'work area', which is used as scratch space for this method.
+ */
 public class SchemaTranslate {
     // storing all the labels for nodes and edges.
     public static List<String> nodeRelLabels = Collections.synchronizedList(new ArrayList<>());
     public static List<String> edgesRelLabels = Collections.synchronizedList(new ArrayList<>());
-
     // storing separate information for types of nodes
     public static Map<String, String> labelMappings = Collections.synchronizedMap(new HashMap<>());
-
+    // storing separate information on the types of relationships
+    public static List<String> relTypes = Collections.synchronizedList(new ArrayList<>());
     // workspace area for both nodes and edges
     public static String nodesFile = c2sqlV2.workspaceArea + "/nodes.txt";
     public static String edgesFile = c2sqlV2.workspaceArea + "/edges.txt";
-
     // JSON Parser for creating JSON objects from the text file.
     // passed to all of the threads
     static JsonParser parser = new JsonParser();
-
+    private static char[] alphabet = "abcdefghijklmnopqrstuvwxyz".toCharArray();
     // regex for deciding whether a line is a node or a relationship
     private static String patternForNode = "(_\\d+:.*)";
     static Pattern patternN = Pattern.compile(patternForNode);
@@ -46,11 +57,10 @@ public class SchemaTranslate {
         // number of concurrent threads to work on dump file. Currently 4. Test.
         final int segments = 4;
         final int amountPerSeg = (int) Math.ceil(count / segments);
-
-        ArrayList<String> s1 = new ArrayList<>();
-        ArrayList<String> s2 = new ArrayList<>();
-        ArrayList<String> s3 = new ArrayList<>();
-        ArrayList<String> s4 = new ArrayList<>();
+        ArrayList<String>[] group = new ArrayList[segments];
+        for (int i = 0; i < segments; i++) {
+            group[i] = new ArrayList<>();
+        }
 
         try {
             // open correctly preparsed file
@@ -63,65 +73,30 @@ public class SchemaTranslate {
             int segNum = 0;
             int amountInSeg = 0;
 
+            System.out.println("***SPLITTING FILE INTO SEGMENTS***");
             while ((line = br.readLine()) != null) {
                 if (amountInSeg++ <= amountPerSeg) {
-                    switch (segNum) {
-                        case 0:
-                            s1.add(line);
-                            break;
-                        case 1:
-                            s2.add(line);
-                            break;
-                        case 2:
-                            s3.add(line);
-                            break;
-                        case 3:
-                            s4.add(line);
-                            break;
-                    }
+                    group[segNum].add(line);
                 } else {
                     segNum++;
-                    switch (segNum) {
-                        case 0:
-                            s1.add(line);
-                            break;
-                        case 1:
-                            s2.add(line);
-                            break;
-                        case 2:
-                            s3.add(line);
-                            break;
-                        case 3:
-                            s4.add(line);
-                            break;
-                    }
+                    group[segNum].add(line);
                     amountInSeg = 1;
                 }
             }
+            System.out.println("\n***SPLITTING COMPLETE***\n");
 
-            // file indicators for the four threads to output to.
-            String[] files = {"a", "b", "c", "d"};
+            // file indicators for the threads to output on.
+            String[] files = new String[segments];
+            for (int j = 0; j < segments; j++) {
+                files[j] = String.valueOf(alphabet[j]);
+            }
 
             Thread[] ts = new Thread[segments];
             for (int i = 0; i < ts.length; i++) {
-                ArrayList<String> temp = null;
-                switch (i) {
-                    case 0:
-                        temp = s1;
-                        break;
-                    case 1:
-                        temp = s2;
-                        break;
-                    case 2:
-                        temp = s3;
-                        break;
-                    case 3:
-                        temp = s4;
-                        break;
-                }
-                ts[i] = new Thread(new PerformWork(temp, files[i]));
+                ts[i] = new Thread(new PerformWork(group[i], files[i]));
             }
 
+            System.out.println("***PARSING***");
             for (Thread q : ts) {
                 q.start();
             }
@@ -135,6 +110,7 @@ public class SchemaTranslate {
                     e.printStackTrace();
                 }
             }
+            System.out.println("***PARSING COMPLETE***\n");
 
             combineWork(files);
 
@@ -148,58 +124,40 @@ public class SchemaTranslate {
             hs.addAll(edgesRelLabels);
             edgesRelLabels.clear();
             edgesRelLabels.addAll(hs);
+            hs.clear();
+
+            hs.addAll(relTypes);
+            relTypes.clear();
+            relTypes.addAll(hs);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     /**
-     * Concatenate result of individual threads to one file. One method call does this
-     * for both the nodes and relationships.
+     * Preprocess the original file to remove weird line breaks and to format
+     * correctly for insertion into a relational backend.
      *
-     * @param files 4 files resulted from reading initial dump.
-     * @throws IOException
-     */
-    private static void combineWork(String[] files) throws IOException {
-        OutputStream out = null;
-        byte[] buf;
-
-        for (int i = 0; i < 2; i++) {
-            String file = (i == 0) ? nodesFile : edgesFile;
-            out = new FileOutputStream(file);
-            buf = new byte[1024];
-            for (String a : files) {
-                InputStream in = new FileInputStream(file.replace(".txt", a + ".txt"));
-                int b;
-                while ((b = in.read(buf)) >= 0) {
-                    out.write(buf, 0, b);
-                    out.flush();
-                }
-                in.close();
-                File f = new File(file.replace(".txt", a + ".txt"));
-                f.delete();
-            }
-        }
-
-        out.close();
-    }
-
-    /**
-     * Perform an initial scan of the file and remove invalid new line characters.
-     *
-     * @param file
-     * @return New file
+     * @param file Location of the dump file.
+     * @return Number of lines in the file, or -1 if there was a failure in this method.
      */
     private static int performPreProcessFile(String file) {
+        System.out.println("***PRE PROCESSING FILE***");
+
         FileInputStream fis;
         FileOutputStream fos;
         int count = 0;
 
         try {
             fis = new FileInputStream(file);
+
             //Construct BufferedReader from InputStreamReader
             BufferedReader br = new BufferedReader(new InputStreamReader(fis));
             String line;
+
+            long totalBytes = new File(file).length();
+            long bytesRead = 0;
+            int previousPercent = 0;
 
             fos = new FileOutputStream(file.replace(".txt", "_new.txt"));
 
@@ -227,6 +185,13 @@ public class SchemaTranslate {
                 } else {
                     output += line;
                 }
+
+                bytesRead += line.length();
+                int percent = (int) (bytesRead * 100 / totalBytes);
+                if (previousPercent < percent) {
+                    System.out.println(percent + "% read.");
+                    previousPercent = percent;
+                }
             }
 
             br.close();
@@ -237,7 +202,46 @@ public class SchemaTranslate {
             e.printStackTrace();
             return -1;
         }
+
+        // delete the original file as no longer needed.
+        File f = new File(file);
+        f.delete();
+
+        System.out.println("***PRE PROCESSING COMPLETE***\n");
         return count;
     }
 
+    /**
+     * Concatenate result of individual threads to one file. One method call does this
+     * for both the nodes and relationships.
+     *
+     * @param files n files resulted from reading initial dump. (where n is the number of files created from
+     *              the last step).
+     * @throws IOException Error with the text files being written to.
+     */
+    private static void combineWork(String[] files) throws IOException {
+        System.out.println("***COMBINING FILES***");
+        OutputStream out = null;
+        byte[] buf;
+
+        for (int i = 0; i < 2; i++) {
+            String file = (i == 0) ? nodesFile : edgesFile;
+            out = new FileOutputStream(file);
+            buf = new byte[1024];
+
+            for (String indivFile : files) {
+                InputStream in = new FileInputStream(file.replace(".txt", indivFile + ".txt"));
+                int b;
+                while ((b = in.read(buf)) >= 0) {
+                    out.write(buf, 0, b);
+                    out.flush();
+                }
+                in.close();
+                File f = new File(file.replace(".txt", indivFile + ".txt"));
+                f.delete();
+            }
+        }
+        out.close();
+        System.out.println("\n***COMBINING COMPLETE***");
+    }
 }

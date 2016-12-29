@@ -277,7 +277,7 @@ class MultipleRel {
                     if (cRel.getId() != null && cRel.getId().equals(cR.getNodeID())) {
                         String prop = cR.getField();
                         int relPos = cRel.getPosInClause();
-                        String idRel = (relPos == 1) ? "a" : (relPos == 2) ? "b" : (relPos == 3) ? "c" : "a";
+                        String idRel = String.valueOf(alphabet[relPos - 1]);
                         relsNeeded = TranslateUtils.addToRelsNeeded(relsNeeded, idRel);
 
                         if (cR.getCaseString() != null) {
