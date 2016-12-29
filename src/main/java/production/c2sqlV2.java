@@ -1,10 +1,12 @@
 package production;
 
+import clauseObjects.CypForEach;
 import clauseObjects.DecodedQuery;
 import database.CypherDriver;
 import database.DbUtil;
 import database.InsertSchema;
 import org.apache.commons.io.FileUtils;
+import query_translation.SQLForEach;
 import query_translation.SQLTranslate;
 import query_translation.SQLUnion;
 import query_translation.SQLWith;
@@ -68,7 +70,7 @@ public class c2sqlV2 {
         neoPW = fileLocations[6];
 
         if (args.length != 3 && args.length != 4) {
-            System.err.println("Incorrect usage of Cyp2SQL v1 : <schema|translate> " +
+            System.err.println("Incorrect usage of Cyp2SQL v2 : <schema|translate> " +
                     "<schemaFile|queriesFile> <databaseName>");
             System.exit(1);
         } else {
@@ -121,7 +123,9 @@ public class c2sqlV2 {
                         sql = (String) mapping[0];
                         returnItemsForCypher = (String[]) mapping[1];
                     } else {
-                        if (line.toLowerCase().contains(" with ")) {
+                        if (line.toLowerCase().contains(" foreach ")) {
+                            sql = convertCypherForEach(line);
+                        } else if (line.toLowerCase().contains(" with ")) {
                             sql = convertCypherWith(line);
                         } else {
                             if (line.contains("match") && line.contains("create")) line = line.replace(",", "-[]-");
@@ -160,6 +164,15 @@ public class c2sqlV2 {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private static String convertCypherForEach(String line) {
+        String changeLine = line.toLowerCase().replace("with", "return");
+        String[] feParts = changeLine.toLowerCase().split(" foreach ");
+        DecodedQuery dQ = convertCypherToSQL(feParts[0].trim() + ";");
+        CypForEach cypForEach = new CypForEach(feParts[1].trim());
+
+        return SQLForEach.genQuery(dQ.getSqlEquiv(), cypForEach);
     }
 
     private static void resetExecTimes() {
