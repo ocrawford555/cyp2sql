@@ -40,7 +40,6 @@ public class CypherWalker extends CypherBaseListener {
     }
 
     public void enterExpression(CypherParser.ExpressionContext ctx) {
-        //System.out.println(ctx.getParent().getRuleIndex());
         switch (ctx.getParent().getRuleIndex()) {
             case 23:
                 skipAmount = Integer.parseInt(ctx.getText());

@@ -80,8 +80,6 @@ class TranslateUtils {
      * @return
      */
     static StringBuilder addWhereClause(StringBuilder sql, String value) {
-        System.out.println(value);
-
         // format part of the where clause correctly for further parsing.
         if (!value.contains("#")) value = "eq#" + value + "#qe";
 
@@ -143,9 +141,9 @@ class TranslateUtils {
         String stmt = "'%";
         String[] labels = label.split(", ");
         for (String l : labels) {
-            stmt = stmt + l + "%' AND " + id + (id == null ? "" : ".") + "label LIKE '%";
+            stmt = stmt + l + "%' AND " + (id == null ? "" : (id + ".")) + "label LIKE '%";
         }
-        stmt = stmt.substring(0, stmt.length() - (19 + (id == null ? 0 : 1)));
+        stmt = stmt.substring(0, stmt.length() - (18 + (id == null ? 0 : 1)));
         return stmt;
     }
 

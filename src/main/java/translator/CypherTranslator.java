@@ -444,7 +444,6 @@ class CypherTranslator {
 
     private static WhereClause extractWhere(String allClause, MatchClause matchC, WhereClause wc) throws Exception {
         allClause = allClause.toLowerCase();
-        System.out.println(allClause);
         ArrayList<String> whereComponents = new ArrayList<>();
         Map<String, String> whereMapping = new HashMap<>();
 
@@ -497,8 +496,6 @@ class CypherTranslator {
                 addCondition(idAndValue, matchC, "ge", typeBooleanA);
             }
         }
-
-        System.out.println(wc.getComponents());
 
         return wc;
     }

@@ -61,7 +61,8 @@ public class InsertSchema {
             DbUtil.createInsert(sqlInsertNodes);
             DbUtil.createInsert(sqlInsertEdges);
             DbUtil.createInsert(createMappingQuery);
-            DbUtil.createInsert(createTClosure);
+            // tclosure can take up excessive disk space and time - do not run unless sure is ok!
+            //DbUtil.createInsert(createTClosure);
             DbUtil.createInsert(forEachFunction);
         } catch (SQLException e) {
             e.printStackTrace();

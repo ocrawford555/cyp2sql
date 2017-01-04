@@ -36,7 +36,7 @@ public class SQLTranslate {
         if (decodedQuery.getMc().getRels().isEmpty()) {
             sql = NoRels.translate(sql, decodedQuery);
         } else if (decodedQuery.getMc().isVarRel() && decodedQuery.getMc().getRels().size() == 1) {
-            sql = SingleVarRel.translate(sql, decodedQuery, false);
+            sql = SingleVarRel.translate(sql, decodedQuery, true);
         } else {
             sql = MultipleRel.translate(sql, decodedQuery);
 

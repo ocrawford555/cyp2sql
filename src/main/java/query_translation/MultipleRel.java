@@ -51,8 +51,9 @@ class MultipleRel {
             String labelC2 = TranslateUtils.getLabelType(c2.getType());
 
             String typeRel = cR.getType();
-            if (typeRel == null) typeRel = "edges";
-            typeRel = "e$" + typeRel;
+            if (typeRel == null) {
+                typeRel = "edges";
+            } else typeRel = "e$" + typeRel;
 
             switch (cR.getDirection()) {
                 case "right":
@@ -301,7 +302,7 @@ class MultipleRel {
 
         String table = TranslateUtils.getTable(returnC);
 
-        if (needNodeTable) sql.append(" FROM ").append(table).append(" n, ");
+        if (needNodeTable) sql.append(" FROM ").append(table).append(" n, ").append(relsNeeded);
         else sql.append(" FROM ").append(relsNeeded);
 
         int numRels = matchC.getRels().size();
@@ -364,13 +365,15 @@ class MultipleRel {
         ArrayList<String> nodeIDS = new ArrayList<>();
         ArrayList<String> crossResults = new ArrayList<>();
 
+        int nullCount = 0;
+
         for (CypNode cN : matchC.getNodes()) {
             if (cN.getId() != null) {
                 if (nodeIDS.contains(cN.getId())) {
                     crossResults.add(nodeIDS.indexOf(cN.getId()) + "," +
-                            (nodeIDS.size() + crossResults.size()));
+                            (nodeIDS.size() + crossResults.size() + nullCount));
                 } else nodeIDS.add(cN.getId());
-            }
+            } else nullCount++;
         }
 
         for (CypReturn cR : returnC.getItems()) {
@@ -426,7 +429,6 @@ class MultipleRel {
         }
 
         if (sql.toString().endsWith(" AND ")) sql.setLength(sql.length() - 5);
-
         if (sql.toString().endsWith(" WHERE ")) sql.setLength(sql.length() - 7);
         return sql;
     }

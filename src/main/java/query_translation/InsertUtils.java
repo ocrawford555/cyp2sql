@@ -12,7 +12,6 @@ class InsertUtils {
     static String findRelation(MatchClause createC, int index) {
         String labels = createC.getNodes().get(index).getType();
         labels = labels.replace(", ", "_");
-        System.out.println(labels);
         return labels;
     }
 
