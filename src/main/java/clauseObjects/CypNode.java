@@ -3,12 +3,19 @@ package clauseObjects;
 import com.google.gson.JsonObject;
 
 /**
- * Class for storing nodes from a Cypher query.
+ * Class for storing nodes from a Cypher query, that are present in the MATCH clause.
  */
 public class CypNode {
+    // where the node is in relation to the whole MATCH clause (starts at 1).
     private int posInClause;
+
+    // the id of the node if it has one.
     private String id;
+
+    // any labels belonging to the node (separated by a comma if there are multiple labels).
     private String labels;
+
+    // any properties of the node are stored as they are represented in Cypher: JSON object.
     private JsonObject props;
 
     public CypNode(int posInClause, String id, String type, JsonObject props) {

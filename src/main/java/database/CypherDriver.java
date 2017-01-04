@@ -23,11 +23,13 @@ public class CypherDriver {
      *
      * @param query          Cypher to execute.
      * @param cypher_results File to store the results.
+     * @param returnItems    Array containing the items to return, used when outputting the results to disk.
      * @param printOutput    Set to true to store the outputs of the query on disk.
      */
     public static void run(String query, String cypher_results, String[] returnItems, boolean printOutput) {
         // database essentials
-        Driver driver = GraphDatabase.driver("bolt://localhost", AuthTokens.basic(Cyp2SQL_v2_Apoc.neoUN, Cyp2SQL_v2_Apoc.neoPW));
+        Driver driver = GraphDatabase.driver("bolt://localhost",
+                AuthTokens.basic(Cyp2SQL_v2_Apoc.neoUN, Cyp2SQL_v2_Apoc.neoPW));
         Session session = driver.session();
 
         // timing unit
@@ -99,12 +101,12 @@ public class CypherDriver {
                 writer.close();
 
                 Cyp2SQL_v2_Apoc.numResultsNeo = countRecords;
-
             } catch (FileNotFoundException | UnsupportedEncodingException e) {
                 e.printStackTrace();
             }
         }
 
+        // close the database connection.
         session.close();
         driver.close();
     }

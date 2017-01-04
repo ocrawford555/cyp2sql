@@ -57,7 +57,7 @@ public class SQLTranslate {
         return sql.toString();
     }
 
-    public static String translateInsert(DecodedQuery decodedQuery) throws Exception {
+    public static String translateInsert(DecodedQuery decodedQuery) {
         StringBuilder sql = new StringBuilder();
         MatchClause createC = decodedQuery.getMc();
 

@@ -16,7 +16,7 @@ class MultipleRel {
     // of the queries. Assumption is that # of relationships in a query has an upper bound of 26.
     private static final char[] alphabet = "abcdefghijklmnopqrstuvwxyz".toCharArray();
 
-    static StringBuilder translate(StringBuilder sql, DecodedQuery decodedQuery) throws Exception {
+    static StringBuilder translate(StringBuilder sql, DecodedQuery decodedQuery) {
         sql = obtainWithClause(sql, decodedQuery.getMc(), decodedQuery.getWc());
         sql = obtainSelectAndFromClause(decodedQuery.getRc(), decodedQuery.getMc(), sql,
                 decodedQuery.getCypherAdditionalInfo().hasDistinct(),

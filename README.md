@@ -1,8 +1,8 @@
 # Cypher to SQL Translator Tool - _Apoc_
 
->_version 2.1_
+>_version 2.2_
 
-_Apoc_ v2.1 is a tool that will perform automatic translation of both 
+_Apoc_ v2.2 is a tool that will perform automatic translation of both 
 graph schemas and graph queries in Neo4J and Cypher respectively, 
 to a relational schema and relational query language (SQL).
 This is an individual project for the Part II Tripos of 
@@ -61,16 +61,14 @@ Computer Science at the University of Cambridge.
 |MATCH (n:Actor:Director)-[:ACTS_IN]->(m:Movie {genre:"Horror"}) RETURN n.name UNION MATCH (n:Actor:Director)-[:ACTS_IN]->(m:Movie {genre:"Drama"}) RETURN n.name UNION MATCH (n:Actor:Director)-[:ACTS_IN]->(m:Movie {genre:"Horror"}) RETURN n.name|
 |MATCH (n:Actor:Director)-[:DIRECTED]->(m:Movie {genre:"Action"}) return m.title As TitleFilm, m.imdbId As IMDBRef|
 |MATCH (a:Actor)-[r:ACTS_IN]->(b:Movie) WHERE b.title = "Love Actually" RETURN r.name AS Role|
-|CREATE (n:Person:Actor:Director {name:"Oliver Crawford"})|
-|CREATE (n:Movie {title:"Amazing Days", genre:"Comedy"})|
-|MATCH (a:Person:Actor:Director),(b:Movie) WHERE a.name = "Oliver Crawford" AND b.title = "Amazing Days" CREATE UNIQUE (a)-[r:ACTS_IN]->(b)|
+|CREATE (n:Person:Actor:Director {name:"Oliver Crawford"})-[:ACTS_IN]->(fe:Movie {title:"Amazing Days", genre:"Comedy"})|
 |MATCH (a:Person)-[:ACTS_IN]->(b:Movie {title:"Amazing Days"}) RETURN a.name AS NewActorDirector|
 |MATCH (n:Person:Actor:Director {name:"Oliver Crawford"}) DETACH DELETE n|
 |MATCH (n:Movie {title:"Amazing Days"}) DETACH DELETE n|
 |MATCH (m:Movie {genre:"Poor comedy..."})<-[:ACTS_IN]-(:Actor {name:"Jennifer Aniston"}) WITH collect(m) AS ms FOREACH (x in ms | set x.genre = "Comedy")|
-|MATCH (u:User {name:"Olliver"}) WITH collect(u) AS ms FOREACH (x in ms  set x.name = "Oliver")|
-|MATCH (u:User {name:"Olliver"}) WITH collect(u) AS ms FOREACH (x in ms  set x.name = "Oliver")|
-|MATCH (eng {language:"en"}) WITH collect(eng) AS ms FOREACH (x in ms  set x.language = "English")|
+|MATCH (u:User {name:"Olliver"}) WITH collect(u) AS ms FOREACH (x in ms | set x.name = "Oliver")|
+|MATCH (u:User {name:"Olliver"}) WITH collect(u) AS ms FOREACH (x in ms | set x.name = "Oliver")|
+|MATCH (eng {language:"en"}) WITH collect(eng) AS ms FOREACH (x in ms | set x.language = "English")|
 
 
 ## Instructions for Running

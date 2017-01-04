@@ -12,8 +12,7 @@ public class CypRel {
     private JsonObject props;
     private String direction;
 
-    public CypRel(int posInClause, String id, String type, JsonObject props
-            , String direction) {
+    public CypRel(int posInClause, String id, String type, JsonObject props, String direction) {
         this.posInClause = posInClause;
         this.id = id;
         this.type = type;

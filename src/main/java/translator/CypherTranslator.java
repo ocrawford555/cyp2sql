@@ -115,7 +115,7 @@ class CypherTranslator {
      *
      * @param matchClause The tokens comprising the MATCH clause of Cypher.
      * @return MatchClause object with all the important information inside it.
-     * @throws Exception
+     * @throws Exception Error in the clause.
      */
     private static MatchClause matchDecode(List<String> matchClause) throws Exception {
         MatchClause m = new MatchClause();
@@ -219,10 +219,10 @@ class CypherTranslator {
     /**
      * Extract the relationships from the MATCH clause.
      *
-     * @param clause
-     * @param m
-     * @return
-     * @throws Exception
+     * @param clause Token version of the clause.
+     * @param m Internal representation of the MATCH clause.
+     * @return An ArrayList of CypRel objects that correspond to the relationships (if any) described by Cypher.
+     * @throws Exception Error in the clause.
      */
     private static ArrayList<CypRel> extractRels(List<String> clause, MatchClause m) throws Exception {
         ArrayList<CypRel> rels = new ArrayList<>();

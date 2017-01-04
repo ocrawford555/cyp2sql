@@ -212,8 +212,8 @@ public class DbUtil {
      *               generated during the conversion process, and it is required to make the Cypher driver write the
      *               output of Neo4J to a local file correctly.
      * @param dbName Database name to execute SQL against.
-     * @throws SQLException
-     * @throws IOException
+     * @throws SQLException Error in executing on the database.
+     * @throws IOException Error in serialisation of object.
      */
     public static void insertMapping(String cypher, String sql, Object obj, String dbName)
             throws SQLException, IOException {
@@ -253,6 +253,13 @@ public class DbUtil {
         stmt.close();
     }
 
+    /**
+     * Method for executing an SQL statement which will either insert or delete records.
+     *
+     * @param query  SQL statement to execute.
+     * @param dbName Database name of the database to execute the statement on.
+     * @throws SQLException Error with the transaction.
+     */
     public static void insertOrDelete(String query, String dbName) throws SQLException {
         if (!DB_OPEN) createConnection(dbName);
         Statement stmt = c.createStatement();
@@ -262,6 +269,7 @@ public class DbUtil {
         stmt.executeUpdate(query);
         long endNanoInsert = System.nanoTime();
         lastExecTimeInsert += (endNanoInsert - startNanoInsert);
+
         stmt.close();
     }
 
