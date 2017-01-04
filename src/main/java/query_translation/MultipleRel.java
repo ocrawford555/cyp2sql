@@ -50,35 +50,43 @@ class MultipleRel {
             String labelC1 = TranslateUtils.getLabelType(c1.getType());
             String labelC2 = TranslateUtils.getLabelType(c2.getType());
 
+            String typeRel = cR.getType();
+            if (typeRel == null) typeRel = "edges";
+            typeRel = "e$" + typeRel;
+
             switch (cR.getDirection()) {
                 case "right":
-                    sql.append(" FROM ").append(labelC1).append(" n1 " + "INNER JOIN edges e").append(indexRel + 1)
+                    sql.append(" FROM ").append(labelC1).append(" n1 " + "INNER JOIN ").append(typeRel).append(" e")
+                            .append(indexRel + 1)
                             .append(" on n1.id = e").append(indexRel + 1).append(".idl ")
                             .append("INNER JOIN ").append(labelC2).append(" n2 on e").append(indexRel + 1)
                             .append(".idr = n2.id");
-                    sql = obtainWhereInWithClause(cR, matchC, sql, false, indexRel, wc);
+                    sql = obtainWhereInWithClause(cR, matchC, sql, false, indexRel, wc, labelC1, labelC2);
                     break;
                 case "left":
-                    sql.append(" FROM ").append(labelC1).append(" n1 " + "INNER JOIN edges e").append(indexRel + 1)
+                    sql.append(" FROM ").append(labelC1).append(" n1 " + "INNER JOIN ").append(typeRel).append(" e")
+                            .append(indexRel + 1)
                             .append(" on n1.id = e").append(indexRel + 1).append(".idr ")
                             .append("INNER JOIN ").append(labelC2).append(" n2 on e").append(indexRel + 1)
                             .append(".idl = n2.id");
-                    sql = obtainWhereInWithClause(cR, matchC, sql, false, indexRel, wc);
+                    sql = obtainWhereInWithClause(cR, matchC, sql, false, indexRel, wc, labelC1, labelC2);
                     break;
                 case "none":
-                    sql.append(" FROM ").append(labelC1).append(" n1 " + "INNER JOIN edges e").append(indexRel + 1)
+                    sql.append(" FROM ").append(labelC1).append(" n1 INNER JOIN ").append(typeRel).append(" e")
+                            .append(indexRel + 1)
                             .append(" on n1.id = e").append(indexRel + 1).append(".idl ")
                             .append("INNER JOIN ").append(labelC2).append(" n2 on e").append(indexRel + 1)
                             .append(".idr = n2.id");
-                    sql = obtainWhereInWithClause(cR, matchC, sql, true, indexRel, wc);
+                    sql = obtainWhereInWithClause(cR, matchC, sql, true, indexRel, wc, labelC1, labelC2);
                     sql.append("SELECT n1.id AS ").append(withAlias).append(1).append(", ");
                     sql.append("n2.id AS ").append(withAlias).append(2);
                     sql.append(", e").append(indexRel + 1).append(".*");
-                    sql.append(" FROM ").append(labelC1).append(" n1 " + "INNER JOIN edges e").append(indexRel + 1)
+                    sql.append(" FROM ").append(labelC1).append(" n1 INNER JOIN ").append(typeRel).append(" e")
+                            .append(indexRel + 1)
                             .append(" on n1.id = e").append(indexRel + 1).append(".idr ")
                             .append("INNER JOIN ").append(labelC2).append(" n2 on e").append(indexRel + 1)
                             .append(".idl = n2.id");
-                    sql = obtainWhereInWithClause(cR, matchC, sql, false, indexRel, wc);
+                    sql = obtainWhereInWithClause(cR, matchC, sql, false, indexRel, wc, labelC1, labelC2);
                     break;
             }
 
@@ -91,18 +99,19 @@ class MultipleRel {
     }
 
     /**
-     * Obtains the WHERE within each WITH CTE.
-     *
-     * @param cR              Relationship to map.
-     * @param matchC          Match Clause of Cypher.
-     * @param sql             Existing SQL.
-     * @param isBiDirectional Does the Cypher relationship map both directions (i.e. -[]-)
-     * @param indexRel        Where is the relationship in the whole context of the match clause (index starts at 1)
-     * @param wc              Where Clause of Cypher.
-     * @return New SQL.
+     * @param cR
+     * @param matchC
+     * @param sql
+     * @param isBiDirectional
+     * @param indexRel
+     * @param wc
+     * @param nodeLabel1
+     * @param nodeLabel2
+     * @return
      */
     private static StringBuilder obtainWhereInWithClause(CypRel cR, MatchClause matchC, StringBuilder sql,
-                                                         boolean isBiDirectional, int indexRel, WhereClause wc) {
+                                                         boolean isBiDirectional, int indexRel, WhereClause wc,
+                                                         String nodeLabel1, String nodeLabel2) {
         boolean includesWhere = false;
         int posOfRel = cR.getPosInClause();
 
@@ -110,7 +119,6 @@ class MultipleRel {
         JsonObject leftProps = leftNode.getProps();
         CypNode rightNode = obtainNode(matchC, posOfRel + 1);
         JsonObject rightProps = rightNode.getProps();
-        String typeRel = cR.getType();
         JsonObject o = cR.getProps();
 
         if (leftProps != null) {
@@ -130,7 +138,7 @@ class MultipleRel {
             sql.append(") AND ");
         }
 
-        if (leftNode.getType() != null) {
+        if (leftNode.getType() != null && nodeLabel1.equals("nodes")) {
             if (!includesWhere) {
                 sql.append(" WHERE ");
                 includesWhere = true;
@@ -139,23 +147,13 @@ class MultipleRel {
             sql.append(TranslateUtils.genLabelLike(leftNode, "n1")).append(" AND ");
         }
 
-        if (rightNode.getType() != null) {
+        if (rightNode.getType() != null && nodeLabel2.equals("nodes")) {
             if (!includesWhere) {
                 sql.append(" WHERE ");
                 includesWhere = true;
             }
             sql.append("n2.label LIKE ");
             sql.append(TranslateUtils.genLabelLike(rightNode, "n2")).append(" AND ");
-        }
-
-        if (typeRel != null) {
-            if (!includesWhere) {
-                sql.append(" WHERE ");
-                includesWhere = true;
-            }
-
-            sql.append("e").append(indexRel + 1).append(".type = '").append(typeRel);
-            sql.append("' AND ");
         }
 
         if (o != null) {

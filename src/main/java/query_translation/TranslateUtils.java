@@ -3,7 +3,7 @@ package query_translation;
 import clauseObjects.*;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import production.c2sqlV2;
+import production.Cyp2SQL_v2_Apoc;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -162,7 +162,7 @@ class TranslateUtils {
         int changed = 0;
 
         try {
-            fis = new FileInputStream(c2sqlV2.workspaceArea + "/meta_tables.txt");
+            fis = new FileInputStream(Cyp2SQL_v2_Apoc.workspaceArea + "/meta_tables.txt");
             BufferedReader br = new BufferedReader(new InputStreamReader(fis));
             String line;
             while ((line = br.readLine()) != null) {
@@ -185,11 +185,11 @@ class TranslateUtils {
         String table = "nodes";
 
         for (CypReturn cR : rc.getItems()) {
-            if (!c2sqlV2.mapLabels.containsKey(cR.getField())) {
+            if (!Cyp2SQL_v2_Apoc.mapLabels.containsKey(cR.getField())) {
                 possibleOpti = false;
                 break;
             } else {
-                String newTable = c2sqlV2.mapLabels.get(cR.getField());
+                String newTable = Cyp2SQL_v2_Apoc.mapLabels.get(cR.getField());
                 if (!table.equals(newTable) && !table.equals("nodes")) {
                     possibleOpti = false;
                     break;

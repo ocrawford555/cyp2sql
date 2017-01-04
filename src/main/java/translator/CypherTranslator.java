@@ -37,24 +37,15 @@ class CypherTranslator {
                 deleteClause = tokenList.subList(posOfMatch + 1, posOfDelete);
                 createOrDelete = matchDecode(deleteClause);
             } else {
-                if (posOfMatch == -1) {
-                    List<String> createClause;
-                    createClause = tokenList.subList(posOfCreate + 1, tokenList.size());
-                    createOrDelete = matchDecode(createClause);
-                } else {
-                    List<String> matchCreate;
-                    List<String> createClause;
+                List<String> matchCreate;
 
-                    if (cypherQ.doesCluaseHaveWhere())
-                        matchCreate = tokenList.subList(posOfMatch + 1, posOfWhere);
-                    else
-                        matchCreate = tokenList.subList(posOfMatch + 1, posOfCreate);
-
-                    createClause = tokenList.subList(posOfCreate + 1, tokenList.size());
-
+                if (cypherQ.doesCluaseHaveWhere()) {
+                    matchCreate = tokenList.subList(posOfCreate + 1, posOfWhere);
                     createOrDelete = matchDecode(matchCreate);
                     whereDecode(createOrDelete, cypherQ);
-                    cypherQ.setCreateClauseRel(matchDecode(createClause));
+                } else {
+                    matchCreate = tokenList.subList(posOfCreate + 1, tokenList.size());
+                    createOrDelete = matchDecode(matchCreate);
                 }
             }
             return new DecodedQuery(createOrDelete, null, null, null, -1, -1, cypherQ);

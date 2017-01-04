@@ -1,5 +1,6 @@
 package query_translation;
 
+import clauseObjects.CypRel;
 import clauseObjects.MatchClause;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -20,8 +21,8 @@ class InsertUtils {
         return extractFromObject(obj);
     }
 
-    static String[] findColsAndValuesRels(MatchClause createClauseRel) {
-        JsonObject obj = createClauseRel.getRels().get(0).getProps();
+    static String[] findColsAndValuesRels(CypRel r) {
+        JsonObject obj = r.getProps();
         return extractFromObject(obj);
     }
 

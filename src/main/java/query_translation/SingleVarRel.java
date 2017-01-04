@@ -14,7 +14,7 @@ import java.util.Set;
  * Note - direction of relationship must be specified.
  */
 class SingleVarRel {
-    static StringBuilder translate(StringBuilder sql, DecodedQuery decodedQuery) {
+    static StringBuilder translate(StringBuilder sql, DecodedQuery decodedQuery, boolean createTClosure) {
         MatchClause matchC = decodedQuery.getMc();
 
         String direction = "none";
@@ -39,18 +39,21 @@ class SingleVarRel {
         if (direction.equals("left")) {
             cN1 = matchC.getNodes().get(1);
             cN2 = matchC.getNodes().get(0);
-            sql.append(getZeroStep(cN1, decodedQuery.getRc()));
+            if (createTClosure) sql.append(createTCSpecific(cN1));
+            else sql.append(getZeroStep(cN1, decodedQuery.getRc()));
         } else if (direction.equals("right")) {
             cN1 = matchC.getNodes().get(0);
             cN2 = matchC.getNodes().get(1);
-            sql.append(getZeroStep(cN1, decodedQuery.getRc()));
+            if (createTClosure) sql.append(createTCSpecific(cN1));
+            else sql.append(getZeroStep(cN1, decodedQuery.getRc()));
         }
 
         sql.append(" ");
+
         // create the query that goes along all the paths, based on the transitive
         // closure view in SQL.
         sql = createStepView(sql, amountLow, amountHigh, decodedQuery.getRc(),
-                decodedQuery.getCypherAdditionalInfo().getAliasMap());
+                decodedQuery.getCypherAdditionalInfo().getAliasMap(), createTClosure);
 
         // final part to add to the SQL statement is to select the data that matches
         // the properties desired (such as a film title or certain director etc.)
@@ -85,20 +88,58 @@ class SingleVarRel {
         return sql;
     }
 
+    private static String createTCSpecific(CypNode cN) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("CREATE TEMP VIEW tx1 AS(WITH RECURSIVE search_graph(idl, idr, depth, path, cycle) AS " +
+                "(SELECT e.idl, e.idr, 1, ARRAY[e.idl], false FROM edges e UNION ALL SELECT sg.idl, e.idr, " +
+                "sg.depth + 1, path || e.idl, e.idl = ANY(sg.path) FROM edges e, search_graph sg " +
+                "WHERE e.idl = sg.idr AND NOT cycle) SELECT * FROM search_graph where " +
+                "(not cycle OR not idr = ANY(path)) and idl in (select id from nodes");
+
+        boolean hasWhere = false;
+        JsonObject obj = cN.getProps();
+
+        if (obj != null) {
+            sb.append(" WHERE ");
+            hasWhere = true;
+            Set<Map.Entry<String, JsonElement>> entries = obj.entrySet();
+
+            for (Map.Entry<String, JsonElement> entry : entries) {
+                sb.append(entry.getKey());
+                sb = TranslateUtils.addWhereClause(sb, entry.getValue().getAsString());
+            }
+
+        }
+
+        if (cN.getType() != null) {
+            if (!hasWhere) {
+                sb.append(" WHERE ");
+            } else {
+                sb.append(" AND ");
+            }
+            sb.append("label LIKE ").append(TranslateUtils.genLabelLike(cN, null));
+        }
+
+        sb.append("));");
+        return sb.toString();
+    }
+
     /**
      * The query for the binding the results of the variable relationship
      * query to the nodes relation, thus returning the correct results.
      *
-     * @param sql        Existing SQL query.
-     * @param amountLow  Lower bound on depth of links to search.
-     * @param amountHigh Upper bound on depth of links to search.
-     * @param returnC    @return New SQL.
+     * @param sql            Existing SQL query.
+     * @param amountLow      Lower bound on depth of links to search.
+     * @param amountHigh     Upper bound on depth of links to search.
+     * @param returnC        @return New SQL.
      * @param alias
+     * @param createTClosure
      */
     private static StringBuilder createStepView(StringBuilder sql, int amountLow,
-                                                int amountHigh, ReturnClause returnC, Map<String, String> alias) {
+                                                int amountHigh, ReturnClause returnC,
+                                                Map<String, String> alias, boolean createTClosure) {
         sql.append("CREATE TEMP VIEW step AS (WITH graphT AS (SELECT idr as x, idl as y");
-        sql.append(" FROM tClosure JOIN zerostep on idl = zerostep.id");
+        sql.append(" FROM ").append((createTClosure) ? "tx1" : "tClosure JOIN zerostep on idl = zerostep.id");
         sql.append(" JOIN nodes as n on idr = n.id where depth <= ");
         sql.append(amountHigh).append(" AND depth >= ").append(amountLow);
         sql.append(") SELECT * from graphT); ");
@@ -150,7 +191,7 @@ class SingleVarRel {
         getZStep.append("CREATE TEMP VIEW zerostep AS SELECT id");
 
         for (CypReturn cR : rc.getItems()) {
-            if (cR.getPosInClause() == 1) {
+            if (cR.getPosInClause() == 1 && cR.getField() != null) {
                 getZStep.append(", ").append(cR.getField());
             }
         }

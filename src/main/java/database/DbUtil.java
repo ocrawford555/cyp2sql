@@ -1,6 +1,6 @@
 package database;
 
-import production.c2sqlV2;
+import production.Cyp2SQL_v2_Apoc;
 
 import java.io.*;
 import java.sql.*;
@@ -26,7 +26,7 @@ public class DbUtil {
         try {
             Class.forName("org.postgresql.Driver");
             c = DriverManager.getConnection("jdbc:postgresql://localhost:5432/" + dbName,
-                    c2sqlV2.postUN, c2sqlV2.postPW);
+                    Cyp2SQL_v2_Apoc.postUN, Cyp2SQL_v2_Apoc.postPW);
             DB_OPEN = true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -63,7 +63,7 @@ public class DbUtil {
         long startNanoCreate = System.nanoTime();
         stmt.executeUpdate(query);
         long endNanoCreate = System.nanoTime();
-        lastExecTimeCreate = endNanoCreate - startNanoCreate;
+        lastExecTimeCreate += (endNanoCreate - startNanoCreate);
 
         stmt.close();
     }
@@ -112,7 +112,7 @@ public class DbUtil {
             }
         }
 
-        c2sqlV2.numResultsPost = numRecords;
+        Cyp2SQL_v2_Apoc.numResultsPost = numRecords;
         DbUtil.closeConnection();
     }
 
@@ -178,7 +178,7 @@ public class DbUtil {
         ResultSet rs = stm.executeQuery(query);
         long endNanoReadQuery = System.nanoTime();
 
-        lastExecTimeRead = endNanoReadQuery - startNanoReadQuery;
+        lastExecTimeRead += (endNanoReadQuery - startNanoReadQuery);
         ResultSetMetaData rsm = rs.getMetaData();
 
         feed = new ArrayList<>();
@@ -217,7 +217,7 @@ public class DbUtil {
      */
     public static void insertMapping(String cypher, String sql, Object obj, String dbName)
             throws SQLException, IOException {
-        String preparedStatement = "INSERT INTO query_mapping(cypher, sql, object) VALUES (?, ?, ?)";
+        String preparedStatement = "INSERT INTO query_mapping(cypher, sql, object, neoT, pgT) VALUES (?, ?, ?, ?, ?)";
         if (!DB_OPEN) createConnection(dbName);
         PreparedStatement pstmt = c.prepareStatement(preparedStatement);
         pstmt.setString(1, cypher);
@@ -228,6 +228,10 @@ public class DbUtil {
         oos.writeObject(obj);
         oos.close();
         pstmt.setBytes(3, baos.toByteArray());
+
+        pstmt.setDouble(4, CypherDriver.lastExecTime / 1000000.0);
+        pstmt.setDouble(5, (DbUtil.lastExecTimeRead + DbUtil.lastExecTimeCreate +
+                DbUtil.lastExecTimeInsert) / 1000000.0);
 
         pstmt.executeUpdate();
         pstmt.close();
@@ -257,7 +261,7 @@ public class DbUtil {
         long startNanoInsert = System.nanoTime();
         stmt.executeUpdate(query);
         long endNanoInsert = System.nanoTime();
-        lastExecTimeInsert = endNanoInsert - startNanoInsert;
+        lastExecTimeInsert += (endNanoInsert - startNanoInsert);
         stmt.close();
     }
 

@@ -2,7 +2,7 @@ package database;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import production.c2sqlV2;
+import production.Cyp2SQL_v2_Apoc;
 import schemaConversion.SchemaTranslate;
 
 import java.io.*;
@@ -40,7 +40,8 @@ public class InsertSchema {
 
         System.out.println("TIME TO CREATE EDGES RELATION : " + ((timeEndEdges - timeStartEdges) / 1000000.0) + "ms.");
 
-        String createMappingQuery = "create table query_mapping (cypher TEXT, sql TEXT, object BYTEA);";
+        String createMappingQuery = "create table query_mapping (cypher TEXT, sql TEXT, object BYTEA, " +
+                "neoT DOUBLE PRECISION, pgT DOUBLE PRECISION);";
         String createTClosure = "CREATE MATERIALIZED VIEW tclosure AS(WITH RECURSIVE search_graph(idl, idr, depth, " +
                 "path, cycle) " +
                 "AS (SELECT e.idl, e.idr, 1, ARRAY[e.idl], false FROM edges e UNION ALL SELECT sg.idl, e.idr, " +
@@ -73,11 +74,22 @@ public class InsertSchema {
     private static void addFieldsToMetaFile() {
         FileOutputStream fos;
         try {
-            fos = new FileOutputStream(c2sqlV2.workspaceArea + "/meta.txt");
+            fos = new FileOutputStream(Cyp2SQL_v2_Apoc.workspaceArea + "/meta.txt");
 
             //Construct BufferedReader from InputStreamReader
             BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos));
             for (String s : fieldsForMetaFile) {
+                bw.write(s);
+                bw.newLine();
+            }
+            bw.close();
+            fos.close();
+
+            fos = new FileOutputStream(Cyp2SQL_v2_Apoc.workspaceArea + "/meta_rels.txt");
+
+            //Construct BufferedReader from InputStreamReader
+            bw = new BufferedWriter(new OutputStreamWriter(fos));
+            for (String s : SchemaTranslate.relTypes) {
                 bw.write(s);
                 bw.newLine();
             }
@@ -99,8 +111,8 @@ public class InsertSchema {
         FileOutputStream fos;
         FileOutputStream fos2;
         try {
-            fos = new FileOutputStream(c2sqlV2.workspaceArea + "/meta_tables.txt");
-            fos2 = new FileOutputStream(c2sqlV2.workspaceArea + "/meta_labels.txt");
+            fos = new FileOutputStream(Cyp2SQL_v2_Apoc.workspaceArea + "/meta_tables.txt");
+            fos2 = new FileOutputStream(Cyp2SQL_v2_Apoc.workspaceArea + "/meta_labels.txt");
 
             BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos));
             BufferedWriter bw2 = new BufferedWriter(new OutputStreamWriter(fos2));

@@ -1,6 +1,5 @@
 package translator;
 
-import clauseObjects.MatchClause;
 import parsing_lexing.CypherBaseListener;
 import parsing_lexing.CypherParser;
 
@@ -29,9 +28,6 @@ public class CypherWalker extends CypherBaseListener {
     private String latestOrderDirection = "";
     private int skipAmount = -1;
     private int limitAmount = -1;
-
-    // used for adding relationships to the database
-    private MatchClause createClauseRel;
 
     public void enterMatch(CypherParser.MatchContext ctx) {
         //optional keyword attached or not
@@ -168,13 +164,5 @@ public class CypherWalker extends CypherBaseListener {
 
     public boolean hasDelete() {
         return hasDelete;
-    }
-
-    public MatchClause getCreateClauseRel() {
-        return createClauseRel;
-    }
-
-    public void setCreateClauseRel(MatchClause createClauseRel) {
-        this.createClauseRel = createClauseRel;
     }
 }

@@ -1,7 +1,7 @@
 package query_translation;
 
 import clauseObjects.*;
-import production.c2sqlV2;
+import production.Cyp2SQL_v2_Apoc;
 
 import java.util.Map;
 
@@ -75,11 +75,11 @@ class NoRels {
             String possTable = "nodes";
 
             for (CypReturn cR : rc.getItems()) {
-                if (!c2sqlV2.mapLabels.containsKey(cR.getField())) {
+                if (!Cyp2SQL_v2_Apoc.mapLabels.containsKey(cR.getField())) {
                     possibleOpti = false;
                     break;
                 } else {
-                    String newTable = c2sqlV2.mapLabels.get(cR.getField());
+                    String newTable = Cyp2SQL_v2_Apoc.mapLabels.get(cR.getField());
                     if (!possTable.equals(newTable) && !possTable.equals("nodes")) {
                         possibleOpti = false;
                         break;

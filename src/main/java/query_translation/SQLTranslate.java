@@ -1,7 +1,7 @@
 package query_translation;
 
 import clauseObjects.*;
-import production.c2sqlV2;
+import production.Cyp2SQL_v2_Apoc;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -36,7 +36,7 @@ public class SQLTranslate {
         if (decodedQuery.getMc().getRels().isEmpty()) {
             sql = NoRels.translate(sql, decodedQuery);
         } else if (decodedQuery.getMc().isVarRel() && decodedQuery.getMc().getRels().size() == 1) {
-            sql = SingleVarRel.translate(sql, decodedQuery);
+            sql = SingleVarRel.translate(sql, decodedQuery, false);
         } else {
             sql = MultipleRel.translate(sql, decodedQuery);
 
@@ -57,48 +57,29 @@ public class SQLTranslate {
         return sql.toString();
     }
 
-    public static String translateInsertNodes(DecodedQuery decodedQuery) throws Exception {
+    public static String translateInsert(DecodedQuery decodedQuery) throws Exception {
         StringBuilder sql = new StringBuilder();
         MatchClause createC = decodedQuery.getMc();
-        String relation = InsertUtils.findRelation(createC, 0);
-        String[] colsAndValues = InsertUtils.findColsAndValues(createC, 0);
 
-        sql.append("INSERT INTO nodes");
-        sql.append("(");
-        sql.append(colsAndValues[0]).append(", label) ");
-        sql.append("VALUES (");
-        sql.append(colsAndValues[1]).append(", '").append(relation.replace("_", ", ")).append("');");
-
-        sql.append("INSERT INTO ");
-        sql.append(relation).append("(");
-        sql.append(colsAndValues[0]).append(", id, label) ");
-        sql.append("VALUES (");
-        sql.append(colsAndValues[1]).append(", (SELECT id FROM nodes WHERE ");
-
-        String[] values = colsAndValues[1].split(", ");
-        int i = 0;
-        for (String col : colsAndValues[0].split(", ")) {
-            sql.append(col).append(" = ").append(values[i++]).append(" AND ");
-        }
-        sql.setLength(sql.length() - 5);
-        sql.append("), '").append(relation.replace("_", ", ")).append("');");
+        sql = translateInsertNodes(sql, createC);
+        sql = translateInsertEdges(sql, createC);
 
         System.out.println(sql.toString());
         return sql.toString();
     }
 
-    public static String translateInsertRels(DecodedQuery decodedQuery) {
-        StringBuilder sql = new StringBuilder();
-        MatchClause createC = decodedQuery.getMc();
-        String[] colsAndValues = InsertUtils.findColsAndValuesRels(
-                decodedQuery.getCypherAdditionalInfo().getCreateClauseRel());
-        sql.append("INSERT INTO edges (");
+    private static StringBuilder translateInsertEdges(StringBuilder sql, MatchClause createC) {
+        String[] colsAndValues;
 
-        if (!colsAndValues[0].equals("")) sql.append(colsAndValues[0]).append(", idl, idr, type) ");
-        else sql.append("idl, idr, type) ");
+        StringBuilder insertEdgesString = new StringBuilder();
 
-        sql.append("VALUES ((");
-        if (!colsAndValues[1].equals("")) sql.append(colsAndValues[1]).append(", ");
+        colsAndValues = InsertUtils.findColsAndValuesRels(createC.getRels().get(0));
+
+        if (!colsAndValues[0].equals("")) insertEdgesString.append(colsAndValues[0]).append(", idl, idr, type) ");
+        else insertEdgesString.append("idl, idr, type) ");
+
+        insertEdgesString.append("VALUES ((");
+        if (!colsAndValues[1].equals("")) insertEdgesString.append(colsAndValues[1]).append(", ");
 
         String selectA = "SELECT id FROM " + InsertUtils.findRelation(createC, 0) + " WHERE ";
         String[] selectAColsAndValues = InsertUtils.findColsAndValues(createC, 0);
@@ -111,7 +92,6 @@ public class SQLTranslate {
         selectA = selectA.substring(0, selectA.length() - 5);
         selectA = selectA + ")";
 
-
         String selectB = "SELECT id FROM " + InsertUtils.findRelation(createC, 1) + " WHERE ";
         String[] selectBColsAndValues = InsertUtils.findColsAndValues(createC, 1);
         values = selectBColsAndValues[1].split(", ");
@@ -122,14 +102,47 @@ public class SQLTranslate {
         selectB = selectB.substring(0, selectB.length() - 5);
         selectB = selectB + ")";
 
-        sql.append(selectA).append(", (").append(selectB).append(", '").append(
-                decodedQuery.getCypherAdditionalInfo().getCreateClauseRel().getRels().get(0).getType()).append("'");
+        String relType = createC.getRels().get(0).getType();
 
-        sql.append(");");
-        System.out.println(sql.toString());
-        return sql.toString();
+        insertEdgesString.append(selectA).append(", (")
+                .append(selectB).append(", '").append(relType).append("'");
+
+        sql.append("INSERT INTO edges (").append(insertEdgesString.toString()).append("); ");
+        sql.append("INSERT INTO e$").append(relType).append(" (").append(insertEdgesString.toString()).append(");");
+
+        return sql;
     }
 
+    private static StringBuilder translateInsertNodes(StringBuilder sql, MatchClause createC) {
+        String[] colsAndValues;
+
+        for (int i = 0; i < 2; i++) {
+            String relation = InsertUtils.findRelation(createC, i);
+            colsAndValues = InsertUtils.findColsAndValues(createC, i);
+
+            sql.append("INSERT INTO nodes");
+            sql.append("(");
+            sql.append(colsAndValues[0]).append(", label) ");
+            sql.append("VALUES (");
+            sql.append(colsAndValues[1]).append(", '").append(relation.replace("_", ", ")).append("');");
+
+            sql.append("INSERT INTO ");
+            sql.append(relation).append("(");
+            sql.append(colsAndValues[0]).append(", id, label) ");
+            sql.append("VALUES (");
+            sql.append(colsAndValues[1]).append(", (SELECT id FROM nodes WHERE ");
+
+            String[] values = colsAndValues[1].split(", ");
+            int j = 0;
+            for (String col : colsAndValues[0].split(", ")) {
+                sql.append(col).append(" = ").append(values[j++]).append(" AND ");
+            }
+            sql.setLength(sql.length() - 5);
+            sql.append("), '").append(relation.replace("_", ", ")).append("'); ");
+        }
+
+        return sql;
+    }
 
     public static String translateDelete(DecodedQuery decodedQuery) {
         StringBuilder sql = new StringBuilder();
@@ -137,8 +150,10 @@ public class SQLTranslate {
         String relation = InsertUtils.findRelation(deleteC, 0);
         String[] colsAndValues = InsertUtils.findColsAndValues(deleteC, 0);
 
-        sql.append("DELETE FROM nodes");
-        sql.append(" WHERE ");
+        // delete the relationships belonging to the node/nodes.
+        sql = deleteFromEdgeRelations(sql, colsAndValues);
+
+        sql.append("DELETE FROM nodes WHERE ");
 
         String[] values = colsAndValues[1].split(", ");
         int i = 0;
@@ -163,6 +178,29 @@ public class SQLTranslate {
 
         System.out.println(sql.toString());
         return sql.toString();
+    }
+
+    private static StringBuilder deleteFromEdgeRelations(StringBuilder sql, String[] colsAndValues) {
+        StringBuilder whereString = new StringBuilder();
+
+        sql.append("DELETE FROM edges WHERE idl in (SELECT id FROM nodes WHERE ");
+
+        String[] values = colsAndValues[1].split(", ");
+        int i = 0;
+        for (String col : colsAndValues[0].split(", ")) {
+            whereString.append(col).append(" = ").append(values[i++]).append(" AND ");
+        }
+
+        if (whereString.toString().endsWith(" AND ")) whereString.setLength(whereString.length() - 5);
+
+        sql.append(whereString).append(") OR idr in (SELECT id FROM nodes WHERE ").append(whereString).append("); ");
+
+        for (String s : Cyp2SQL_v2_Apoc.relsList) {
+            sql.append(" DELETE FROM e$").append(s).append(" WHERE idl in (SELECT id FROM nodes WHERE ");
+            sql.append(whereString).append("); ");
+        }
+
+        return sql;
     }
 
     /**
@@ -208,7 +246,7 @@ public class SQLTranslate {
                     sql.append("n").append(".").append(prop).append(", ");
                 }
             } else {
-                FileInputStream fis = new FileInputStream(c2sqlV2.workspaceArea + "/meta.txt");
+                FileInputStream fis = new FileInputStream(Cyp2SQL_v2_Apoc.workspaceArea + "/meta.txt");
                 BufferedReader br = new BufferedReader(new InputStreamReader(fis));
                 String line;
                 while ((line = br.readLine()) != null) {
