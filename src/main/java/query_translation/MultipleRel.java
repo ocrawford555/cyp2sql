@@ -208,14 +208,18 @@ class MultipleRel {
         sql.append("SELECT ");
         if (hasDistinct) sql.append("DISTINCT ");
         boolean needNodeTable = false;
+        int nodeTableCount = 0;
+        ArrayList<String> nodesSoFar = new ArrayList<>();
         String relsNeeded = "";
 
         for (CypReturn cR : returnC.getItems()) {
+            System.out.println(cR.toString());
             boolean isNode = false;
 
             if (cR.getNodeID() == null && cR.getField().equals("*")) {
                 sql.append("*  ");
                 needNodeTable = true;
+                nodeTableCount++;
                 break;
             }
 
@@ -227,6 +231,7 @@ class MultipleRel {
                 sql.append("count(").append(toAdd).append(")");
                 sql.append(useAlias("count(" + cR.getNodeID() + ")", alias)).append(", ");
                 needNodeTable = true;
+                nodeTableCount++;
                 break;
             }
 
@@ -238,6 +243,7 @@ class MultipleRel {
                 sql.append("array_agg(").append(toAdd).append(")");
                 sql.append(useAlias(cR.getField(), alias)).append(", ");
                 needNodeTable = true;
+                nodeTableCount++;
                 break;
             }
 
@@ -246,19 +252,25 @@ class MultipleRel {
                     String prop = cR.getField();
                     needNodeTable = true;
 
+                    if (!nodesSoFar.contains(cR.getNodeID())) {
+                        nodesSoFar.add(cR.getNodeID());
+                        nodeTableCount++;
+                    }
+
                     if (cR.getCollect()) sql.append("array_agg(");
                     if (cR.getCount()) sql.append("count(");
 
                     if (cR.getCaseString() != null) {
                         String caseString = cR.getCaseString().replace(cR.getNodeID() + "." + cR.getField(),
-                                "n." + cR.getField());
+                                "n0" + nodeTableCount + "." + cR.getField());
                         sql.append(caseString).append(", ");
                     } else {
                         if (prop != null) {
-                            sql.append("n").append(".").append(prop)
+                            sql.append("n0").append(nodeTableCount).append(".").append(prop)
                                     .append(useAlias(cR.getNodeID(), alias)).append(", ");
                         } else {
-                            sql.append("n.*").append(useAlias(cR.getNodeID(), alias)).append(", ");
+                            sql.append("n0").append(nodeTableCount)
+                                    .append(".*").append(useAlias(cR.getNodeID(), alias)).append(", ");
                         }
                     }
                     if (cR.getCollect() || cR.getCount()) {
@@ -271,26 +283,42 @@ class MultipleRel {
                 }
             }
 
+            // must be a relationship being returned.
             if (!isNode) {
                 for (CypRel cRel : matchC.getRels()) {
                     if (cRel.getId() != null && cRel.getId().equals(cR.getNodeID())) {
-                        String prop = cR.getField();
+                        String field = cR.getField();
                         int relPos = cRel.getPosInClause();
                         String idRel = String.valueOf(alphabet[relPos - 1]);
                         relsNeeded = TranslateUtils.addToRelsNeeded(relsNeeded, idRel);
+
+                        if (cR.getCollect()) sql.append("array_agg(");
+                        if (cR.getCount()) sql.append("count(");
 
                         if (cR.getCaseString() != null) {
                             String caseString = cR.getCaseString().replace(cR.getNodeID() + "." + cR.getField(),
                                     idRel + "." + cR.getField());
                             sql.append(caseString).append(", ");
                         } else {
-                            if (prop != null) {
-                                sql.append(idRel).append(".").append(prop)
+                            if (field != null) {
+                                sql.append(idRel).append(".").append(field)
                                         .append(useAlias(cR.getNodeID(), alias)).append(", ");
                             } else {
                                 sql.append(idRel).append(".*")
                                         .append(useAlias(cR.getNodeID(), alias)).append(", ");
                             }
+                        }
+                        if (cR.getCollect() || cR.getCount()) {
+                            sql.setLength(sql.length() - 2);
+                            sql.append(")");
+                            if (cR.getCollect())
+                                sql.append(
+                                        TranslateUtils.useAlias(
+                                                "collect(" + cR.getNodeID() + ")", null, alias))
+                                        .append(", ");
+                            else sql.append(
+                                    TranslateUtils.useAlias("count(" + cR.getNodeID() + ")", null, alias))
+                                    .append(", ");
                         }
                         break;
                     }
@@ -302,8 +330,13 @@ class MultipleRel {
 
         String table = TranslateUtils.getTable(returnC);
 
-        if (needNodeTable) sql.append(" FROM ").append(table).append(" n, ").append(relsNeeded);
-        else sql.append(" FROM ").append(relsNeeded);
+        if (needNodeTable) {
+            sql.append(" FROM ");
+            for (int k = nodeTableCount; k > 0; k--) {
+                sql.append(table).append(" n0").append(k).append(", ");
+            }
+            sql.append(relsNeeded);
+        } else sql.append(" FROM ").append(relsNeeded);
 
         int numRels = matchC.getRels().size();
 
@@ -357,8 +390,8 @@ class MultipleRel {
         if ((numRels == 1)) {
             if (matchC.getRels().get(0).getDirection().equals("none")) {
                 int posInCl = returnC.getItems().get(0).getPosInClause();
-                if (posInCl == 1) return sql.append(" n.id = a.a1");
-                else return sql.append("n.id = a.a2");
+                if (posInCl == 1) return sql.append(" n01.id = a.a1");
+                else return sql.append("n01.id = a.a2");
             }
         }
 
@@ -376,13 +409,21 @@ class MultipleRel {
             } else nullCount++;
         }
 
+        int nodeTableCount = 0;
+        ArrayList<String> nodesSeenSoFar = new ArrayList<>();
+
         for (CypReturn cR : returnC.getItems()) {
             if (cR.getType() != null) {
                 switch (cR.getType()) {
                     case "node":
                         if (!(cR.getCount() && returnC.getItems().size() > 1)) {
+                            if (!nodesSeenSoFar.contains(cR.getNodeID())) {
+                                nodesSeenSoFar.add(cR.getNodeID());
+                                nodeTableCount++;
+                            }
+
                             int posInClause = cR.getPosInClause();
-                            sql.append("n.id = ");
+                            sql.append("n0").append(nodeTableCount).append(".id = ");
 
                             if (posInClause == 1) {
                                 sql.append("a.a1");

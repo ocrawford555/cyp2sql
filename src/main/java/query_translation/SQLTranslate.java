@@ -7,6 +7,7 @@ import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 
 /**
  * MAIN TRANSLATION UNIT FROM INTERMEDIATE TRANSLATION TO SQL.
@@ -214,12 +215,16 @@ public class SQLTranslate {
         sql.append(" ");
         sql.append("ORDER BY ");
 
+        int nodeTableCount = 0;
+
         for (CypOrder cO : orderC.getItems()) {
+            nodeTableCount++;
             if (cO.getField().startsWith("count")) {
                 sql.append("count(n) ").append(cO.getAscOrDesc()).append(", ");
                 break;
             }
-            sql.append("n").append(".").append(cO.getField()).append(" ").append(cO.getAscOrDesc());
+            sql.append("n0").append(nodeTableCount).append(".").append(cO.getField()).append(" ")
+                    .append(cO.getAscOrDesc());
             sql.append(", ");
         }
 
@@ -234,23 +239,28 @@ public class SQLTranslate {
      * @param rc  Return Clause of the Cypher query.
      * @param sql Query before GROUP BY
      * @return Query after GROUP BY
-     * @throws IOException
+     * @throws IOException Error reading the associated metafile from the workarea location.
      */
     private static StringBuilder obtainGroupByClause(ReturnClause rc, StringBuilder sql) throws IOException {
         sql.append(" GROUP BY ");
 
+        int nodeTableCount = 0;
+        ArrayList<String> nodesSeenSoFar = new ArrayList<>();
+
         for (CypReturn cR : rc.getItems()) {
-            if (cR.getField() != null && !cR.getField().startsWith("count")) {
-                String prop = cR.getField();
-                if (prop != null) {
-                    sql.append("n").append(".").append(prop).append(", ");
-                }
-            } else {
+            if (!nodesSeenSoFar.contains(cR.getNodeID())) {
+                nodesSeenSoFar.add(cR.getNodeID());
+                nodeTableCount++;
+            }
+
+            if (cR.getField() != null && !cR.getCount()) {
+                sql.append("n0").append(nodeTableCount).append(".").append(cR.getField()).append(", ");
+            } else if (!cR.getCount()) {
                 FileInputStream fis = new FileInputStream(Cyp2SQL_v2_Apoc.workspaceArea + "/meta.txt");
                 BufferedReader br = new BufferedReader(new InputStreamReader(fis));
                 String line;
                 while ((line = br.readLine()) != null) {
-                    sql.append("n").append(".").append(line).append(", ");
+                    sql.append("n0").append(nodeTableCount).append(".").append(line).append(", ");
                 }
             }
         }

@@ -14,6 +14,7 @@ public class DecodedQuery {
     private int limitAmount;
     private CypherWalker cypherAdditionalInfo;
     private String sqlEquiv;
+    private boolean needGroupBy;
 
     public DecodedQuery(MatchClause m, ReturnClause r, OrderClause o,
                         WhereClause wc, int skip, int limit, CypherWalker c) {
@@ -24,6 +25,7 @@ public class DecodedQuery {
         this.skipAmount = skip;
         this.limitAmount = limit;
         this.cypherAdditionalInfo = c;
+        this.needGroupBy = false;
     }
 
     public MatchClause getMc() {
@@ -60,5 +62,13 @@ public class DecodedQuery {
 
     public void setSqlEquiv(String sqlEquiv) {
         this.sqlEquiv = sqlEquiv;
+    }
+
+    public boolean doWeNeedGroupBy() {
+        return needGroupBy;
+    }
+
+    public void setGroupBy(boolean needGroupBy) {
+        this.needGroupBy = needGroupBy;
     }
 }

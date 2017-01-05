@@ -23,15 +23,14 @@ class NoRels {
     }
 
     private static StringBuilder getSelect(ReturnClause rc, MatchClause mc,
-                                           StringBuilder sql, boolean hasDistinct, Map<String, String> alias) {
+                                           StringBuilder sql,
+                                           boolean hasDistinct, Map<String, String> alias) {
         sql.append("SELECT ");
         if (hasDistinct) sql.append("DISTINCT ");
 
         for (CypReturn r : rc.getItems()) {
             if (r.getNodeID() == null && r.getField().equals("*")) {
                 sql.append("*");
-            } else if (r.getCount()) {
-                sql.append("count(n)");
             } else if (r.getCaseString() != null) {
                 String caseString = r.getCaseString().replace(r.getNodeID() + "." + r.getField(), "n." + r.getField());
                 sql.append(caseString);
