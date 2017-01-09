@@ -506,39 +506,7 @@ class CypherTranslator {
 
         for (CypNode cN : matchC.getNodes()) {
             if (cN.getId().equals(idAndProp[0])) {
-                JsonObject obj = cN.getProps();
-                if (obj == null) obj = new JsonObject();
-                String valueToAdd = "";
-                if (obj.has(idAndProp[1])) {
-                    valueToAdd = obj.get(idAndProp[1]).getAsString() + "~" + typeBoolean + "~";
-                }
-                switch (op) {
-                    case "equals":
-                        valueToAdd += "eq#" + idAndValue[1].replace("\"", "").toLowerCase() + "#qe";
-                        obj.addProperty(idAndProp[1], valueToAdd);
-                        break;
-                    case "nequals":
-                        valueToAdd += "ne#" + idAndValue[1].replace("\"", "").toLowerCase() + "#en";
-                        obj.addProperty(idAndProp[1], valueToAdd);
-                        break;
-                    case "lt":
-                        valueToAdd += "lt#" + idAndValue[1].replace("\"", "").toLowerCase() + "#tl";
-                        obj.addProperty(idAndProp[1], valueToAdd);
-                        break;
-                    case "gt":
-                        valueToAdd += "gt#" + idAndValue[1].replace("\"", "").toLowerCase() + "#tg";
-                        obj.addProperty(idAndProp[1], valueToAdd);
-                        break;
-                    case "le":
-                        valueToAdd += "le#" + idAndValue[1].replace("\"", "").toLowerCase() + "#el";
-                        obj.addProperty(idAndProp[1], valueToAdd);
-                        break;
-                    case "ge":
-                        valueToAdd += "ge#" + idAndValue[1].replace("\"", "").toLowerCase() + "#eg";
-                        obj.addProperty(idAndProp[1], valueToAdd);
-                        break;
-                }
-
+                JsonObject obj = addToJSONObject(cN.getProps(), idAndProp, idAndValue, op, typeBoolean);
                 cN.setProps(obj);
                 return;
             }
@@ -546,30 +514,51 @@ class CypherTranslator {
 
         for (CypRel cR : matchC.getRels()) {
             if (cR.getId() != null && cR.getId().equals(idAndProp[0])) {
-                JsonObject obj = cR.getProps();
-                if (obj == null) obj = new JsonObject();
-                switch (op) {
-                    case "equals":
-                        obj.addProperty(idAndProp[1], idAndValue[1].replace("\"", "").toLowerCase());
-                        break;
-                    case "nequals":
-                        obj.addProperty(idAndProp[1],
-                                "<#" + idAndValue[1].replace("\"", "").toLowerCase() + "#>");
-                        break;
-                    case "lt":
-                        obj.addProperty(idAndProp[1],
-                                "lt#" + idAndValue[1].replace("\"", "").toLowerCase() + "#lt");
-                        break;
-                    case "gt":
-                        obj.addProperty(idAndProp[1],
-                                "gt#" + idAndValue[1].replace("\"", "").toLowerCase() + "#gt");
-                        break;
-                }
+                JsonObject obj = addToJSONObject(cR.getProps(), idAndProp, idAndValue, op, typeBoolean);
                 cR.setProps(obj);
                 return;
             }
         }
+
         throw new Exception("WHERE CLAUSE MALFORMED");
+    }
+
+    private static JsonObject addToJSONObject(JsonObject origProps, String[] idAndProp, String[] idAndValue,
+                                              String op, String typeBoolean) {
+        JsonObject obj = origProps;
+        if (origProps == null) obj = new JsonObject();
+
+        String valueToAdd = "";
+        if (obj.has(idAndProp[1])) {
+            valueToAdd = obj.get(idAndProp[1]).getAsString() + "~" + typeBoolean + "~";
+        }
+        switch (op) {
+            case "equals":
+                valueToAdd += "eq#" + idAndValue[1].replace("\"", "").toLowerCase() + "#qe";
+                obj.addProperty(idAndProp[1], valueToAdd);
+                break;
+            case "nequals":
+                valueToAdd += "ne#" + idAndValue[1].replace("\"", "").toLowerCase() + "#en";
+                obj.addProperty(idAndProp[1], valueToAdd);
+                break;
+            case "lt":
+                valueToAdd += "lt#" + idAndValue[1].replace("\"", "").toLowerCase() + "#tl";
+                obj.addProperty(idAndProp[1], valueToAdd);
+                break;
+            case "gt":
+                valueToAdd += "gt#" + idAndValue[1].replace("\"", "").toLowerCase() + "#tg";
+                obj.addProperty(idAndProp[1], valueToAdd);
+                break;
+            case "le":
+                valueToAdd += "le#" + idAndValue[1].replace("\"", "").toLowerCase() + "#el";
+                obj.addProperty(idAndProp[1], valueToAdd);
+                break;
+            case "ge":
+                valueToAdd += "ge#" + idAndValue[1].replace("\"", "").toLowerCase() + "#eg";
+                obj.addProperty(idAndProp[1], valueToAdd);
+                break;
+        }
+        return obj;
     }
 
     private static CypRel extractVarRel(List<String> varRel, MatchClause m, String varD) {

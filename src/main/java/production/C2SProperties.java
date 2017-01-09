@@ -1,7 +1,6 @@
 package production;
 
-import java.io.FileNotFoundException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.Properties;
 
 /**
@@ -15,6 +14,7 @@ class C2SProperties {
     private String ppw = null;
     private String nun = null;
     private String npw = null;
+    private String lastDB = null;
 
     /**
      * Get the properties from the properties file.
@@ -27,6 +27,7 @@ class C2SProperties {
      * 4. Postgres password
      * 5. Neo4J username (usually neo4j)
      * 6. Neo4J password
+     * 7. Name of the last database used by the tool (to correct SSL issues with Neo4J).
      */
     String[] getLocalProperties() {
         try {
@@ -49,11 +50,36 @@ class C2SProperties {
             ppw = prop.getProperty("postPW");
             nun = prop.getProperty("neo4JUser");
             npw = prop.getProperty("neoPW");
+            lastDB = prop.getProperty("lastDatabase");
 
             inputStream.close();
         } catch (Exception e) {
             System.out.println("Exception: " + e);
         }
-        return new String[]{cyp, pg, wspace, pun, ppw, nun, npw};
+        return new String[]{cyp, pg, wspace, pun, ppw, nun, npw, lastDB};
+    }
+
+    void setDatabaseProperty(String newDB) {
+        try {
+            Properties prop = new Properties();
+            String propFileName = "configC2S.properties";
+
+            InputStream inputStream = getClass().getClassLoader().getResourceAsStream(propFileName);
+
+            if (inputStream != null) {
+                prop.load(inputStream);
+            } else {
+                throw new FileNotFoundException("property file '" + propFileName + "' not found in the classpath");
+            }
+            inputStream.close();
+
+            prop.setProperty("lastDatabase", newDB);
+            File f = new File(getClass().getClassLoader().getResource(propFileName).getFile()
+                    .replace("target/classes", "src/main/resources"));
+            OutputStream out = new FileOutputStream(f);
+            prop.store(out, null);
+        } catch (Exception e) {
+            System.out.println("Exception: " + e);
+        }
     }
 }

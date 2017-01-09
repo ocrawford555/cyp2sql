@@ -92,6 +92,11 @@ public class Cyp2SQL_v2_Apoc {
 
             dbName = args[2];
 
+            if (!dbName.equals(fileLocations[7])) {
+                CypherDriver.resetSSLNeo4J();
+                props.setDatabaseProperty(dbName);
+            }
+
             if (args.length == 4 && args[3].equals("-p")) {
                 printBool = true;
             }

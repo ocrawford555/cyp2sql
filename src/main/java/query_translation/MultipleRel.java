@@ -1,12 +1,10 @@
 package query_translation;
 
 import clauseObjects.*;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import java.util.ArrayList;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Translation of Cypher queries with a structure of (a)-[]-(b)-...-(c).
@@ -162,12 +160,8 @@ class MultipleRel {
                 sql.append(" WHERE ");
                 includesWhere = true;
             }
-
-            Set<Map.Entry<String, JsonElement>> entries = o.entrySet();
-            for (Map.Entry<String, JsonElement> entry : entries) {
-                sql.append("e").append(indexRel + 1).append(".").append(entry.getKey()).append(" = '");
-                sql.append(entry.getValue().getAsString()).append("' AND ");
-            }
+            sql = TranslateUtils.getWholeWhereClauseRel(sql, cR, wc, "e" + (indexRel + 1));
+            sql.append(" AND ");
         }
 
         if (includesWhere) sql.setLength(sql.length() - 5);

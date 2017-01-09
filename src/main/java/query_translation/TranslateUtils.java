@@ -17,18 +17,7 @@ import java.util.Set;
  * actually being translated.
  */
 class TranslateUtils {
-    /**
-     * Takes a CypNode with properties and generates the correct SQL to append to the SQL statement being generated.
-     *
-     * @param sql      Original SQL
-     * @param cN       CypNode with properties.
-     * @param wc       WhereClause containing information about the OR and AND mappings
-     *                 and position of the where clauses.
-     * @param sqlLabel The SQL identifier for which the WHERE statement is being applied to.
-     * @return New SQL with WHERE part added.
-     */
-    static StringBuilder getWholeWhereClause(StringBuilder sql, CypNode cN, WhereClause wc, String sqlLabel) {
-        JsonObject obj = cN.getProps();
+    private static StringBuilder genWhere(StringBuilder sql, JsonObject obj, WhereClause wc, String sqlLabel) {
         Set<Map.Entry<String, JsonElement>> entries = obj.entrySet();
 
         // default boolean condition to add.
@@ -59,6 +48,11 @@ class TranslateUtils {
         return sql;
     }
 
+    static StringBuilder getWholeWhereClause(StringBuilder sql, CypNode cN, WhereClause wc, String sqlLabel) {
+        JsonObject obj = cN.getProps();
+        return genWhere(sql, obj, wc, sqlLabel);
+    }
+
     /**
      * If no label provided as an argument, method just adds the default label which is just 'n' (for node), and
      * then calls the method getWholeWhereClause.
@@ -70,6 +64,11 @@ class TranslateUtils {
      */
     static StringBuilder getWholeWhereClause(StringBuilder sql, CypNode cN, WhereClause wc) {
         return getWholeWhereClause(sql, cN, wc, "n");
+    }
+
+    static StringBuilder getWholeWhereClauseRel(StringBuilder sql, CypRel cR, WhereClause wc, String sqlLabel) {
+        JsonObject obj = cR.getProps();
+        return genWhere(sql, obj, wc, sqlLabel);
     }
 
     /**

@@ -134,4 +134,42 @@ public class CypherDriver {
         }
         return toReturn;
     }
+
+    /**
+     * Erase contents of this file to reset the SSL settings for Neo4J.
+     */
+    public static void resetSSLNeo4J() {
+        String file = "C:/Users/ocraw/.neo4j/known_hosts";
+        ArrayList<String> contents = new ArrayList<>();
+        try {
+            FileInputStream fis = new FileInputStream(file);
+            BufferedReader br = new BufferedReader(new InputStreamReader(fis));
+            String line;
+            while ((line = br.readLine()) != null) {
+                contents.add(line);
+            }
+            br.close();
+            fis.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        FileOutputStream fos;
+        try {
+            fos = new FileOutputStream(file);
+
+            //Construct BufferedReader from InputStreamReader
+            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos));
+            for (String s : contents) {
+                if (s.startsWith("#")) {
+                    bw.write(s);
+                    bw.newLine();
+                }
+            }
+            bw.close();
+            fos.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }
