@@ -200,9 +200,9 @@ class PerformWork implements Runnable {
         } else {
             try {
                 Integer.parseInt(testValue);
-                SchemaTranslate.labelMappings.put(nodeLabel, key + " INT");
+                SchemaTranslate.labelMappings.put(nodeLabel, "id INT, " + key + " INT");
             } catch (NumberFormatException nfe) {
-                SchemaTranslate.labelMappings.put(nodeLabel, key + " TEXT");
+                SchemaTranslate.labelMappings.put(nodeLabel, "id INT, " + key + " TEXT");
             }
         }
     }

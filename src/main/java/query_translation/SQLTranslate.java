@@ -220,7 +220,7 @@ public class SQLTranslate {
         for (CypOrder cO : orderC.getItems()) {
             nodeTableCount++;
             if (cO.getField().startsWith("count")) {
-                sql.append("count(n) ").append(cO.getAscOrDesc()).append(", ");
+                sql.append("count(n01) ").append(cO.getAscOrDesc()).append(", ");
                 break;
             }
             sql.append("n0").append(nodeTableCount).append(".").append(cO.getField()).append(" ")

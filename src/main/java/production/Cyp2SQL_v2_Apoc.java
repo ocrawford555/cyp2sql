@@ -92,6 +92,7 @@ public class Cyp2SQL_v2_Apoc {
 
             dbName = args[2];
 
+            // used to fix with SSLEngine issues with Neo4J
             if (!dbName.equals(fileLocations[7])) {
                 CypherDriver.resetSSLNeo4J();
                 props.setDatabaseProperty(dbName);
@@ -102,6 +103,7 @@ public class Cyp2SQL_v2_Apoc {
             }
 
             System.out.println("PRINT TO FILE : " + ((printBool) ? "enabled" : "disabled"));
+            System.out.println("DATABASE RUNNING : " + dbName);
 
             switch (args[0]) {
                 case "-schema":

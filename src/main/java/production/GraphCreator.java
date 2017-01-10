@@ -7,21 +7,39 @@ import java.util.Arrays;
 import java.util.Random;
 
 public class GraphCreator {
-    private static final int numVertices = 500;
+    private static final int numVertices = 100;
     private static int numEdges = 0;
     private static int[] degreeOfVertices;
+    private static String[] labelsOfNodes;
     private static int[][] adjMat;
+    private static String[] labels = {"website", "programmer", "owner"};
+    private static int[] allocations = {
+            (int) ((0.8) * numVertices),
+            (int) ((0.15) * numVertices),
+            (int) ((0.05) * numVertices)
+    };
 
     public static void main(String args[]) {
         // setup the adjacency matrix and keep track of the degree of each node.
         degreeOfVertices = new int[numVertices];
+        labelsOfNodes = new String[numVertices];
         adjMat = new int[numVertices][numVertices];
 
         // setup a Random object to help build the graph.
         Random r = new Random();
 
+        boolean labelAdded;
         // initialise the degree of each node to 0 at the start.
         for (int a = 0; a < numVertices; a++) {
+            labelAdded = false;
+            while (!labelAdded) {
+                int labelAllocation = r.nextInt(labels.length);
+                if (allocations[labelAllocation] > 0) {
+                    allocations[labelAllocation]--;
+                    labelsOfNodes[a] = labels[labelAllocation];
+                    labelAdded = true;
+                }
+            }
             degreeOfVertices[a] = 0;
         }
 
@@ -87,11 +105,70 @@ public class GraphCreator {
     private static void produceCSV(Random r) throws FileNotFoundException {
         PrintWriter pw = new PrintWriter(new File("D:/dense500.csv"));
         StringBuilder sb = new StringBuilder();
-        sb.append("sourceID,destID,numLikes").append("\n");
+        sb.append("sourceID,destID,popularity,commits,salary,carShare").append("\n");
         for (int from = 0; from < adjMat.length; from++) {
             for (int to = 0; to < adjMat.length; to++) {
                 if (adjMat[from][to] == 1) {
                     if (Math.random() < 0.5) {
+                        String labelFrom = labelsOfNodes[from];
+                        String labelTo = labelsOfNodes[to];
+                        String typeRel = workoutrel(labelFrom, labelTo);
+                        if (typeRel != null) {
+                            sb = fillCSV(sb, from, to, typeRel, r);
+                            adjMat[from][to] = 0;
+                            adjMat[to][from] = 0;
+                        }
+                    }
+                }
+            }
+        }
+
+        sb = addRemainingEdges(sb, 0, r);
+        sb = addRemainingEdges(sb, 1, r);
+
+        pw.write(sb.toString());
+        pw.close();
+        System.out.println("done!");
+    }
+
+    private static StringBuilder fillCSV(StringBuilder sb, int from, int to, String typeRel, Random r) {
+        sb.append(from).append(",").append(to).append(",");
+
+        switch (typeRel) {
+            case "LINKED_TO":
+                sb.append(r.nextInt(1000)).append(0).append(0).append(0).append("\n");
+                break;
+            case "CODES_FOR":
+                sb.append(0).append(r.nextInt(1000)).append(0).append(0).append("\n");
+                break;
+            case "OWNS":
+                sb.append(0).append(0).append((r.nextInt(1000) + 1500) * 2000).append(0).append("\n");
+                break;
+            case "EMPLOYS":
+                String carShare = "no";
+                if (Math.random() > 0.5) carShare = "yes";
+                sb.append(0).append(0).append((r.nextInt(1000) + 1500) * 100).append(carShare).append("\n");
+                break;
+            case "FRIENDS":
+                sb.append(0).append(0).append(0).append(0).append("\n");
+                break;
+        }
+        return sb;
+    }
+
+    private static StringBuilder addRemainingEdges(StringBuilder sb, int i, Random r) {
+        for (int from = 0; from < adjMat.length; from++) {
+            for (int to = 0; to < adjMat.length; to++) {
+                if (i == 1) {
+                    int temp = from;
+                    from = to;
+                    to = temp;
+                }
+                if (adjMat[from][to] == 1) {
+                    String labelFrom = labelsOfNodes[from];
+                    String labelTo = labelsOfNodes[to];
+                    String typeRel = workoutrel(labelFrom, labelTo);
+                    if (typeRel != null) {
                         sb.append(from).append(",").append(to).append(",").append(r.nextInt(1000)).append("\n");
                         adjMat[from][to] = 0;
                         adjMat[to][from] = 0;
@@ -99,19 +176,25 @@ public class GraphCreator {
                 }
             }
         }
-        for (int from = 0; from < adjMat.length; from++) {
-            for (int to = 0; to < adjMat.length; to++) {
-                if (adjMat[from][to] == 1) {
-                    sb.append(from).append(",").append(to).append(",").append(r.nextInt(1000)).append("\n");
-                    adjMat[from][to] = 0;
-                    adjMat[to][from] = 0;
-                }
-            }
-        }
+        return sb;
+    }
 
-        pw.write(sb.toString());
-        pw.close();
-        System.out.println("done!");
+    private static String workoutrel(String labelFrom, String labelTo) {
+        if (labelFrom.equals("website") && labelTo.equals("website")) {
+            return "LINKED_TO";
+        } else if (labelFrom.equals("programmer") && labelTo.equals("website")) {
+            return "CODES_FOR";
+        } else if (labelFrom.equals("owner") && labelTo.equals("website")) {
+            return "OWNS";
+        } else if (labelFrom.equals("owner") && labelTo.equals("programmer")) {
+            return "EMPLOYS";
+        } else if (labelFrom.equals("programmer") && labelTo.equals("programmer")) {
+            return "FRIENDS";
+        } else if (labelFrom.equals("owner") && labelTo.equals("owner")) {
+            return "FRIENDS";
+        } else {
+            return null;
+        }
     }
 
     private static void printMatirx(int[][] adjMat) {

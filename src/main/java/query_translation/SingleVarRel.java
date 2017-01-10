@@ -77,7 +77,7 @@ class SingleVarRel {
     private static StringBuilder addWhereToSelectForVarRels(StringBuilder sql, CypNode node, WhereClause wc) {
         boolean usedWhere = false;
         if (node.getType() != null) {
-            sql.append(" WHERE n.label LIKE ").append(TranslateUtils.genLabelLike(node, "n"));
+            sql.append(" WHERE n01.label LIKE ").append(TranslateUtils.genLabelLike(node, "n01"));
             usedWhere = true;
         }
         if (node.getProps() != null) {

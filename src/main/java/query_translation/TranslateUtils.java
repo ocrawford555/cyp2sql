@@ -31,15 +31,18 @@ class TranslateUtils {
             String i = null;
             int index = 0;
             int j = 0;
+            boolean findBoolToAppend = false;
             if (wc != null) {
                 for (String x : wc.getComponents()) {
                     if (x.contains(entry.getKey())) {
+                        findBoolToAppend = true;
                         i = x;
                         index = j;
                     }
                     j++;
                 }
-                boolToAppend = (index < wc.getWhereMappings().size()) ? wc.getWhereMappings().get(i) : "and";
+                if (findBoolToAppend)
+                    boolToAppend = (index < wc.getWhereMappings().size()) ? wc.getWhereMappings().get(i) : "and";
             }
 
             sql.append(" ").append(boolToAppend).append(" ");
@@ -63,7 +66,7 @@ class TranslateUtils {
      * @return New SQL with WHERE part added.
      */
     static StringBuilder getWholeWhereClause(StringBuilder sql, CypNode cN, WhereClause wc) {
-        return getWholeWhereClause(sql, cN, wc, "n");
+        return getWholeWhereClause(sql, cN, wc, "n01");
     }
 
     static StringBuilder getWholeWhereClauseRel(StringBuilder sql, CypRel cR, WhereClause wc, String sqlLabel) {

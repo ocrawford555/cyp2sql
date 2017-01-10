@@ -32,7 +32,7 @@ class NoRels {
             if (r.getNodeID() == null && r.getField().equals("*")) {
                 sql.append("*");
             } else if (r.getCaseString() != null) {
-                String caseString = r.getCaseString().replace(r.getNodeID() + "." + r.getField(), "n." + r.getField());
+                String caseString = r.getCaseString().replace(r.getNodeID() + "." + r.getField(), "n01." + r.getField());
                 sql.append(caseString);
             } else {
                 for (CypNode cN : mc.getNodes()) {
@@ -41,10 +41,10 @@ class NoRels {
                         if (r.getCollect()) sql.append("array_agg(");
                         if (r.getCount()) sql.append("count(");
                         if (prop != null) {
-                            sql.append("n").append(".").append(prop)
+                            sql.append("n01").append(".").append(prop)
                                     .append(TranslateUtils.useAlias(r.getNodeID(), r.getField(), alias)).append(", ");
                         } else {
-                            sql.append("n.*")
+                            sql.append("n01.*")
                                     .append(TranslateUtils.useAlias(r.getNodeID(), r.getField(), alias)).append(", ");
                         }
                         if (r.getCollect() || r.getCount()) {
@@ -91,7 +91,7 @@ class NoRels {
             else table = "nodes";
         }
         sql.append(table);
-        sql.append(" n");
+        sql.append(" n01");
         return sql;
     }
 
@@ -111,7 +111,7 @@ class NoRels {
         for (CypReturn cR : returnC.getItems()) {
             if (cR.getNodeID() == null && cR.getField().equals("*")) {
                 CypNode cN = matchC.getNodes().get(0);
-                sql.append(" WHERE n.label LIKE ").append(TranslateUtils.genLabelLike(cN, "n"));
+                sql.append(" WHERE n01.label LIKE ").append(TranslateUtils.genLabelLike(cN, "n01"));
                 if (cN.getProps() != null) {
                     sql.append(" AND ");
                     sql = TranslateUtils.getWholeWhereClause(sql, cN, wc);
@@ -135,13 +135,13 @@ class NoRels {
 
                     if (cN.getType() != null && !useOptimalTable) {
                         if (!hasWhere) {
-                            sql.append(" WHERE n.label LIKE");
+                            sql.append(" WHERE n01.label LIKE");
                             hasWhere = true;
                         } else {
                             if (!sql.toString().endsWith("AND ")) sql.append(" AND ");
-                            sql.append("n.label LIKE");
+                            sql.append("n01.label LIKE");
                         }
-                        sql.append(" ").append(TranslateUtils.genLabelLike(cN, "n"));
+                        sql.append(" ").append(TranslateUtils.genLabelLike(cN, "n01"));
                     }
                 }
             }
