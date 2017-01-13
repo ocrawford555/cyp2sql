@@ -7,16 +7,18 @@ import java.util.Arrays;
 import java.util.Random;
 
 public class GraphCreator {
-    private static final int numVertices = 100;
+    private static final int numVertices = 500;
+    private static final long edgesToAdd = 5730;
     private static int numEdges = 0;
     private static int[] degreeOfVertices;
     private static String[] labelsOfNodes;
     private static int[][] adjMat;
-    private static String[] labels = {"website", "programmer", "owner"};
+    private static String[] labels = {"website", "programmer", "owner", "progOwner"};
     private static int[] allocations = {
-            (int) ((0.8) * numVertices),
-            (int) ((0.15) * numVertices),
-            (int) ((0.05) * numVertices)
+            (int) ((0.7) * numVertices),
+            (int) ((0.22) * numVertices),
+            (int) ((0.05) * numVertices),
+            (int) ((0.03) * numVertices)
     };
 
     public static void main(String args[]) {
@@ -57,7 +59,7 @@ public class GraphCreator {
         // the edges are added proportionally to the degree of each node
         // thus, a node with a higher degree than the other nodes has more chance of having
         // edges added to it.
-        for (int b = 0; b < 86825; b++) {
+        for (int b = 0; b < edgesToAdd; b++) {
             int v = r.nextInt(numEdges) + 1;
             int indexFrom = 0;
 
@@ -100,12 +102,64 @@ public class GraphCreator {
             e.printStackTrace();
         }
 
+        StringBuilder web = new StringBuilder();
+        StringBuilder prog = new StringBuilder();
+        StringBuilder owner = new StringBuilder();
+        StringBuilder po = new StringBuilder();
+
+        web.append("webID\n");
+        prog.append("progID\n");
+        owner.append("ownerID\n");
+        po.append("poID\n");
+
+        for (int i = 0; i < labelsOfNodes.length; i++) {
+            switch (labelsOfNodes[i]) {
+                case "website":
+                    web.append(i).append("\n");
+                    break;
+                case "programmer":
+                    prog.append(i).append("\n");
+                    break;
+                case "owner":
+                    owner.append(i).append("\n");
+                    break;
+                case "progOwner":
+                    po.append(i).append("\n");
+                    break;
+            }
+        }
+
+        try {
+            PrintWriter pw = new PrintWriter(new File("C:/Users/ocraw/Desktop/website.csv"));
+            pw.write(web.toString());
+            pw.close();
+            pw = new PrintWriter(new File("C:/Users/ocraw/Desktop/programmer.csv"));
+            pw.write(prog.toString());
+            pw.close();
+            pw = new PrintWriter(new File("C:/Users/ocraw/Desktop/owner.csv"));
+            pw.write(owner.toString());
+            pw.close();
+            pw = new PrintWriter(new File("C:/Users/ocraw/Desktop/progOwner.csv"));
+            pw.write(po.toString());
+            pw.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 
     private static void produceCSV(Random r) throws FileNotFoundException {
-        PrintWriter pw = new PrintWriter(new File("D:/dense500.csv"));
-        StringBuilder sb = new StringBuilder();
-        sb.append("sourceID,destID,popularity,commits,salary,carShare").append("\n");
+        StringBuilder sb_LINKED_TO = new StringBuilder();
+        StringBuilder sb_CODES_FOR = new StringBuilder();
+        StringBuilder sb_OWNS = new StringBuilder();
+        StringBuilder sb_EMPLOYS = new StringBuilder();
+        StringBuilder sb_FRIENDS = new StringBuilder();
+
+        sb_LINKED_TO.append("sourceID,destID,popularity").append("\n");
+        sb_CODES_FOR.append("sourceID,destID,commits").append("\n");
+        sb_OWNS.append("sourceID,destID,salary").append("\n");
+        sb_EMPLOYS.append("sourceID,destID,salary,carShare").append("\n");
+        sb_FRIENDS.append("sourceID,destID").append("\n");
+
         for (int from = 0; from < adjMat.length; from++) {
             for (int to = 0; to < adjMat.length; to++) {
                 if (adjMat[from][to] == 1) {
@@ -114,7 +168,24 @@ public class GraphCreator {
                         String labelTo = labelsOfNodes[to];
                         String typeRel = workoutrel(labelFrom, labelTo);
                         if (typeRel != null) {
-                            sb = fillCSV(sb, from, to, typeRel, r);
+                            switch (typeRel) {
+                                case "LINKED_TO":
+                                    sb_LINKED_TO = fillCSV(sb_LINKED_TO, from, to, typeRel, r);
+                                    break;
+                                case "CODES_FOR":
+                                    sb_CODES_FOR = fillCSV(sb_CODES_FOR, from, to, typeRel, r);
+                                    break;
+                                case "OWNS":
+                                    sb_OWNS = fillCSV(sb_OWNS, from, to, typeRel, r);
+                                    break;
+                                case "EMPLOYS":
+                                    sb_EMPLOYS = fillCSV(sb_EMPLOYS, from, to, typeRel, r);
+                                    break;
+                                case "FRIENDS":
+                                    sb_FRIENDS = fillCSV(sb_FRIENDS, from, to, typeRel, r);
+                                    break;
+                            }
+
                             adjMat[from][to] = 0;
                             adjMat[to][from] = 0;
                         }
@@ -123,40 +194,61 @@ public class GraphCreator {
             }
         }
 
-        sb = addRemainingEdges(sb, 0, r);
-        sb = addRemainingEdges(sb, 1, r);
+        sb_LINKED_TO = addRemainingEdges(sb_LINKED_TO, "LINKED_TO", 0, r);
+        sb_LINKED_TO = addRemainingEdges(sb_LINKED_TO, "LINKED_TO", 1, r);
+        sb_CODES_FOR = addRemainingEdges(sb_CODES_FOR, "CODES_FOR", 0, r);
+        sb_CODES_FOR = addRemainingEdges(sb_CODES_FOR, "CODES_FOR", 1, r);
+        sb_OWNS = addRemainingEdges(sb_OWNS, "OWNS", 0, r);
+        sb_OWNS = addRemainingEdges(sb_OWNS, "OWNS", 1, r);
+        sb_EMPLOYS = addRemainingEdges(sb_EMPLOYS, "EMPLOYS", 0, r);
+        sb_EMPLOYS = addRemainingEdges(sb_EMPLOYS, "EMPLOYS", 1, r);
+        sb_FRIENDS = addRemainingEdges(sb_FRIENDS, "FRIENDS", 0, r);
+        sb_FRIENDS = addRemainingEdges(sb_FRIENDS, "FRIENDS", 1, r);
 
-        pw.write(sb.toString());
+        PrintWriter pw = new PrintWriter(new File("C:/Users/ocraw/Desktop/LINKED_TO.csv"));
+        pw.write(sb_LINKED_TO.toString());
+        pw.close();
+        pw = new PrintWriter(new File("C:/Users/ocraw/Desktop/CODES_FOR.csv"));
+        pw.write(sb_CODES_FOR.toString());
+        pw.close();
+        pw = new PrintWriter(new File("C:/Users/ocraw/Desktop/OWNS.csv"));
+        pw.write(sb_OWNS.toString());
+        pw.close();
+        pw = new PrintWriter(new File("C:/Users/ocraw/Desktop/EMPLOYS.csv"));
+        pw.write(sb_EMPLOYS.toString());
+        pw.close();
+        pw = new PrintWriter(new File("C:/Users/ocraw/Desktop/FRIENDS.csv"));
+        pw.write(sb_FRIENDS.toString());
         pw.close();
         System.out.println("done!");
     }
 
     private static StringBuilder fillCSV(StringBuilder sb, int from, int to, String typeRel, Random r) {
-        sb.append(from).append(",").append(to).append(",");
+        sb.append(from).append(",").append(to);
 
         switch (typeRel) {
             case "LINKED_TO":
-                sb.append(r.nextInt(1000)).append(0).append(0).append(0).append("\n");
+                sb.append(",").append(r.nextInt(100));
                 break;
             case "CODES_FOR":
-                sb.append(0).append(r.nextInt(1000)).append(0).append(0).append("\n");
+                sb.append(",").append(r.nextInt(100));
                 break;
             case "OWNS":
-                sb.append(0).append(0).append((r.nextInt(1000) + 1500) * 2000).append(0).append("\n");
+                sb.append(",").append((r.nextInt(1000) + 1500) * 2000);
                 break;
             case "EMPLOYS":
                 String carShare = "no";
                 if (Math.random() > 0.5) carShare = "yes";
-                sb.append(0).append(0).append((r.nextInt(1000) + 1500) * 100).append(carShare).append("\n");
+                sb.append(",").append((r.nextInt(1000) + 1500) * 10).append(",").append(carShare);
                 break;
             case "FRIENDS":
-                sb.append(0).append(0).append(0).append(0).append("\n");
                 break;
         }
+        sb.append("\n");
         return sb;
     }
 
-    private static StringBuilder addRemainingEdges(StringBuilder sb, int i, Random r) {
+    private static StringBuilder addRemainingEdges(StringBuilder sb, String rel, int i, Random r) {
         for (int from = 0; from < adjMat.length; from++) {
             for (int to = 0; to < adjMat.length; to++) {
                 if (i == 1) {
@@ -168,8 +260,8 @@ public class GraphCreator {
                     String labelFrom = labelsOfNodes[from];
                     String labelTo = labelsOfNodes[to];
                     String typeRel = workoutrel(labelFrom, labelTo);
-                    if (typeRel != null) {
-                        sb.append(from).append(",").append(to).append(",").append(r.nextInt(1000)).append("\n");
+                    if (typeRel != null && typeRel.equals(rel)) {
+                        sb = fillCSV(sb, from, to, typeRel, r);
                         adjMat[from][to] = 0;
                         adjMat[to][from] = 0;
                     }
@@ -182,15 +274,18 @@ public class GraphCreator {
     private static String workoutrel(String labelFrom, String labelTo) {
         if (labelFrom.equals("website") && labelTo.equals("website")) {
             return "LINKED_TO";
-        } else if (labelFrom.equals("programmer") && labelTo.equals("website")) {
+        } else if ((labelFrom.equals("programmer") || labelFrom.equals("progOwner")) && labelTo.equals("website")) {
             return "CODES_FOR";
-        } else if (labelFrom.equals("owner") && labelTo.equals("website")) {
+        } else if ((labelFrom.equals("owner") || labelFrom.equals("progOwner")) && labelTo.equals("website")) {
             return "OWNS";
-        } else if (labelFrom.equals("owner") && labelTo.equals("programmer")) {
+        } else if ((labelFrom.equals("owner") || labelFrom.equals("progOwner")) &&
+                (labelTo.equals("programmer") || labelTo.equals("progOwner"))) {
             return "EMPLOYS";
-        } else if (labelFrom.equals("programmer") && labelTo.equals("programmer")) {
+        } else if ((labelFrom.equals("programmer") || labelFrom.equals("progOwner")) &&
+                (labelTo.equals("programmer") || labelTo.equals("progOwner"))) {
             return "FRIENDS";
-        } else if (labelFrom.equals("owner") && labelTo.equals("owner")) {
+        } else if ((labelFrom.equals("owner") || labelFrom.equals("progOwner"))
+                && (labelTo.equals("owner") || labelTo.equals("progOwner"))) {
             return "FRIENDS";
         } else {
             return null;
