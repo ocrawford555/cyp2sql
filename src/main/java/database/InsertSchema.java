@@ -1,5 +1,6 @@
 package database;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import production.Cyp2SQL_v2_Apoc;
@@ -42,11 +43,13 @@ public class InsertSchema {
 
         String createMappingQuery = "create table query_mapping (cypher TEXT, sql TEXT, object BYTEA, " +
                 "neoT DOUBLE PRECISION, pgT DOUBLE PRECISION);";
+
         String createTClosure = "CREATE MATERIALIZED VIEW tclosure AS(WITH RECURSIVE search_graph(idl, idr, depth, " +
                 "path, cycle) " +
                 "AS (SELECT e.idl, e.idr, 1, ARRAY[e.idl], false FROM edges e UNION ALL SELECT sg.idl, e.idr, " +
                 "sg.depth + 1, path || e.idl, e.idl = ANY(sg.path) FROM edges e, search_graph sg WHERE e.idl = " +
                 "sg.idr AND NOT cycle) SELECT * FROM search_graph where (not cycle OR not idr = ANY(path)));";
+
         String forEachFunction = "CREATE FUNCTION doForEachFunc(int[], field TEXT, newV TEXT) RETURNS void AS $$ " +
                 "DECLARE x int; r record; l text; BEGIN if array_length($1, 1) > 0 THEN FOREACH x SLICE 0 " +
                 "IN ARRAY $1 LOOP FOR r IN SELECT label from nodes where id = x LOOP " +
@@ -111,6 +114,7 @@ public class InsertSchema {
         StringBuilder sb = new StringBuilder();
         FileOutputStream fos;
         FileOutputStream fos2;
+
         try {
             fos = new FileOutputStream(Cyp2SQL_v2_Apoc.workspaceArea + "/meta_tables.txt");
             fos2 = new FileOutputStream(Cyp2SQL_v2_Apoc.workspaceArea + "/meta_labels.txt");
@@ -125,14 +129,15 @@ public class InsertSchema {
                 sb.append("); ");
                 bw2.write("*" + tableLabel + "*");
                 bw2.newLine();
-                for (String y : SchemaTranslate.labelMappings.get(label).replace(" TEXT", "")
-                        .replace(" INT", "").split(", ")) {
+                for (String y : SchemaTranslate.labelMappings.get(label).replace(" TEXT[]", "")
+                        .replace(" BIGINT", "").replace(" INT", "").replace(" TEXT", "").split(", ")) {
                     bw2.write(y);
                     bw2.newLine();
                 }
                 bw.write(tableLabel);
                 bw.newLine();
             }
+
             bw.close();
             bw2.close();
             fos.close();
@@ -140,6 +145,7 @@ public class InsertSchema {
         } catch (IOException ioe) {
             ioe.printStackTrace();
         }
+
         return sb.toString();
     }
 
@@ -176,7 +182,8 @@ public class InsertSchema {
         sb.append("INSERT INTO ").append(tableLabel).append("(");
 
         for (String prop : SchemaTranslate.labelMappings.get(label).split(", ")) {
-            sb.append(prop.replace(" TEXT", "").replace(" INT", "")).append(", ");
+            sb.append(prop.replace(" TEXT[]", "").replace(" BIGINT", "").replace(" TEXT", "").replace(" INT", ""))
+                    .append(", ");
         }
 
         sb.setLength(sb.length() - 2);
@@ -348,11 +355,19 @@ public class InsertSchema {
     private static String getInsertString(String z, JsonObject o) {
         String temp;
         try {
-            if (z.endsWith("INT")) {
+            if (z.endsWith("BIGINT")) {
+                long value = o.get(z.split(" ")[0]).getAsLong();
+                temp = value + ", ";
+            } else if (z.endsWith("INT")) {
                 int value = o.get(z.split(" ")[0]).getAsInt();
                 temp = value + ", ";
+            } else if (z.endsWith("[]")) {
+                // is text with list property
+                JsonArray value = o.get(z.split(" ")[0]).getAsJsonArray();
+                System.out.println(value.toString());
+                temp = "ARRAY" + value.toString().replace("\"", "'") + ", ";
             } else {
-                // is text
+                // is just text
                 String value = o.get(z.split(" ")[0]).getAsString();
                 temp = "'" + value + "', ";
             }

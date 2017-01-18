@@ -58,6 +58,7 @@ public class SchemaTranslate {
         final int segments = 4;
         final int amountPerSeg = (int) Math.ceil(count / segments);
         ArrayList<String>[] group = new ArrayList[segments];
+
         for (int i = 0; i < segments; i++) {
             group[i] = new ArrayList<>();
         }

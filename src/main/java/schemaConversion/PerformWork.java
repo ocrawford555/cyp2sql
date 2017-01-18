@@ -1,5 +1,6 @@
 package schemaConversion;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
@@ -52,6 +53,11 @@ class PerformWork implements Runnable {
         int linesRead = 0;
         int previousPercent = 0;
 
+        // temporary hack for the OPUS graphs where some names are lists and others are not.
+        // intend to store in postgres as an array, and therefore single names not in list
+        // format will be converted to a singleton list.
+        boolean opusLists = false;
+
         for (String s : lines) {
             // remove CREATE characters
             s = s.substring(7).toLowerCase();
@@ -75,24 +81,49 @@ class PerformWork implements Runnable {
                 String nodeLabel;
                 idAndTable[1] = idAndTable[1].replace("`", ", ");
                 nodeLabel = idAndTable[1];
+                if (nodeLabel.equals("process")) opusLists = true;
 
                 String props = firstSplit[1].replace("`", "");
 
                 JsonObject o = (JsonObject) SchemaTranslate.parser.parse(props.substring(0, props.length() - 1));
 
+                if (o.has("name") && !o.get("name").isJsonArray()) {
+                    String name = o.get("name").getAsString();
+                    JsonArray j_array = new JsonArray();
+                    j_array.add(name);
+                    o.remove("name");
+                    o.add("name", j_array);
+                }
+
                 o.addProperty("id", id);
                 o.addProperty("label", nodeLabel);
 
                 entries = o.entrySet();
+
                 for (Map.Entry<String, JsonElement> entry : entries) {
-                    addToLabelMap(nodeLabel, entry.getKey(), entry.getValue().getAsString());
+                    addToLabelMap(nodeLabel, entry.getKey(), entry.getValue());
+
                     if (!SchemaTranslate.nodeRelLabels.contains(entry.getKey() + " TEXT") &&
-                            !SchemaTranslate.nodeRelLabels.contains(entry.getKey() + " INT")) {
-                        try {
-                            Integer.parseInt(entry.getValue().getAsString());
-                            SchemaTranslate.nodeRelLabels.add(entry.getKey() + " INT");
-                        } catch (NumberFormatException nfe) {
-                            SchemaTranslate.nodeRelLabels.add(entry.getKey() + " TEXT");
+                            !SchemaTranslate.nodeRelLabels.contains(entry.getKey() + " INT") &&
+                            !SchemaTranslate.nodeRelLabels.contains(entry.getKey() + " BIGINT") &&
+                            !SchemaTranslate.nodeRelLabels.contains(entry.getKey() + " TEXT[]")) {
+                        if (entry.getValue().isJsonArray()) {
+                            SchemaTranslate.nodeRelLabels.add(entry.getKey() + " TEXT[]");
+                        } else {
+                            try {
+                                // another OPUS hack
+                                if (entry.getKey().equals("mono_time")) throw new NumberFormatException();
+                                Integer.parseInt(entry.getValue().getAsString());
+                                SchemaTranslate.nodeRelLabels.add(entry.getKey() + " INT");
+                            } catch (NumberFormatException nfe) {
+                                try {
+                                    Long.parseLong(entry.getValue().getAsString());
+                                    SchemaTranslate.nodeRelLabels.add(entry.getKey() + " BIGINT");
+                                } catch (NumberFormatException nfe2) {
+                                    String textToAdd = entry.getKey() + " TEXT";
+                                    SchemaTranslate.nodeRelLabels.add(textToAdd);
+                                }
+                            }
                         }
                     }
                 }
@@ -142,14 +173,25 @@ class PerformWork implements Runnable {
                 }
 
                 entries = o.entrySet();
+
+
                 for (Map.Entry<String, JsonElement> entry : entries) {
                     if (!SchemaTranslate.edgesRelLabels.contains(entry.getKey() + " TEXT") &&
-                            !SchemaTranslate.edgesRelLabels.contains(entry.getKey() + " INT")) {
+                            !SchemaTranslate.edgesRelLabels.contains(entry.getKey() + " INT") &&
+                            !SchemaTranslate.edgesRelLabels.contains(entry.getKey() + " BIGINT") &&
+                            !SchemaTranslate.edgesRelLabels.contains(entry.getKey() + " TEXT[]")) {
                         try {
                             Integer.parseInt(entry.getValue().getAsString());
                             SchemaTranslate.edgesRelLabels.add(entry.getKey() + " INT");
                         } catch (NumberFormatException nfe) {
-                            SchemaTranslate.edgesRelLabels.add(entry.getKey() + " TEXT");
+                            try {
+                                Long.parseLong(entry.getValue().getAsString());
+                                SchemaTranslate.edgesRelLabels.add(entry.getKey() + " BIGINT");
+                            } catch (NumberFormatException nfe2) {
+                                String textToAdd = entry.getKey() + " TEXT";
+                                if (entry.getKey().equals("name") && opusLists) textToAdd = textToAdd + "[]";
+                                SchemaTranslate.edgesRelLabels.add(textToAdd);
+                            }
                         }
                     }
                 }
@@ -178,31 +220,48 @@ class PerformWork implements Runnable {
         }
     }
 
-    /**
-     * The output module of Apoc requires knowledge of all the possible properties of nodes. This method
-     * stores that information in a meta file.
-     *
-     * @param nodeLabel Node label
-     * @param key       Node property
-     * @param testValue An example value of the property, to see if it is an INTEGER or STRING. This can fail,
-     *                  for example if the value is normally a string, but one value is '1'. Need to fix this.
-     */
-    private void addToLabelMap(String nodeLabel, String key, String testValue) {
+    private void addToLabelMap(String nodeLabel, String key, JsonElement value) {
         if (SchemaTranslate.labelMappings.keySet().contains(nodeLabel)) {
             String currentValue = SchemaTranslate.labelMappings.get(nodeLabel);
-            if (!currentValue.contains(key))
+
+            if (!currentValue.contains(key)) {
+                if (value.isJsonArray()) {
+                    SchemaTranslate.labelMappings.put(nodeLabel, currentValue + ", " + key + " TEXT[]");
+                } else {
+                    String testValue = value.getAsString();
+                    try {
+                        // another OPUS hack
+                        if (key.equals("mono_time")) throw new NumberFormatException();
+                        Integer.parseInt(testValue);
+                        SchemaTranslate.labelMappings.put(nodeLabel, currentValue + ", " + key + " INT");
+                    } catch (NumberFormatException nfe) {
+                        try {
+                            Long.parseLong(testValue);
+                            SchemaTranslate.labelMappings.put(nodeLabel, currentValue + ", " + key + " BIGINT");
+                        } catch (NumberFormatException nfe2) {
+                            String textToAdd = currentValue + ", " + key + " TEXT";
+                            SchemaTranslate.labelMappings.put(nodeLabel, textToAdd);
+                        }
+                    }
+                }
+            }
+        } else {
+            if (value.isJsonArray()) {
+                SchemaTranslate.labelMappings.put(nodeLabel, "id INT, " + key + " TEXT[]");
+            } else {
+                String testValue = value.getAsString();
                 try {
                     Integer.parseInt(testValue);
-                    SchemaTranslate.labelMappings.put(nodeLabel, currentValue + ", " + key + " INT");
+                    SchemaTranslate.labelMappings.put(nodeLabel, "id INT, " + key + " INT");
                 } catch (NumberFormatException nfe) {
-                    SchemaTranslate.labelMappings.put(nodeLabel, currentValue + ", " + key + " TEXT");
+                    try {
+                        Long.parseLong(testValue);
+                        SchemaTranslate.labelMappings.put(nodeLabel, "id INT, " + key + " BIGINT");
+                    } catch (NumberFormatException nfe2) {
+                        String textToAdd = "id INT, " + key + " TEXT";
+                        SchemaTranslate.labelMappings.put(nodeLabel, textToAdd);
+                    }
                 }
-        } else {
-            try {
-                Integer.parseInt(testValue);
-                SchemaTranslate.labelMappings.put(nodeLabel, "id INT, " + key + " INT");
-            } catch (NumberFormatException nfe) {
-                SchemaTranslate.labelMappings.put(nodeLabel, "id INT, " + key + " TEXT");
             }
         }
     }
