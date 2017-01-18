@@ -152,7 +152,8 @@ class TranslateUtils {
         for (String l : labels) {
             stmt = stmt + l + "%' AND " + (id == null ? "" : (id + ".")) + "label LIKE '%";
         }
-        stmt = stmt.substring(0, stmt.length() - (18 + (id == null ? 0 : 1)));
+        //stmt = stmt.substring(0, stmt.length() - (18 + (id == null ? 0 : 1)));
+        stmt = stmt.substring(0, stmt.substring(0, stmt.length() - 2).lastIndexOf("'") + 1);
         return stmt;
     }
 

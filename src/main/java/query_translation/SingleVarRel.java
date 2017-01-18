@@ -32,6 +32,11 @@ class SingleVarRel {
             }
         }
 
+        // only do tclosure for those where upper depth is 5 or less.
+//        if (amountHigh > 5) {
+//            return SingleVarRelExtended.translate(sql, decodedQuery, direction, amountLow, amountHigh, matchC);
+//        }
+
         CypNode cN1;
         CypNode cN2 = null;
 
@@ -74,8 +79,9 @@ class SingleVarRel {
      * @param wc   Where Clause to examine and add.
      * @return New SQL.
      */
-    private static StringBuilder addWhereToSelectForVarRels(StringBuilder sql, CypNode node, WhereClause wc) {
+    static StringBuilder addWhereToSelectForVarRels(StringBuilder sql, CypNode node, WhereClause wc) {
         boolean usedWhere = false;
+
         if (node.getType() != null) {
             sql.append(" WHERE n01.label LIKE ").append(TranslateUtils.genLabelLike(node, "n01"));
             usedWhere = true;
@@ -138,45 +144,18 @@ class SingleVarRel {
     private static StringBuilder createStepView(StringBuilder sql, int amountLow,
                                                 int amountHigh, ReturnClause returnC,
                                                 Map<String, String> alias, boolean createTClosure) {
+        sql = getStepView(sql, createTClosure, amountLow, amountHigh);
+        sql = getFinalSelect(sql, returnC, alias, false);
+        return sql;
+    }
+
+    static StringBuilder getStepView(StringBuilder sql, boolean createTClosure,
+                                     int amountLow, int amountHigh) {
         sql.append("CREATE TEMP VIEW step AS (WITH graphT AS (SELECT idr as x, idl as y");
         sql.append(" FROM ").append((createTClosure) ? "tx1" : "tClosure JOIN zerostep on idl = zerostep.id");
         sql.append(" JOIN nodes as n on idr = n.id where depth <= ");
         sql.append(amountHigh).append(" AND depth >= ").append(amountLow);
         sql.append(") SELECT * from graphT); ");
-
-        sql.append("SELECT ");
-
-        boolean joinZeroStep = false;
-
-        // return only the correct things
-        for (CypReturn cR : returnC.getItems()) {
-            if (cR.getCollect()) sql.append("array_agg(");
-            if (cR.getCount()) sql.append("count(");
-            if (cR.getField() == null) {
-                sql.append("*");
-            } else {
-                if (cR.getPosInClause() == 1) {
-                    sql.append("z.").append(cR.getField());
-                    joinZeroStep = true;
-                } else {
-                    sql.append("n.").append(cR.getField());
-                }
-            }
-            if (cR.getCollect() || cR.getCount()) {
-                sql.append(") ").append(TranslateUtils.useAlias(cR.getNodeID(), cR.getField(), alias)).append(", ");
-            } else {
-                sql.append(TranslateUtils.useAlias(cR.getNodeID(), cR.getField(), alias)).append(", ");
-            }
-        }
-
-        String table = TranslateUtils.getTable(returnC);
-
-        if (sql.toString().endsWith(", ")) {
-            sql.setLength(sql.length() - 2);
-        }
-        sql.append(" ");
-        sql.append("FROM ").append(table).append(" n JOIN step on x = n.id");
-        if (joinZeroStep) sql.append(" JOIN zerostep z on z.id = y");
         return sql;
     }
 
@@ -186,7 +165,7 @@ class SingleVarRel {
      *           is being searched from, then need to include those fields in the initial zerostep.
      * @return SQL view of this first step in the variable relationship.
      */
-    private static String getZeroStep(CypNode cN, ReturnClause rc) {
+    static String getZeroStep(CypNode cN, ReturnClause rc) {
         StringBuilder getZStep = new StringBuilder();
         getZStep.append("CREATE TEMP VIEW zerostep AS SELECT id");
 
@@ -226,4 +205,47 @@ class SingleVarRel {
         return getZStep.toString();
     }
 
+    static StringBuilder getFinalSelect(StringBuilder sql, ReturnClause returnC, Map<String, String> alias,
+                                        boolean extended) {
+        sql.append("SELECT ");
+
+        if (extended) {
+            sql.append("id FROM nodes n01 JOIN step on x = n01.id");
+        } else {
+
+            boolean joinZeroStep = false;
+
+            // return only the correct things
+            for (CypReturn cR : returnC.getItems()) {
+                if (cR.getCollect()) sql.append("array_agg(");
+                if (cR.getCount()) sql.append("count(");
+                if (cR.getField() == null) {
+                    sql.append("*");
+                } else {
+                    if (cR.getPosInClause() == 1) {
+                        sql.append("z.").append(cR.getField());
+                        joinZeroStep = true;
+                    } else {
+                        sql.append("n01.").append(cR.getField());
+                    }
+                }
+                if (cR.getCollect() || cR.getCount()) {
+                    sql.append(") ").append(TranslateUtils.useAlias(cR.getNodeID(), cR.getField(), alias)).append(", ");
+                } else {
+                    sql.append(TranslateUtils.useAlias(cR.getNodeID(), cR.getField(), alias)).append(", ");
+                }
+            }
+
+            String table = TranslateUtils.getTable(returnC);
+
+            if (sql.toString().endsWith(", ")) {
+                sql.setLength(sql.length() - 2);
+            }
+            sql.append(" ");
+            sql.append("FROM ").append(table).append(" n01 JOIN step on x = n01.id");
+            if (joinZeroStep) sql.append(" JOIN zerostep z on z.id = y");
+        }
+
+        return sql;
+    }
 }

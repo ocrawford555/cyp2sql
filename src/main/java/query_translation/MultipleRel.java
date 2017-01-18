@@ -207,7 +207,6 @@ class MultipleRel {
         String relsNeeded = "";
 
         for (CypReturn cR : returnC.getItems()) {
-            System.out.println(cR.toString());
             boolean isNode = false;
 
             if (cR.getNodeID() == null && cR.getField().equals("*")) {

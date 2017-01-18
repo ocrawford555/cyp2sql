@@ -94,15 +94,6 @@ class NoRels {
         return sql;
     }
 
-    /**
-     * Obtain WHERE clause of SQL when there are no relationships to deal with.
-     *
-     * @param sql     Existing SQL.
-     * @param returnC Return Clause of original Cypher query.
-     * @param matchC  Match Clause of original Cypher query.
-     * @param wc
-     * @return New SQL.
-     */
     private static StringBuilder getWhere(StringBuilder sql, ReturnClause returnC,
                                           MatchClause matchC, WhereClause wc) {
         boolean hasWhere = false;
@@ -145,6 +136,7 @@ class NoRels {
                 }
             }
         }
+
         return sql;
     }
 }

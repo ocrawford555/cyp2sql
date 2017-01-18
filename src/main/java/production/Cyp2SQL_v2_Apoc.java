@@ -2,6 +2,7 @@ package production;
 
 import clauseObjects.CypForEach;
 import clauseObjects.DecodedQuery;
+import database.AddTClosure;
 import database.CypherDriver;
 import database.DbUtil;
 import database.InsertSchema;
@@ -65,6 +66,8 @@ public class Cyp2SQL_v2_Apoc {
      *
      * @param args arguments to the application.
      *             <-schema|-translate|-s|-t> <schemaFile|queriesFile> <databaseName> <-p>
+     *             or alternatively, one of the special commands,
+     *             <-tc> <databaseName> : this is to perform the transitive closure for the graph and store it.
      *             View README for additional guidance.
      */
     public static void main(String args[]) {
@@ -81,7 +84,9 @@ public class Cyp2SQL_v2_Apoc {
         neoUN = fileLocations[5];
         neoPW = fileLocations[6];
 
-        if (args.length != 3 && args.length != 4) {
+        if (args.length == 2 && args[0].equals("-tc")) {
+            AddTClosure.addTClosure(args[1]);
+        } else if (args.length != 3 && args.length != 4) {
             // error with the command line arguments
             System.err.println("Incorrect usage of Cyp2SQL v2 : " +
                     "<-schema|-translate|-s|-t> <schemaFile|queriesFile> <databaseName> <-p>");

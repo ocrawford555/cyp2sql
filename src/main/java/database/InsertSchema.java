@@ -364,7 +364,6 @@ public class InsertSchema {
             } else if (z.endsWith("[]")) {
                 // is text with list property
                 JsonArray value = o.get(z.split(" ")[0]).getAsJsonArray();
-                System.out.println(value.toString());
                 temp = "ARRAY" + value.toString().replace("\"", "'") + ", ";
             } else {
                 // is just text
