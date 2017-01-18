@@ -51,7 +51,7 @@ public class Cyp2SQL_v2_Apoc {
     public static int numResultsPost = 0;
 
     // database name is given to the program as an argument.
-    private static String dbName;
+    public static String dbName;
 
     // stores the last decoded query so that the Cypher results module can use it,
     // without having to rerun computation.

@@ -22,8 +22,7 @@ class NoRels {
         return sql;
     }
 
-    private static StringBuilder getSelect(ReturnClause rc, MatchClause mc,
-                                           StringBuilder sql,
+    private static StringBuilder getSelect(ReturnClause rc, MatchClause mc, StringBuilder sql,
                                            boolean hasDistinct, Map<String, String> alias) {
         sql.append("SELECT ");
         if (hasDistinct) sql.append("DISTINCT ");

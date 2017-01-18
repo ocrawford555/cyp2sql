@@ -220,7 +220,7 @@ class CypherTranslator {
      * Extract the relationships from the MATCH clause.
      *
      * @param clause Token version of the clause.
-     * @param m Internal representation of the MATCH clause.
+     * @param m      Internal representation of the MATCH clause.
      * @return An ArrayList of CypRel objects that correspond to the relationships (if any) described by Cypher.
      * @throws Exception Error in the clause.
      */
@@ -376,19 +376,26 @@ class CypherTranslator {
 
         json.append("{");
 
+        boolean listSyntax = propsString.contains("[");
+
         int i = 0;
+
         for (String a : propsString) {
             if (a.equals(",")) {
                 continue;
-            }
-            if (i % 3 == 0) {
+            } else if (a.equals("[")) {
+                json.append("[");
+                continue;
+            } else if (a.equals("]")) {
+                json.setLength(json.length() - 2);
+                json.append("]").append(", ");
+            } else if (i % 3 == 0) {
                 json.append("\"").append(a).append("\"");
-            }
-            if (i % 3 == 1) {
+            } else if (i % 3 == 1) {
                 json.append(":");
-            }
-            if (i % 3 == 2) {
+            } else if (i % 3 == 2) {
                 json.append(a).append(", ");
+                if (listSyntax) continue;
             }
             i++;
         }

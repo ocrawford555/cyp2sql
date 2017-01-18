@@ -25,7 +25,12 @@ class TranslateUtils {
 
         for (Map.Entry<String, JsonElement> entry : entries) {
             sql.append(sqlLabel).append(".").append(entry.getKey());
-            String value = entry.getValue().getAsString();
+            String value;
+            if (entry.getValue().isJsonArray()) {
+                value = "ARRAY" + entry.getValue().getAsJsonArray().toString();
+            } else if (entry.getKey().equals("name") && Cyp2SQL_v2_Apoc.dbName.startsWith("opus")) {
+                value = "ARRAY[" + entry.getValue().toString() + "]";
+            } else value = entry.getValue().getAsString();
             sql = TranslateUtils.addWhereClause(sql, value);
 
             String i = null;
@@ -126,7 +131,9 @@ class TranslateUtils {
             v = value.substring(3, value.indexOf("#eg"));
         }
 
-        sql.append("'").append(v.replace("'", "")).append("' ");
+        if (v.startsWith("ARRAY")) {
+            sql.append(v.replace("\"", "'")).append(" ");
+        } else sql.append("'").append(v.replace("'", "")).append("' ");
 
         return sql;
     }
