@@ -7,10 +7,7 @@ import database.CypherDriver;
 import database.DbUtil;
 import database.InsertSchema;
 import org.apache.commons.io.FileUtils;
-import query_translation.SQLForEach;
-import query_translation.SQLTranslate;
-import query_translation.SQLUnion;
-import query_translation.SQLWith;
+import query_translation.*;
 import schemaConversion.SchemaTranslate;
 import translator.CypherTokenizer;
 
@@ -120,7 +117,10 @@ public class Cyp2SQL_v2_Apoc {
                 case "-t":
                     // translate Cypher queries to SQL.
                     getLabelMapping();
-                    translateCypherToSQL(args[1], f_cypher, f_pg, cypher_results, pg_results);
+                    for (int i = -10; i <= 10; i++) {
+                        System.out.println("Warming up - iterations left : " + (i * -1));
+                        translateCypherToSQL(args[1], f_cypher, f_pg, cypher_results, pg_results, i);
+                    }
                     break;
                 default:
                     // error with the command line arguments
@@ -202,7 +202,7 @@ public class Cyp2SQL_v2_Apoc {
      * @param pg_results     String file location of f_pg.
      */
     private static void translateCypherToSQL(String translateFile, File f_cypher, File f_pg, String cypher_results,
-                                             String pg_results) {
+                                             String pg_results, int repeatCount) {
         try {
             FileInputStream fis = new FileInputStream(translateFile);
             BufferedReader br = new BufferedReader(new InputStreamReader(fis));
@@ -224,6 +224,8 @@ public class Cyp2SQL_v2_Apoc {
                             sql = convertCypherForEach(line);
                         } else if (line.toLowerCase().contains(" with ")) {
                             sql = convertCypherWith(line);
+                        } else if (line.toLowerCase().contains("allshortestpaths")) {
+                            sql = convertCypherASP(line);
                         } else {
                             sql = convertCypherToSQL(line).getSqlEquiv();
                         }
@@ -231,8 +233,8 @@ public class Cyp2SQL_v2_Apoc {
                         returnItemsForCypher = null;
 
                         if (sql != null && !sql.startsWith("INSERT") && !sql.startsWith("DELETE")) {
-                            returnItemsForCypher = lastDQ.getCypherAdditionalInfo().
-                                    getReturnClause().replace(" ", "").split(",");
+                            returnItemsForCypher = lastDQ.getCypherAdditionalInfo().getReturnClause()
+                                    .replace(" ", "").split(",");
                         }
                     }
 
@@ -241,8 +243,12 @@ public class Cyp2SQL_v2_Apoc {
                     } else throw new Exception("Conversion of SQL failed");
 
                     CypherDriver.run(line, cypher_results, returnItemsForCypher, printBool);
-                    printSummary(line, sql, f_cypher, f_pg);
-                    DbUtil.insertMapping(line, sql, returnItemsForCypher, dbName);
+
+                    if (repeatCount > 0) {
+                        printSummary(line, sql, f_cypher, f_pg);
+                        DbUtil.insertMapping(line, sql, returnItemsForCypher, dbName);
+                    }
+
                     resetExecTimes();
                 }
             }
@@ -251,6 +257,15 @@ public class Cyp2SQL_v2_Apoc {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private static String convertCypherASP(String line) throws Exception {
+        String path = line.substring(line.indexOf("(") + 1, line.indexOf("RETURN") - 2);
+        String returnClause = line.substring(line.indexOf("RETURN"));
+        String cypherPathQuery = "MATCH " + path + " " + returnClause;
+        DecodedQuery dQMainPath = CypherTokenizer.decode(cypherPathQuery, false);
+        lastDQ = dQMainPath;
+        return SQLAllShortestPaths.translate(dQMainPath).toString();
     }
 
     /**

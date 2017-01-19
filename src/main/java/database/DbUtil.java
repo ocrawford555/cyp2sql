@@ -177,8 +177,8 @@ public class DbUtil {
         long startNanoReadQuery = System.nanoTime();
         ResultSet rs = stm.executeQuery(query);
         long endNanoReadQuery = System.nanoTime();
-
         lastExecTimeRead += (endNanoReadQuery - startNanoReadQuery);
+
         ResultSetMetaData rsm = rs.getMetaData();
 
         feed = new ArrayList<>();
