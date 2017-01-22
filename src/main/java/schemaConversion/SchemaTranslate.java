@@ -1,7 +1,7 @@
 package schemaConversion;
 
 import com.google.gson.JsonParser;
-import production.Cyp2SQL_v2_Apoc;
+import production.Cyp2SQL_v3_Apoc;
 
 import java.io.*;
 import java.util.*;
@@ -28,8 +28,8 @@ public class SchemaTranslate {
     // storing separate information on the types of relationships
     public static List<String> relTypes = Collections.synchronizedList(new ArrayList<>());
     // workspace area for both nodes and edges
-    public static String nodesFile = Cyp2SQL_v2_Apoc.workspaceArea + "/nodes.txt";
-    public static String edgesFile = Cyp2SQL_v2_Apoc.workspaceArea + "/edges.txt";
+    public static String nodesFile = Cyp2SQL_v3_Apoc.workspaceArea + "/nodes.txt";
+    public static String edgesFile = Cyp2SQL_v3_Apoc.workspaceArea + "/edges.txt";
     // JSON Parser for creating JSON objects from the text file.
     // passed to all of the threads
     static JsonParser parser = new JsonParser();

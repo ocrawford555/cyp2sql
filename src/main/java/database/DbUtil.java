@@ -1,6 +1,6 @@
 package database;
 
-import production.Cyp2SQL_v2_Apoc;
+import production.Cyp2SQL_v3_Apoc;
 
 import java.io.*;
 import java.sql.*;
@@ -26,7 +26,7 @@ public class DbUtil {
         try {
             Class.forName("org.postgresql.Driver");
             c = DriverManager.getConnection("jdbc:postgresql://localhost:5432/" + dbName,
-                    Cyp2SQL_v2_Apoc.postUN, Cyp2SQL_v2_Apoc.postPW);
+                    Cyp2SQL_v3_Apoc.postUN, Cyp2SQL_v3_Apoc.postPW);
             DB_OPEN = true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -112,7 +112,7 @@ public class DbUtil {
             }
         }
 
-        Cyp2SQL_v2_Apoc.numResultsPost = numRecords;
+        Cyp2SQL_v3_Apoc.numResultsPost = numRecords;
         DbUtil.closeConnection();
     }
 

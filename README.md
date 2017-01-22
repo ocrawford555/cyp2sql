@@ -1,8 +1,8 @@
 # Cypher to SQL Translator Tool - _Apoc_
 
->_version 2.2_
+>_version 3.0_
 
-_Apoc_ v2.2 is a tool that will perform automatic translation of both 
+_Apoc_ v3.0 is a tool that will perform automatic translation of both 
 graph schemas and graph queries in Neo4J and Cypher respectively, 
 to a relational schema and relational query language (SQL).
 This is an individual project for the Part II Tripos of 
@@ -14,19 +14,18 @@ Computer Science at the University of Cambridge.
 - This can be part-automated by running the following command: neo4jplay.bat -c dump  > testD.txt (then type "dump" into the console, followed by enter). When the file "testD.txt" stops growing, the command prompt can be exited.
 - neo4jplay.bat = `@echo off java -classpath "C:\Program Files\Neo4j CE 3.0.6\bin\neo4j-desktop-3.0.6.jar" org.neo4j.shell.StartClient`
 - The current schema translator converts the dump to two relations at a minimum: nodes and edges. The translator will attempt to optimise, if possible, by creating smaller relations with fewer NULLs. A separate metadata file is also created containing all the possible labels of the node store.
-- Future improvements: improve conversion of the relationships to be more efficient, and test against larger datasets.
  
 ### Cypher parsing unit
 - Built using ANTLRv4 tool.
 - Grammar: https://s3.amazonaws.com/artifacts.opencypher.org/Cypher.g4
 - Produces a token list which can be parsed more in the Cyp2SQL tool.
-- Future improvements: performance analysis, extend for more aspects of the language.
+- Future improvements: performance analysis, nicer code in Java.
 
 ### Query translator unit
 - Maps the Cypher query input to an internal representation in Java.
 - This is then used to build up the SQL piece by piece.
 - Types of queries that can be modelled currently shown below.
-- Future improvements: extend for more of the Cypher language, refactor to cleaner looking code.
+- Future improvements: refactor to cleaner looking code, allow for different representations to be translated against.
 
 ### Output Module
 - Fills in two text files - one is the results from Neo4J based on the Cypher input; the other is the results from Postgres based on the SQL generated from the Cypher input.
@@ -74,10 +73,10 @@ Computer Science at the University of Cambridge.
 ## Instructions for Running
 The properties file (configC2S.properties) must first be set with the correct properties.
 
-Run the .jar (to come in next commit!) with the following parameters, depending on whether or not the schema needs to be translated first.
+Run the .jar with the following parameters, depending on whether or not the schema needs to be translated first.
 
 ```bash
-java -jar <location of .jar file> <-schema|-translate|-s|-t> <schemaFile|queriesFile> <databaseName> <-p>
+java -jar <location of .jar file> <-schema|-translate|-s|-t|-t2> <schemaFile|queriesFile> <databaseName> <-p>
 ```
 
 Thus, if wishing to first convert the schema:

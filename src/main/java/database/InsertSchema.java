@@ -3,7 +3,7 @@ package database;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import production.Cyp2SQL_v2_Apoc;
+import production.Cyp2SQL_v3_Apoc;
 import schemaConversion.SchemaTranslate;
 
 import java.io.*;
@@ -78,7 +78,7 @@ public class InsertSchema {
     private static void addFieldsToMetaFile() {
         FileOutputStream fos;
         try {
-            fos = new FileOutputStream(Cyp2SQL_v2_Apoc.workspaceArea + "/meta.txt");
+            fos = new FileOutputStream(Cyp2SQL_v3_Apoc.workspaceArea + "/meta.txt");
 
             //Construct BufferedReader from InputStreamReader
             BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos));
@@ -89,7 +89,7 @@ public class InsertSchema {
             bw.close();
             fos.close();
 
-            fos = new FileOutputStream(Cyp2SQL_v2_Apoc.workspaceArea + "/meta_rels.txt");
+            fos = new FileOutputStream(Cyp2SQL_v3_Apoc.workspaceArea + "/meta_rels.txt");
 
             //Construct BufferedReader from InputStreamReader
             bw = new BufferedWriter(new OutputStreamWriter(fos));
@@ -116,8 +116,8 @@ public class InsertSchema {
         FileOutputStream fos2;
 
         try {
-            fos = new FileOutputStream(Cyp2SQL_v2_Apoc.workspaceArea + "/meta_tables.txt");
-            fos2 = new FileOutputStream(Cyp2SQL_v2_Apoc.workspaceArea + "/meta_labels.txt");
+            fos = new FileOutputStream(Cyp2SQL_v3_Apoc.workspaceArea + "/meta_tables.txt");
+            fos2 = new FileOutputStream(Cyp2SQL_v3_Apoc.workspaceArea + "/meta_labels.txt");
 
             BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos));
             BufferedWriter bw2 = new BufferedWriter(new OutputStreamWriter(fos2));
