@@ -23,9 +23,14 @@ public class CypherTokenizer {
 
     public static ArrayList<String> getTokenList(String cyp, boolean DEBUG_PRINT) {
         CypherLexer lexer = new CypherLexer(new ANTLRInputStream(cyp));
+
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         tokens.fill();
         CypherParser parser = new CypherParser(tokens);
+
+        // dangerous - take out only when sure.
+        parser.removeErrorListeners();
+
         ParseTree tree = parser.cypher();
         ParseTreeWalker walker = new ParseTreeWalker();
 

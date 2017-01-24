@@ -37,7 +37,7 @@ public class SQLTranslate {
         if (decodedQuery.getMc().getRels().isEmpty()) {
             sql = NoRels.translate(sql, decodedQuery);
         } else if (decodedQuery.getMc().isVarRel() && decodedQuery.getMc().getRels().size() == 1) {
-            if (typeTranslate.equals("t")) {
+            if (typeTranslate.equals("-t")) {
                 sql = SingleVarRel.translate(sql, decodedQuery, false);
             } else {
                 sql = SingleVarAdjList.translate(sql, decodedQuery);

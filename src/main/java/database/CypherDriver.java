@@ -72,6 +72,13 @@ public class CypherDriver {
                                         int resultInt = record.get(t).asInt();
                                         writer.println(bits[1].toLowerCase() + " : " + resultInt);
                                     }
+                                } else if (t.contains("count")) {
+                                    try {
+                                        int countResult = record.get(t).asInt();
+                                        writer.println("count" + " : " + countResult);
+                                    } catch (ClientException ce) {
+
+                                    }
                                 } else {
                                     // currently only deals with returning nodes
                                     List<String> fields = getAllFieldsNodes();

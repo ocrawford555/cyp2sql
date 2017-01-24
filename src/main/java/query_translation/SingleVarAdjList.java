@@ -37,7 +37,7 @@ class SingleVarAdjList {
             if (i == amountHigh) {
                 sql.append("xx FROM ");
                 int j = i;
-                while (j > 0) {
+                while (j > (amountLow - 1)) {
                     j--;
                     sql.append(alphabet[j]).append(" UNION ALL SELECT xx FROM ");
                 }

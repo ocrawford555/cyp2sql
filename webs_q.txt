@@ -1,0 +1,25 @@
+// general basic queries, domain independent
+MATCH (node) RETURN node;
+MATCH ()-[r]->() RETURN count(r);
+MATCH (a)-[r]->(b)--(c)<-[q]-(a) RETURN count(a);
+MATCH (a)-[*1..2]->(b) RETURN b;
+MATCH (a)-[*1..3]->(b) RETURN b;
+MATCH (a)-[*2..4]->(b) RETURN count(b);
+
+// general basic queries, with small data knowledge included to make query more sensible
+MATCH (node:Programmer:Owner) WHERE node.cars > 1 RETURN node;
+MATCH (node) WHERE node.domain = "co.uk" OR node.domain = "jp" RETURN DISTINCT node.host ORDER BY node.host ASC;
+MATCH (node:Programmer {pets:2}) RETURN DISTINCT node.city SKIP 5 LIMIT 10;
+MATCH (node:Programmer {pets:2}) RETURN node.city ORDER BY node.state DESC LIMIT 50;
+MATCH (a:Programmer:Owner)-->(b:Website)<--(c:Owner)<--(a) RETURN a.surname;
+MATCH (a {pets:2})--(b)--(c:Owner)-->(d) RETURN d;
+MATCH (a:Website {host:"google"})-[*1..3]->(b:Website) RETURN b.host;
+
+// explore scope of translation tool (UNION[ALL], WITH, COLLECT, CASE)
+MATCH (nodeA:Website {domain:"co.in"})-[link:LINKED_TO]->(nodeB:Website) WHERE link.popularity > 80 RETURN nodeB.host UNION MATCH (nodeA:Website {domain:"org"})-[link:LINKED_TO]->(nodeB:Website) WHERE link.popularity > 80 RETURN nodeB.host;
+MATCH (a:Website)-[m:LINKED_TO]->(b:Website {domain:"com"}) WITH a, count(m) AS Link_Count WHERE Link_Count >= 15 RETURN a.host, Link_Count ORDER BY Link_Count DESC;
+MATCH (texas {state:"Texas"}) RETURN collect(texas.city); 
+MATCH (o:Programmer {pets:2})-[:CODES_FOR]->()<--(p:Owner {cars:1}) RETURN CASE p.state WHEN 'California' THEN 'CA' WHEN 'New York' THEN 'YA' ELSE 'Other' END;
+
+// more advanced queries
+MATCH (a {host:"google"})-[:LINKED_TO]->(b)-[l1:LINKED_TO]->(c)-[l2]->(a)-->(d {domain:"com"}) WHERE l1.popularity < 15 AND l2.popularity > 85 RETURN d.host AS HostName, l1.popularity, l2.popularity;

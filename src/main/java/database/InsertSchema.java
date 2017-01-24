@@ -50,6 +50,12 @@ public class InsertSchema {
                 "sg.depth + 1, path || e.idl, e.idl = ANY(sg.path) FROM edges e, search_graph sg WHERE e.idl = " +
                 "sg.idr AND NOT cycle) SELECT * FROM search_graph where (not cycle OR not idr = ANY(path)));";
 
+        String createAltRep = "CREATE MATERIALIZED VIEW adjList_from AS (select idl as LeftNode, " +
+                "array_agg(idr ORDER BY idr asc) AS RightNode FROM edges e JOIN nodes n on e.idl = n.id GROUP BY idl);";
+
+        String createAltRep2 = "CREATE MATERIALIZED VIEW adjList_to AS (select idr as LeftNode, " +
+                "array_agg(idl ORDER BY idl asc) AS RightNode FROM edges e JOIN nodes n on e.idr = n.id GROUP BY idr);";
+
         String forEachFunction = "CREATE FUNCTION doForEachFunc(int[], field TEXT, newV TEXT) RETURNS void AS $$ " +
                 "DECLARE x int; r record; l text; BEGIN if array_length($1, 1) > 0 THEN FOREACH x SLICE 0 " +
                 "IN ARRAY $1 LOOP FOR r IN SELECT label from nodes where id = x LOOP " +
@@ -66,6 +72,8 @@ public class InsertSchema {
             DbUtil.createInsert(createMappingQuery);
             // tclosure can take up excessive disk space and time - do not run unless sure is ok!
             //DbUtil.createInsert(createTClosure);
+            DbUtil.createInsert(createAltRep);
+            DbUtil.createInsert(createAltRep2);
             DbUtil.createInsert(forEachFunction);
         } catch (SQLException e) {
             e.printStackTrace();

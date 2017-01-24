@@ -641,7 +641,7 @@ class CypherTranslator {
                     caseString.append(s).append(" ");
                 }
             }
-            return new CypReturn(clause.get(2), clause.get(4),
+            return new CypReturn(clause.get(1), clause.get(3),
                     false, false, caseString.toString(), matchC);
         } else throw new Exception("RETURN CLAUSE MALFORMED");
     }

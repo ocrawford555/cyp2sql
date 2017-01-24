@@ -25,13 +25,13 @@ import java.util.Map;
  * - adding new representation to tool (adjacency lists)
  * - change to how transitive closure is computed/used possibly?
  * - move towards a hybrid tool that chooses graph or relational structure for
- *   optimal performance
+ * optimal performance
  * - time permitting, look at extending Cypher language...
  * Output of the whole tool to be cleaner and faster if possible.
  * Milestone end of version 3 should be a product that is at production standard
  * , and has probably performed most of the testing and evaluation for the
  * dissertation.
- *
+ * <p>
  * Created by ojc37.
  * Deadline : 19th February 2017 (show demo to supervisor and/or DoS).
  */
@@ -123,20 +123,16 @@ public class Cyp2SQL_v3_Apoc {
                     break;
                 case "-translate":
                 case "-t":
-                    // translate Cypher queries to SQL.
-                    getLabelMapping();
-                    for (int i = -10; i <= 10; i++) {
-                        if (i < 1) System.out.println("Warming up - iterations left : " + (i * -1));
-                        translateCypherToSQL(args[1], f_cypher, f_pg, cypher_results, pg_results, i, "t");
-                    }
-                    break;
                 case "-t2":
                     // translate Cypher queries to SQL.
                     getLabelMapping();
-                    for (int i = -10; i <= 10; i++) {
-                        if (i < 1) System.out.println("Warming up - iterations left : " + (i * -1));
-                        translateCypherToSQL(args[1], f_cypher, f_pg, cypher_results, pg_results, i, "t2");
-                    }
+                    if (!printBool) {
+                        for (int i = -10; i <= 10; i++) {
+                            if (i < 1) System.out.println("Warming up - iterations left : " + (i * -1));
+                            translateCypherToSQL(args[1], f_cypher, f_pg, cypher_results, pg_results, i, args[0]);
+                        }
+                    } else translateCypherToSQL(args[1], f_cypher, f_pg, cypher_results,
+                            pg_results, 1, args[0]);
                     break;
                 default:
                     // error with the command line arguments
@@ -210,7 +206,8 @@ public class Cyp2SQL_v3_Apoc {
 
     /**
      * Translating the queries in the file to SQL and executing them.
-     *  @param translateFile  String file location containing a list of Cypher queries.
+     *
+     * @param translateFile  String file location containing a list of Cypher queries.
      * @param f_cypher       File object - the output from the Neo4J Java driver will be sent here.
      * @param f_pg           File object - the output from the JDBC driver will be sent here.
      * @param cypher_results String file location of f_cypher.
@@ -260,6 +257,15 @@ public class Cyp2SQL_v3_Apoc {
 
                     CypherDriver.run(line, cypher_results, returnItemsForCypher, printBool);
 
+                    try {
+                        if (numResultsNeo != numResultsPost) throw new Exception();
+                    } catch (Exception e) {
+                        System.err.println("\n**********Statements do not appear to " +
+                                "be logically correct - please check\n" + line + "\n" + sql + "\n***********");
+                        printSummary(line, sql, f_cypher, f_pg);
+                        System.exit(1);
+                    }
+
                     if (repeatCount > 0) {
                         printSummary(line, sql, f_cypher, f_pg);
                         DbUtil.insertMapping(line, sql, returnItemsForCypher, dbName);
@@ -308,7 +314,7 @@ public class Cyp2SQL_v3_Apoc {
     /**
      * Converting correctly Cypher queries with the keyword FOREACH.
      *
-     * @param line Cypher input.
+     * @param line          Cypher input.
      * @param typeTranslate
      * @return SQL equivalent of input.
      */
@@ -333,7 +339,7 @@ public class Cyp2SQL_v3_Apoc {
     /**
      * Converting correctly Cypher queries with the keyword WITH.
      *
-     * @param line Cypher input.
+     * @param line          Cypher input.
      * @param typeTranslate
      * @return SQL equivalent.
      */
@@ -383,7 +389,7 @@ public class Cyp2SQL_v3_Apoc {
     /**
      * Convert Cypher queries to SQL
      *
-     * @param cypher Original Cypher query to translate.
+     * @param cypher        Original Cypher query to translate.
      * @param typeTranslate
      * @return SQL that maps to the Cypher input.
      */

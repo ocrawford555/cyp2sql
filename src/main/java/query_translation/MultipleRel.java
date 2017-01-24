@@ -216,6 +216,15 @@ class MultipleRel {
                 break;
             }
 
+            if (cR.getCaseString() != null) {
+                String caseString =
+                        cR.getCaseString().replace(cR.getNodeID() + "." + cR.getField(), "n01." + cR.getField());
+                sql.append(caseString).append("  ");
+                needNodeTable = true;
+                nodeTableCount++;
+                break;
+            }
+
             if (cR.getField() != null && cR.getField().startsWith("count")) {
                 String toAdd;
                 int posInCluase = cR.getPosInClause();

@@ -83,8 +83,9 @@ import java.util.Random;
  */
 public class GraphCreator {
     // set these before running the main method.
-    private static final int numVertices = 500;
-    private static final String type = "SPARSE";
+    private static final int numVertices = 2000;
+    // options are SPARSE, REGULAR, DENSE
+    private static final String type = "DENSE";
 
     // density calculation based on d = m / n.
     // where m is the number of edges, and n is the number of nodes.
@@ -185,7 +186,6 @@ public class GraphCreator {
      * Print information of the graph created.
      */
     private static void printInformation() {
-        System.out.println(Arrays.toString(degreeOfVertices));
         System.out.println("Graph density : " + (double) (numEdges) / (numVertices));
         Arrays.parallelSort(degreeOfVertices);
         System.out.println("Minimal degree of node : " + degreeOfVertices[0]);
