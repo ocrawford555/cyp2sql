@@ -13,9 +13,7 @@ import translator.CypherTokenizer;
 
 import java.io.*;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * This is version 3 of the translation tool.
@@ -109,7 +107,10 @@ public class Cyp2SQL_v3_Apoc {
             }
 
             if (args.length == 4 && args[3].equals("-p")) {
-                printBool = true;
+                System.out.println("WARNING: print to be enabled, are you sure? (Y/N)");
+                Scanner in = new Scanner(System.in);
+                String resp = in.nextLine();
+                printBool = resp.toUpperCase().equals("Y");
             }
 
             System.out.println("PRINT TO FILE : " + ((printBool) ? "enabled" : "disabled"));
@@ -125,14 +126,22 @@ public class Cyp2SQL_v3_Apoc {
                 case "-t":
                 case "-t2":
                     // translate Cypher queries to SQL.
+                    // first, reorder the queries file to randomise order in which queries are executed
+                    randomiseQueriesFile(args[1]);
+
                     getLabelMapping();
                     if (!printBool) {
                         for (int i = -10; i <= 10; i++) {
                             if (i < 1) System.out.println("Warming up - iterations left : " + (i * -1));
-                            translateCypherToSQL(args[1], f_cypher, f_pg, cypher_results, pg_results, i, args[0]);
+                            translateCypherToSQL(args[1].replace(".txt", "_temp.txt"), f_cypher, f_pg,
+                                    cypher_results, pg_results, i, args[0]);
                         }
-                    } else translateCypherToSQL(args[1], f_cypher, f_pg, cypher_results,
-                            pg_results, 1, args[0]);
+                    } else translateCypherToSQL(args[1].replace(".txt", "_temp.txt"), f_cypher, f_pg,
+                            cypher_results, pg_results, 1, args[0]);
+
+                    // delete temporary queries file
+                    File f = new File(args[1].replace(".txt", "_temp.txt"));
+                    f.delete();
                     break;
                 default:
                     // error with the command line arguments
@@ -140,6 +149,29 @@ public class Cyp2SQL_v3_Apoc {
                             "<-schema|-translate|-s|-t> <schemaFile|queriesFile> <databaseName> <-p>");
                     System.exit(1);
             }
+        }
+    }
+
+    private static void randomiseQueriesFile(String queriesFile) {
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader(queriesFile));
+            Map<Integer, String> queries = new TreeMap<>();
+            String line;
+            Random r = new Random();
+            while ((line = reader.readLine()) != null) {
+                queries.put(r.nextInt(1000), line);
+            }
+            reader.close();
+
+            FileWriter writer = new FileWriter(queriesFile.replace(".txt", "_temp.txt"));
+
+            for (String val : queries.values()) {
+                writer.write(val);
+                writer.write('\n');
+            }
+            writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 

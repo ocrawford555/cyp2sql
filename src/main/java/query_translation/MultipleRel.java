@@ -472,6 +472,15 @@ class MultipleRel {
                 else a = alphabet[indices[0] - 1] + "." + alphabet[indices[0] - 1] + "2";
                 b = alphabet[indices[1] - 1] + "." + alphabet[indices[1] - 1] + "2";
                 sql.append(a).append(" = ").append(b).append(" AND ");
+
+                // EXPERIMENTAL LOGIC!
+                if (numRels > indices[1]) {
+                    indices[0]++;
+                    indices[1]++;
+                    a = alphabet[indices[0] - 1] + "." + alphabet[indices[0] - 1] + "2";
+                    b = alphabet[indices[1] - 1] + "." + alphabet[indices[1] - 1] + "2";
+                    sql.append(a).append(" != ").append(b).append(" AND ");
+                }
             }
         }
 
