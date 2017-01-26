@@ -215,7 +215,7 @@ public class SQLTranslate {
      * @param sql    Original SQL built up already.
      * @return New SQL StringBuilder object with ORDER BY clause appended to the end.
      */
-    private static StringBuilder obtainOrderByClause(OrderClause orderC, StringBuilder sql) {
+    public static StringBuilder obtainOrderByClause(OrderClause orderC, StringBuilder sql) {
         sql.append(" ");
         sql.append("ORDER BY ");
 

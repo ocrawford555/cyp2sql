@@ -269,8 +269,8 @@ public class Cyp2SQL_v3_Apoc {
                             sql = convertCypherForEach(line, typeTranslate);
                         } else if (line.toLowerCase().contains(" with ")) {
                             sql = convertCypherWith(line, typeTranslate);
-                        } else if (line.toLowerCase().contains("allshortestpaths")) {
-                            sql = convertCypherASP(line);
+                        } else if (line.toLowerCase().contains("shortestpath")) {
+                            sql = convertCypherShortPath(line);
                         } else {
                             sql = convertCypherToSQL(line, typeTranslate).getSqlEquiv();
                         }
@@ -293,7 +293,8 @@ public class Cyp2SQL_v3_Apoc {
                         if (numResultsNeo != numResultsPost) throw new Exception();
                     } catch (Exception e) {
                         System.err.println("\n**********Statements do not appear to " +
-                                "be logically correct - please check\n" + line + "\n" + sql + "\n***********");
+                                "be logically correct - please check**********\n"
+                                + line + "\n" + sql + "\n***********");
                         printSummary(line, sql, f_cypher, f_pg);
                         System.exit(1);
                     }
@@ -313,14 +314,23 @@ public class Cyp2SQL_v3_Apoc {
         }
     }
 
-    private static String convertCypherASP(String line) throws Exception {
+    private static String convertCypherShortPath(String line) throws Exception {
         String path = line.substring(line.indexOf("(") + 1, line.indexOf("RETURN") - 2);
         String returnClause = line.substring(line.indexOf("RETURN"));
         String cypherPathQuery = "MATCH " + path + " " + returnClause;
         DecodedQuery dQMainPath = CypherTokenizer.decode(cypherPathQuery, false);
         lastDQ = dQMainPath;
-        return SQLAllShortestPaths.translate(dQMainPath).toString();
+        return SQLShortestPath.translate(dQMainPath).toString();
     }
+
+//    private static String convertCypherASP(String line) throws Exception {
+//        String path = line.substring(line.indexOf("(") + 1, line.indexOf("RETURN") - 2);
+//        String returnClause = line.substring(line.indexOf("RETURN"));
+//        String cypherPathQuery = "MATCH " + path + " " + returnClause;
+//        DecodedQuery dQMainPath = CypherTokenizer.decode(cypherPathQuery, false);
+//        lastDQ = dQMainPath;
+//        return SQLAllShortestPaths.translate(dQMainPath).toString();
+//    }
 
     /**
      * Print summary of the translation.
@@ -347,7 +357,8 @@ public class Cyp2SQL_v3_Apoc {
      * Converting correctly Cypher queries with the keyword FOREACH.
      *
      * @param line          Cypher input.
-     * @param typeTranslate
+     * @param typeTranslate Choose type of translation method for the tool to use. -t is standard, -t2
+     *                      uses different methods (view README for more information).
      * @return SQL equivalent of input.
      */
     private static String convertCypherForEach(String line, String typeTranslate) {
