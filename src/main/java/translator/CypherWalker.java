@@ -145,11 +145,11 @@ public class CypherWalker extends CypherBaseListener {
         return hasCount;
     }
 
-    public boolean hasCase() {
+    boolean hasCase() {
         return hasCase;
     }
 
-    public boolean hasCollect() {
+    boolean hasCollect() {
         return hasCollect;
     }
 

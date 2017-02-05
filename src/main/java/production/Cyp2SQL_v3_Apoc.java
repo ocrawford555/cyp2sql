@@ -131,7 +131,7 @@ public class Cyp2SQL_v3_Apoc {
 
                     getLabelMapping();
                     if (!printBool) {
-                        for (int i = -10; i <= 10; i++) {
+                        for (int i = 9; i <= 10; i++) {
                             if (i < 1) System.out.println("Warming up - iterations left : " + (i * -1));
                             translateCypherToSQL(args[1].replace(".txt", "_temp.txt"), f_cypher, f_pg,
                                     cypher_results, pg_results, i, args[0]);

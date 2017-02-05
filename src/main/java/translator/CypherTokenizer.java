@@ -17,10 +17,26 @@ import java.util.ArrayList;
 public class CypherTokenizer {
     private static CypherWalker cypherWalker;
 
+    /**
+     * Takes Cypher query as input and returns a DecodedQuery object representing it.
+     *
+     * @param cyp         Cypher input.
+     * @param DEBUG_PRINT Print out debug statements or not.
+     * @return DecodedQuery object representing the Cypher input.
+     * @throws Exception
+     */
     public static DecodedQuery decode(String cyp, boolean DEBUG_PRINT) throws Exception {
         return CypherTranslator.generateDecodedQuery(getTokenList(cyp, DEBUG_PRINT), cypherWalker);
     }
 
+    /**
+     * Extract the token list from the Cypher input. Uses ANTLR classes to perform this. Some tokens
+     * are excluded, such as EOF and semi colons.
+     *
+     * @param cyp         Cypher input as text.
+     * @param DEBUG_PRINT Print out debug statements or not.
+     * @return A list of tokens as deciphered by the ANTLR classes, based on the openCypher grammar.
+     */
     public static ArrayList<String> getTokenList(String cyp, boolean DEBUG_PRINT) {
         CypherLexer lexer = new CypherLexer(new ANTLRInputStream(cyp));
 

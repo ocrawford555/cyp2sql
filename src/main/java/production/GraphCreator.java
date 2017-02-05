@@ -92,6 +92,7 @@ public class GraphCreator {
     private static final double SPARSE_DEGREE = 7.61;
     private static final double REGULAR_DEGREE = 13.49;
     private static final double DENSE_DEGREE = 25.67;
+
     private static final Random r = new Random();
     // labels of the nodes in the graph.
     private static String[] labels = {"website", "programmer", "owner", "progOwner"};

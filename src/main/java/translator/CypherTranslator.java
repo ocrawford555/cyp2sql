@@ -22,33 +22,12 @@ class CypherTranslator {
     static DecodedQuery generateDecodedQuery(ArrayList<String> tokenList, CypherWalker cypherQ) throws Exception {
         // find positions of the tokens in the query (-1 means not found)
         int posOfMatch = tokenList.indexOf("match");
-        int posOfReturn = tokenList.indexOf("return");
         int posOfWhere = tokenList.indexOf("where");
+        int posOfReturn = tokenList.indexOf("return");
 
-        // if no MATCH keyword is present then is a CREATE statement
+        // if no RETURN keyword is present then Cypher has to contain a CREATE OR DELETE keyword.
         if (posOfReturn == -1) {
-            int posOfCreate = tokenList.indexOf("create");
-            int posOfDelete = tokenList.indexOf("delete");
-
-            MatchClause createOrDelete;
-
-            if (posOfCreate == -1) {
-                List<String> deleteClause;
-                deleteClause = tokenList.subList(posOfMatch + 1, posOfDelete);
-                createOrDelete = matchDecode(deleteClause);
-            } else {
-                List<String> matchCreate;
-
-                if (cypherQ.doesCluaseHaveWhere()) {
-                    matchCreate = tokenList.subList(posOfCreate + 1, posOfWhere);
-                    createOrDelete = matchDecode(matchCreate);
-                    whereDecode(createOrDelete, cypherQ);
-                } else {
-                    matchCreate = tokenList.subList(posOfCreate + 1, tokenList.size());
-                    createOrDelete = matchDecode(matchCreate);
-                }
-            }
-            return new DecodedQuery(createOrDelete, null, null, null, -1, -1, cypherQ);
+            return generateDQCreateDelete(tokenList, cypherQ, posOfMatch, posOfWhere);
         } else {
             int posOfOrder = tokenList.indexOf("order");
             int posOfSkip = tokenList.indexOf("skip");
@@ -58,6 +37,7 @@ class CypherTranslator {
             List<String> matchClause;
             List<String> returnClause;
 
+            // ORDER BY may or may not be present, hence must be initialised to NULL.
             List<String> orderClause = null;
 
             if (cypherQ.doesCluaseHaveWhere())
@@ -92,22 +72,59 @@ class CypherTranslator {
 
             MatchClause matchC = matchDecode(matchClause);
             ReturnClause returnC = returnDecode(returnClause, matchC, cypherQ);
-            OrderClause orderC = null;
 
             // if ORDER BY is present in the query
-            if (orderClause != null)
-                orderC = orderDecode(orderClause);
+            OrderClause orderC = null;
+            if (orderClause != null) orderC = orderDecode(orderClause);
 
             int skipAmount = (posOfSkip != -1) ? cypherQ.getSkipAmount() : -1;
             int limitAmount = (posOfLimit != -1) ? cypherQ.getLimitAmount() : -1;
 
             WhereClause wc = null;
-
             if (cypherQ.doesCluaseHaveWhere()) {
                 wc = whereDecode(matchC, cypherQ);
             }
+
             return new DecodedQuery(matchC, returnC, orderC, wc, skipAmount, limitAmount, cypherQ);
         }
+    }
+
+    /**
+     * Generate a DecodedQuery object for Cypher statements with CREATE or DELETE keywords.
+     *
+     * @param tokenList  List of tokens in the Cypher query.
+     * @param cypherQ    CypherWalker object.
+     * @param posOfMatch Index in token list where MATCH keyword is present (-1 if not).
+     * @param posOfWhere Index in token list where WHERE keyword is present (-1 if not).
+     * @return DecodedQuery object with all revelant information.
+     * @throws Exception Something goes wrong.
+     */
+    private static DecodedQuery generateDQCreateDelete(ArrayList<String> tokenList, CypherWalker cypherQ,
+                                                       int posOfMatch, int posOfWhere) throws Exception {
+        int posOfCreate = tokenList.indexOf("create");
+        int posOfDelete = tokenList.indexOf("delete");
+
+        MatchClause createOrDelete;
+
+        if (posOfCreate == -1) {
+            // delete statement.
+            List<String> deleteClause;
+            deleteClause = tokenList.subList(posOfMatch + 1, posOfDelete);
+            createOrDelete = matchDecode(deleteClause);
+        } else {
+            List<String> matchCreate;
+
+            if (cypherQ.doesCluaseHaveWhere()) {
+                matchCreate = tokenList.subList(posOfCreate + 1, posOfWhere);
+                createOrDelete = matchDecode(matchCreate);
+                whereDecode(createOrDelete, cypherQ);
+            } else {
+                matchCreate = tokenList.subList(posOfCreate + 1, tokenList.size());
+                createOrDelete = matchDecode(matchCreate);
+            }
+        }
+
+        return new DecodedQuery(createOrDelete, null, null, null, -1, -1, cypherQ);
     }
 
     /**
@@ -371,6 +388,12 @@ class CypherTranslator {
         return rels;
     }
 
+    /**
+     * Takes token list of JSON based properties string, and convert this to an actual JSON object.
+     *
+     * @param propsString Token list in form similar to ["{", "key", ":", "value", "}"]
+     * @return JSONObject matching the propsString argument.
+     */
     private static JsonObject getJSONProps(List<String> propsString) {
         StringBuilder json = new StringBuilder();
 
@@ -653,13 +676,11 @@ class CypherTranslator {
 
         List<String> currentWorking;
 
-        // find all the separate parts of the return clause
+        // find all the separate parts of the order by clause
         while (orderClause.contains(",")) {
             int posComma = orderClause.indexOf(",");
             currentWorking = orderClause.subList(0, posComma);
-            orderClause = orderClause.subList(posComma + 1,
-                    orderClause.size());
-
+            orderClause = orderClause.subList(posComma + 1, orderClause.size());
             items.add(extractOrder(currentWorking));
         }
 
