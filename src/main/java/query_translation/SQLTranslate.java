@@ -69,7 +69,6 @@ public class SQLTranslate {
         sql = translateInsertNodes(sql, createC);
         sql = translateInsertEdges(sql, createC);
 
-        System.out.println(sql.toString());
         return sql.toString();
     }
 

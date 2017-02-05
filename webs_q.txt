@@ -50,4 +50,8 @@
 //MATCH p=shortestPath((f:Owner {cars:3})-[*1..3]->(t:Website {domain:"co.uk"})) RETURN t.host order by t.host asc;
 //MATCH p=shortestPath((f:Owner {cars:3})-[*1..1]->(t:Programmer)) RETURN t.state order by t.state asc;
 //MATCH p=shortestPath((f)-[*1..2]->(t:Website)) RETURN t.host order by t.host asc;
-MATCH p=shortestPath((f:Owner)-[*1..3]->(t:Website)) RETURN t.host order by t.host asc;
+//MATCH p=shortestPath((f:Owner)-[*1..3]->(t:Website)) RETURN t.host order by t.host asc;
+
+CREATE (a:Programmer {surname:"Crawford", pets:3})-[:CODES_FOR]->(b:Website {domain:"co.uk", host:"trinity"});
+MATCH (n:Programmer {surname:"Crawford", pets:3}) DETACH DELETE n;
+MATCH (n:Website {domain:"co.uk", host:"trinity"}) DETACH DELETE n;

@@ -183,4 +183,15 @@ public class CypherDriver {
             e.printStackTrace();
         }
     }
+
+    public static void warmUp() {
+        Driver driver = GraphDatabase.driver("bolt://localhost",
+                AuthTokens.basic(Cyp2SQL_v3_Apoc.neoUN, Cyp2SQL_v3_Apoc.neoPW));
+        Session session = driver.session();
+        String warm_up_query = " MATCH (n) OPTIONAL MATCH (n)-[r]->() RETURN count(n.prop) + count(r.prop);";
+        session.run(warm_up_query).consume();
+        session.close();
+        driver.close();
+        System.out.println("Warmed up and ready to go!");
+    }
 }

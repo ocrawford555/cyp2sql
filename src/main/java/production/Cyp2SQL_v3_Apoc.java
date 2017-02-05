@@ -64,6 +64,9 @@ public class Cyp2SQL_v3_Apoc {
     // variable set at the command line to turn on/off printing to a file the results of a read query.
     private static boolean printBool = false;
 
+    // variable set at the command line to indicate that query or queries being run are manipulating records in the db.
+    private static boolean upInsDel = false;
+
     /**
      * Main method when application is launched.
      *
@@ -92,7 +95,7 @@ public class Cyp2SQL_v3_Apoc {
         } else if (args.length != 3 && args.length != 4) {
             // error with the command line arguments
             System.err.println("Incorrect usage of Cyp2SQL v2 : " +
-                    "<-schema|-translate|-s|-t> <schemaFile|queriesFile> <databaseName> <-p>");
+                    "<-schema|-translate|-s|-t> <schemaFile|queriesFile> <databaseName> <-p|-c>");
             System.exit(1);
         } else {
             File f_cypher = new File(cypher_results);
@@ -111,6 +114,11 @@ public class Cyp2SQL_v3_Apoc {
                 Scanner in = new Scanner(System.in);
                 String resp = in.nextLine();
                 printBool = resp.toUpperCase().equals("Y");
+            } else if (args.length == 4 && args[3].equals("-c")) {
+                System.out.println("WARNING: manipulating records in the database, are you sure? (Y/N)");
+                Scanner in = new Scanner(System.in);
+                String resp = in.nextLine();
+                upInsDel = resp.toUpperCase().equals("Y");
             }
 
             System.out.println("PRINT TO FILE : " + ((printBool) ? "enabled" : "disabled"));
@@ -125,23 +133,29 @@ public class Cyp2SQL_v3_Apoc {
                 case "-translate":
                 case "-t":
                 case "-t2":
-                    // translate Cypher queries to SQL.
-                    // first, reorder the queries file to randomise order in which queries are executed
-                    randomiseQueriesFile(args[1]);
-
                     getLabelMapping();
-                    if (!printBool) {
-                        for (int i = 9; i <= 10; i++) {
+
+                    // warm up the Cypher caches if the server has just been turned on.
+                    // https://neo4j.com/developer/kb/warm-the-cache-to-improve-performance-from-cold-start/
+                    CypherDriver.warmUp();
+
+                    if (!printBool && !upInsDel) {
+                        // translate Cypher queries to SQL.
+                        // first, reorder the queries file to randomise order in which queries are executed
+                        randomiseQueriesFile(args[1]);
+
+                        for (int i = -10; i <= 10; i++) {
                             if (i < 1) System.out.println("Warming up - iterations left : " + (i * -1));
                             translateCypherToSQL(args[1].replace(".txt", "_temp.txt"), f_cypher, f_pg,
                                     cypher_results, pg_results, i, args[0]);
                         }
-                    } else translateCypherToSQL(args[1].replace(".txt", "_temp.txt"), f_cypher, f_pg,
-                            cypher_results, pg_results, 1, args[0]);
 
-                    // delete temporary queries file
-                    File f = new File(args[1].replace(".txt", "_temp.txt"));
-                    f.delete();
+                        // delete temporary queries file
+                        File f = new File(args[1].replace(".txt", "_temp.txt"));
+                        f.delete();
+                    } else translateCypherToSQL(args[1], f_cypher, f_pg, cypher_results,
+                            pg_results, 1, args[0]);
+
                     break;
                 default:
                     // error with the command line arguments
@@ -244,7 +258,8 @@ public class Cyp2SQL_v3_Apoc {
      * @param f_pg           File object - the output from the JDBC driver will be sent here.
      * @param cypher_results String file location of f_cypher.
      * @param pg_results     String file location of f_pg.
-     * @param typeTranslate
+     * @param typeTranslate  In version three, stick with this being -t2, as -t will attempt to use the
+     *                       transitive closure relation which probably does not exist in the database.
      */
     private static void translateCypherToSQL(String translateFile, File f_cypher, File f_pg, String cypher_results,
                                              String pg_results, int repeatCount, String typeTranslate) {

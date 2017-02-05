@@ -123,18 +123,19 @@ public class SQLShortestPath {
 
         // return only the correct things
         for (CypReturn cR : rc.getItems()) {
-            if (cR.getCollect()) sql.append("array_agg(");
-            if (cR.getCount()) sql.append("count(");
+            //if (cR.getCollect()) sql.append("array_agg(");
+            //if (cR.getCount()) sql.append("count(");
             if (cR.getField() == null) {
                 sql.append("*");
             } else {
                 sql.append("n01.").append(cR.getField());
             }
-            if (cR.getCollect() || cR.getCount()) {
-                sql.append(") ").append(TranslateUtils.useAlias(cR.getNodeID(), cR.getField(), alias)).append(", ");
-            } else {
-                sql.append(TranslateUtils.useAlias(cR.getNodeID(), cR.getField(), alias)).append(", ");
-            }
+//            if (cR.getCollect() || cR.getCount()) {
+//                sql.append(") ").append(TranslateUtils.useAlias(cR.getNodeID(), cR.getField(), alias)).append(", ");
+//            } else {
+//                sql.append(TranslateUtils.useAlias(cR.getNodeID(), cR.getField(), alias)).append(", ");
+//            }
+            sql.append(TranslateUtils.useAlias(cR.getNodeID(), cR.getField(), alias)).append(", ");
             if (cR.getField() != null) {
                 thingsToGroupBy = thingsToGroupBy + cR.getField() + ", ";
             }
