@@ -1,5 +1,5 @@
 // general basic queries, domain independent
-//MATCH (node) RETURN node;
+MATCH (node) RETURN node;
 //MATCH ()-[r]->() RETURN count(r);
 //MATCH (a)-[r]->(b)--(c)<-[q]-(a) RETURN count(a);
 //MATCH (a)-[*1..2]->(b) RETURN b;
@@ -11,7 +11,7 @@
 //MATCH (node) WHERE node.domain = "co.uk" OR node.domain = "jp" RETURN DISTINCT node.host ORDER BY node.host ASC;
 //MATCH (node:Programmer {pets:2}) RETURN DISTINCT node.city SKIP 5 LIMIT 10;
 //MATCH (node:Programmer {pets:2}) RETURN node.city ORDER BY node.state DESC LIMIT 50;
-//MATCH (a:Programmer:Owner)-->(b:Website)<--(c:Owner)<--(a) RETURN a.surname;
+MATCH (a:Programmer:Owner)-->(b:Website)<--(c:Owner)<--(a) RETURN a.surname;
 //MATCH (a {pets:2})--(b)--(c:Owner)-->(d) RETURN d;
 //MATCH (a:Website {host:"google"})-[*1..3]->(b:Website) RETURN b.host;
 
@@ -52,6 +52,6 @@
 //MATCH p=shortestPath((f)-[*1..2]->(t:Website)) RETURN t.host order by t.host asc;
 //MATCH p=shortestPath((f:Owner)-[*1..3]->(t:Website)) RETURN t.host order by t.host asc;
 
-CREATE (a:Programmer {surname:"Crawford", pets:3})-[:CODES_FOR]->(b:Website {domain:"co.uk", host:"trinity"});
-MATCH (n:Programmer {surname:"Crawford", pets:3}) DETACH DELETE n;
-MATCH (n:Website {domain:"co.uk", host:"trinity"}) DETACH DELETE n;
+//CREATE (a:Programmer {surname:"Crawford", pets:3})-[:CODES_FOR]->(b:Website {domain:"co.uk", host:"trinity"});
+//MATCH (n:Programmer {surname:"Crawford", pets:3}) DETACH DELETE n;
+//MATCH (n:Website {domain:"co.uk", host:"trinity"}) DETACH DELETE n;

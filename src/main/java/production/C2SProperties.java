@@ -15,6 +15,7 @@ class C2SProperties {
     private String nun = null;
     private String npw = null;
     private String lastDB = null;
+    private String locationProps = null;
 
     /**
      * Get the properties from the properties file.
@@ -52,9 +53,11 @@ class C2SProperties {
             npw = prop.getProperty("neoPW");
             lastDB = prop.getProperty("lastDatabase");
 
+            locationProps = prop.getProperty("propsLocation");
+
             inputStream.close();
         } catch (Exception e) {
-            System.out.println("Exception: " + e);
+            e.printStackTrace();
         }
         return new String[]{cyp, pg, wspace, pun, ppw, nun, npw, lastDB};
     }
@@ -74,12 +77,13 @@ class C2SProperties {
             inputStream.close();
 
             prop.setProperty("lastDatabase", newDB);
-            File f = new File(getClass().getClassLoader().getResource(propFileName).getFile()
-                    .replace("target/classes", "src/main/resources"));
+
+            File f = new File(locationProps);
             OutputStream out = new FileOutputStream(f);
             prop.store(out, null);
+            out.close();
         } catch (Exception e) {
-            System.out.println("Exception: " + e);
+            e.printStackTrace();
         }
     }
 }
