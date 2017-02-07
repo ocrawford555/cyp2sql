@@ -25,7 +25,7 @@ public class DbUtil {
     static void createConnection(String dbName) {
         try {
             Class.forName("org.postgresql.Driver");
-            c = DriverManager.getConnection("jdbc:postgresql://localhost:5432/" + dbName, Cyp2SQL_v3_Apoc.postUN, "");
+            c = DriverManager.getConnection("jdbc:postgresql://localhost:5432/" + dbName, Cyp2SQL_v3_Apoc.postUN, Cyp2SQL_v3_Apoc.postPW);
             DB_OPEN = true;
         } catch (Exception e) {
             e.printStackTrace();
