@@ -1,0 +1,441 @@
+progID,surname,city,state,pets
+11,Mitchell,Tower,Michigan,3
+15,Perez,Guilderland,New York,0
+21,Roberts,Freeport,Maine,1
+23,Turner,Sanderson,Florida,2
+24,Phillips,Cold Brook,New York,4
+25,Campbell,New Hampton,New Hampshire,0
+26,Parker,Burkburnett,Texas,2
+30,Evans,Pacific Grove,California,3
+34,Edwards,Dunsmuir,California,4
+40,Collins,Guion,Arkansas,1
+44,Stewart,Flaxville,Montana,3
+47,Sanchez,Miltona,Minnesota,4
+49,Morris,Cape Charles,Virginia,1
+51,Rogers,Waggoner,Illinois,0
+54,Reed,Pike,New Hampshire,1
+56,Cook,Climbing Hill,Iowa,3
+60,Morgan,Waring,Texas,2
+64,Bell,Villanova,Pennsylvania,0
+77,Murphy,Ibapah,Utah,0
+79,Bailey,Earlton,New York,2
+81,Rivera,Bond,Colorado,4
+84,Cooper,Salton City,California,4
+97,Richardson,Ellenville,New York,0
+101,Cox,Weott,California,1
+102,Howard,Sandy Level,Virginia,0
+109,Ward,Goodwater,Alabama,3
+113,Torres,Streetman,Texas,0
+121,Peterson,Holly Springs,North Carolina,0
+127,Gray,Holmes Mill,Kentucky,0
+132,Ramirez,Manitowish Waters,Wisconsin,4
+137,James,Roundhead,Ohio,4
+139,Watson,Gig Harbor,Washington,3
+140,Brooks,Post,Texas,1
+141,Kelly,Mc Daniels,Kentucky,4
+142,Sanders,Rawlings,Maryland,0
+143,Price,Santa Clara,Utah,3
+144,Bennett,Claiborne,Maryland,2
+146,Wood,Henryetta,Oklahoma,3
+150,Barnes,Westport,Massachusetts,4
+154,Ross,Puerto Real,Puerto Rico,1
+157,Henderson,Botkins,Ohio,4
+159,Coleman,Inavale,Nebraska,0
+162,Jenkins,New Hudson,Michigan,2
+170,Perry,Baudette,Minnesota,0
+181,Powell,Olmstead,Kentucky,2
+183,Long,South Bloomingville,Ohio,1
+187,Patterson,Walhonding,Ohio,2
+189,Hughes,Rio Verde,Arizona,2
+190,Flores,Mangilao,Guam,0
+207,Washington,Moorcroft,Wyoming,0
+210,Butler,Corning,New York,0
+212,Simmons,Catawissa,Pennsylvania,1
+215,Foster,Fort Riley,Kansas,1
+226,Gonzales,Slaughter,Louisiana,4
+227,Bryant,Union City,New Jersey,4
+229,Alexander,Nanafalia,Alabama,2
+232,Russell,Groveton,New Hampshire,0
+234,Griffin,North Manchester,Indiana,0
+239,Diaz,Tarzan,Texas,3
+240,Hayes,North Aurora,Illinois,2
+245,Myers,Houtzdale,Pennsylvania,0
+246,Ford,Neah Bay,Washington,1
+250,Hamilton,Erwinville,Louisiana,3
+253,Graham,Newbern,Virginia,4
+254,Sullivan,Charles Town,West Virginia,4
+258,Wallace,Anaheim,California,4
+260,Woods,Chriesman,Texas,3
+270,Cole,Hallock,Minnesota,4
+272,West,Sugarloaf,Pennsylvania,4
+273,Jordan,Salfordville,Pennsylvania,0
+274,Owens,Brainard,New York,4
+275,Reynolds,Los Fresnos,Texas,3
+276,Fisher,Ong,Nebraska,3
+280,Ellis,Rosston,Arkansas,2
+281,Harrison,Himrod,New York,3
+283,Gibson,Herington,Kansas,2
+285,Mcdonald,Frenchboro,Maine,4
+287,Cruz,Miami Gardens,Florida,4
+289,Marshall,Shoshoni,Wyoming,1
+292,Ortiz,Girdler,Kentucky,0
+293,Gomez,Gormania,West Virginia,1
+294,Murray,Cassel,California,2
+298,Freeman,Sarasota,Florida,1
+302,Wells,Gold Beach,Oregon,0
+303,Webb,Newbern,Virginia,2
+304,Simpson,Marion Station,Maryland,2
+318,Stevens,Pinetown,North Carolina,3
+322,Tucker,Wesco,Missouri,1
+325,Porter,Concho,Oklahoma,1
+326,Hunter,New Waterford,Ohio,1
+327,Hicks,Verdi,Nevada,2
+331,Crawford,Rowlett,Texas,4
+332,Henry,Florida,Puerto Rico,1
+333,Boyd,Hillview,Kentucky,4
+336,Mason,Williamsville,Vermont,0
+341,Morales,Finchville,Kentucky,1
+343,Kennedy,Edgartown,Massachusetts,0
+344,Warren,Estherville,Iowa,0
+345,Dixon,Brittany,Louisiana,3
+346,Ramos,Hanna City,Illinois,2
+348,Reyes,Gallaway,Tennessee,1
+350,Burns,Tacoma,Washington,1
+353,Gordon,Whiting,Maine,1
+354,Shaw,Princess Anne,Maryland,0
+356,Holmes,Buna,Texas,2
+357,Rice,Majestic,Kentucky,2
+358,Robertson,Almo,Kentucky,1
+361,Hunt,Rivervale,Arkansas,4
+363,Black,Moose Pass,Alaska,2
+365,Daniels,Abercrombie,North Dakota,0
+369,Neal,Saint Rose,Louisiana,1
+374,Caldwell,North Waterford,Maine,1
+376,Lowe,Conda,Idaho,3
+378,Jennings,Siloam Springs,Arkansas,0
+380,Barnett,Yancey,Texas,4
+381,Graves,Clarklake,Michigan,4
+387,Jimenez,Erhard,Minnesota,1
+388,Horton,Frenchville,Maine,1
+390,Shelton,Copake Falls,New York,3
+391,Barrett,Jerseyville,Illinois,3
+393,Obrien,Royse City,Texas,0
+396,Castro,Manzanola,Colorado,0
+400,Sutton,Phillipsburg,New Jersey,2
+404,Gregory,Traverse City,Michigan,3
+408,Mckinney,Swengel,Pennsylvania,4
+411,Lucas,Toccoa Falls,Georgia,4
+416,Miles,Jarrell,Texas,0
+417,Craig,Smicksburg,Pennsylvania,0
+418,Rodriquez,Montgomeryville,Pennsylvania,3
+419,Chambers,Emory,Virginia,1
+421,Holt,Wake,Virginia,3
+422,Lambert,Nora Springs,Iowa,0
+423,Fletcher,Springerton,Illinois,0
+424,Watts,Beaver Creek,Minnesota,1
+425,Bates,Porterville,Mississippi,0
+426,Hale,Lynxville,Wisconsin,2
+427,Rhodes,Weedsport,New York,4
+436,Pena,Wannaska,Minnesota,0
+438,Beck,Elizabeth,New Jersey,2
+440,Newman,Dolton,Illinois,4
+445,Haynes,Winston,Georgia,3
+446,Mcdaniel,South Mills,North Carolina,4
+448,Mendez,East Chatham,New York,2
+449,Bush,Abercrombie,North Dakota,1
+452,Vaughn,Evensville,Tennessee,2
+455,Parks,Ridley Park,Pennsylvania,4
+456,Dawson,Graford,Texas,4
+463,Santiago,Winter,Wisconsin,1
+466,Norris,Collegeville,Pennsylvania,3
+467,Hardy,Torreon,New Mexico,4
+470,Love,Riner,Virginia,4
+471,Steele,Tryon,North Carolina,0
+472,Curry,Story,Arkansas,4
+473,Powers,Grubville,Missouri,0
+477,Schultz,Fountain Green,Utah,0
+478,Barker,Belt,Montana,3
+479,Guzman,Lamont,Florida,4
+480,Page,Trout Lake,Michigan,4
+481,Munoz,Rosebush,Michigan,0
+484,Ball,Cedar Grove,New Jersey,3
+486,Keller,Strathmere,New Jersey,2
+488,Chandler,Corn,Oklahoma,2
+490,Weber,Dorado,Puerto Rico,2
+492,Leonard,Netcong,New Jersey,3
+493,Walsh,Corvallis,Montana,1
+494,Lyons,Bayamon,Puerto Rico,0
+495,Ramsey,West Memphis,Arkansas,1
+498,Wolfe,Ryan,Iowa,0
+499,Schneider,Willshire,Ohio,4
+500,Mullins,Byers,Kansas,0
+501,Benson,Enon,Ohio,4
+502,Sharp,Braselton,Georgia,3
+506,Bowen,Bostwick,Georgia,2
+507,Daniel,Powell Butte,Oregon,3
+509,Barber,Philomont,Virginia,2
+512,Cummings,Acme,Pennsylvania,0
+513,Hines,High View,West Virginia,0
+514,Baldwin,Redding,Connecticut,2
+515,Griffith,Grapeview,Washington,2
+518,Valdez,Moriches,New York,1
+519,Hubbard,Lake Hamilton,Florida,0
+520,Salazar,Town Creek,Alabama,3
+521,Reeves,Cherryville,Pennsylvania,2
+522,Warner,Montesano,Washington,1
+526,Stevenson,Mullen,Nebraska,0
+527,Burgess,Hico,West Virginia,2
+533,Santos,Eddington,Maine,4
+536,Tate,Glenshaw,Pennsylvania,4
+537,Cross,Mckenna,Washington,3
+540,Garner,Townley,Alabama,1
+544,Mann,Quinton,New Jersey,4
+545,Mack,Skipwith,Virginia,2
+546,Moss,Jenkintown,Pennsylvania,4
+548,Thornton,Charlton Depot,Massachusetts,1
+549,Dennis,Thawville,Illinois,3
+550,Mcgee,Sleepy Eye,Minnesota,3
+551,Farmer,Wise River,Montana,3
+552,Delgado,Hunters,Washington,4
+553,Aguilar,Congers,New York,0
+555,Vega,Cazadero,California,2
+556,Glover,Bruin,Pennsylvania,4
+557,Manning,Risingsun,Ohio,1
+558,Cohen,Bartlesville,Oklahoma,3
+560,Harmon,Osyka,Mississippi,1
+566,Rodgers,Cokeville,Wyoming,1
+568,Robbins,New York,New York,1
+569,Newton,De Armanville,Alabama,4
+570,Todd,Waverly,New York,2
+571,Blair,Cheneyville,Louisiana,2
+572,Higgins,Zap,North Dakota,1
+574,Ingram,Gosport,Indiana,4
+581,Reese,Port Kent,New York,3
+582,Cannon,Aldie,Virginia,2
+583,Strickland,Oldwick,New Jersey,1
+585,Townsend,Moweaqua,Illinois,0
+586,Potter,Maxton,North Carolina,1
+588,Goodwin,Canajoharie,New York,3
+592,Walton,Schlater,Mississippi,0
+595,Rowe,East Walpole,Massachusetts,3
+596,Hampton,Schulenburg,Texas,2
+599,Ortega,Hixson,Tennessee,1
+603,Patton,Olivebridge,New York,0
+604,Swanson,Canones,New Mexico,2
+608,Joseph,Nye,Montana,3
+609,Francis,Altaville,California,1
+610,Goodman,Smoketown,Pennsylvania,1
+613,Maldonado,Wellesley,Massachusetts,1
+614,Yates,Bouse,Arizona,2
+615,Becker,Irondale,Ohio,1
+616,Erickson,Ayrshire,Iowa,4
+617,Hodges,Henryville,Pennsylvania,1
+618,Rios,Firth,Nebraska,4
+619,Conner,Fishtail,Montana,2
+620,Adkins,Choctaw,Arkansas,0
+621,Webster,Old Orchard Beach,Maine,4
+622,Norman,Fort Dodge,Iowa,1
+624,Malone,Gasburg,Virginia,0
+625,Hammond,Tahoe City,California,1
+628,Flowers,Whatley,Alabama,3
+630,Cobb,Coalton,West Virginia,2
+634,Moody,Upton,Massachusetts,0
+635,Quinn,Parker Ford,Pennsylvania,0
+638,Blake,Tiltonsville,Ohio,3
+639,Maxwell,Fultondale,Alabama,2
+640,Pope,East Haddam,Connecticut,2
+642,Floyd,New Melle,Missouri,4
+645,Osborne,Smithwick,South Dakota,2
+648,Paul,Beachwood,New Jersey,0
+653,Mccarthy,Arispe,Iowa,0
+656,Guerrero,Shokan,New York,2
+657,Lindsey,Rollinsville,Colorado,2
+658,Estrada,West Leisenring,Pennsylvania,0
+659,Sandoval,Voluntown,Connecticut,4
+661,Gibbs,Bates City,Missouri,2
+663,Tyler,Eleele,Hawaii,4
+668,Gross,Stone Mountain,Georgia,1
+669,Fitzgerald,Paso Robles,California,0
+670,Stokes,Mc Lemoresville,Tennessee,2
+674,Doyle,Raynesford,Montana,4
+675,Sherman,Village Of Nagog Woods,Massachusetts,3
+676,Saunders,Sidell,Illinois,2
+679,Wise,Watseka,Illinois,3
+682,Colon,San Jacinto,California,0
+684,Gill,Friona,Texas,0
+688,Alvarado,Hanapepe,Hawaii,1
+691,Greer,Big Flat,Arkansas,4
+693,Padilla,Centrahoma,Oklahoma,0
+694,Simon,Literberry,Illinois,1
+696,Waters,Shubert,Nebraska,4
+698,Nunez,Picher,Oklahoma,3
+699,Ballard,Maurertown,Virginia,3
+701,Schwartz,Backus,Minnesota,1
+702,Mcbride,Crystal Lake,Iowa,2
+704,Houston,Uxbridge,Massachusetts,2
+707,Christensen,Sonora,Kentucky,1
+708,Klein,Andersonville,Georgia,3
+709,Pratt,Spruce Pine,North Carolina,1
+710,Briggs,Karnack,Texas,3
+711,Parsons,Woodland Park,Colorado,3
+712,Mclaughlin,Aromas,California,0
+714,Zimmerman,Drayden,Maryland,4
+715,French,Wanblee,South Dakota,3
+717,Buchanan,Prompton,Pennsylvania,4
+719,Moran,Morris Chapel,Tennessee,3
+726,Copeland,Center Ridge,Arkansas,1
+729,Roy,Towson,Maryland,4
+730,Pittman,Woolwine,Virginia,0
+731,Brady,Pleasantville,New Jersey,2
+735,Mccormick,Tallevast,Florida,2
+736,Holloway,Wrenshall,Minnesota,3
+737,Brock,Barnum,Iowa,0
+738,Poole,Haubstadt,Indiana,0
+742,Frank,North Concord,Vermont,1
+748,Logan,Donovan,Illinois,0
+750,Owen,Tehuacana,Texas,0
+755,Bass,North Washington,Pennsylvania,3
+756,Marsh,Leitchfield,Kentucky,4
+757,Drake,Susanville,California,2
+759,Wong,Cedarpines Park,California,0
+762,Jefferson,Rolling Meadows,Illinois,0
+763,Park,Devils Lake,North Dakota,1
+764,Morton,Middle Granville,New York,0
+766,Abbott,Assaria,Kansas,4
+769,Sparks,Asbury,New Jersey,4
+770,Patrick,Driftwood,Pennsylvania,2
+779,Norton,Pretty Prairie,Kansas,1
+780,Huff,Winchester Center,Connecticut,2
+781,Clayton,Norcross,Georgia,2
+785,Massey,Marble City,Oklahoma,2
+788,Lloyd,Justice,West Virginia,4
+791,Figueroa,Thorn Hill,Tennessee,2
+792,Carson,Provencal,Louisiana,2
+793,Bowers,Moapa,Nevada,3
+796,Roberson,Tabor City,North Carolina,4
+797,Barton,Westcliffe,Colorado,0
+801,Tran,Alachua,Florida,4
+802,Lamb,Grosvenor Dale,Connecticut,4
+805,Harrington,Hays,North Carolina,1
+806,Casey,Fultonham,New York,3
+807,Boone,Plattekill,New York,0
+808,Cortez,James Creek,Pennsylvania,4
+811,Clarke,Easley,South Carolina,4
+816,Mathis,Soldotna,Alaska,0
+817,Singleton,Steamboat Rock,Iowa,4
+818,Wilkins,Del Valle,Texas,4
+819,Cain,P J S,New York,0
+822,Bryan,Howard Lake,Minnesota,3
+824,Underwood,Elk Point,South Dakota,3
+826,Hogan,Stoneham,Massachusetts,4
+829,Mckenzie,Blossburg,Pennsylvania,3
+832,Collier,Dolgeville,New York,4
+835,Luna,Gray Court,South Carolina,4
+837,Phelps,Scandinavia,Wisconsin,4
+840,Mcguire,Woolstock,Iowa,3
+843,Allison,Washougal,Washington,1
+844,Bridges,Capay,California,3
+845,Wilkerson,Harrisville,Rhode Island,3
+847,Nash,Bandon,Oregon,4
+850,Summers,Triadelphia,West Virginia,1
+852,Atkins,Panaca,Nevada,2
+855,Wilcox,Pauls Valley,Oklahoma,3
+856,Pitts,Pipestem,West Virginia,3
+858,Conley,FDL,Wisconsin,3
+859,Marquez,Delcambre,Louisiana,3
+860,Burnett,Paterson,New Jersey,2
+862,Richard,Washington Mills,New York,0
+864,Cochran,Cannon Ball,North Dakota,4
+865,Chase,Peaster,Texas,2
+866,Davenport,Ingomar,Pennsylvania,3
+867,Hood,Hecla,South Dakota,4
+869,Gates,Sauquoit,New York,2
+870,Clay,Denhoff,North Dakota,4
+871,Ayala,Willsboro,New York,3
+872,Sawyer,Camp H M Smith,Hawaii,1
+875,Roman,Pattersonville,New York,0
+879,Vazquez,Grissom Arb,Indiana,2
+882,Dickerson,West Van Lear,Kentucky,4
+883,Hodge,Ellendale,Delaware,0
+884,Acosta,King City,Missouri,3
+889,Flynn,Terreton,Idaho,3
+890,Espinoza,Imlay City,Michigan,4
+892,Nicholson,Hochheim,Texas,1
+893,Monroe,Dell,Montana,3
+896,Wolf,Karval,Colorado,2
+897,Morrow,Weyanoke,Louisiana,1
+899,Kirk,Pacolet,South Carolina,3
+900,Randall,Saint Marys City,Maryland,3
+901,Anthony,Mountain Iron,Minnesota,1
+902,Whitaker,West Farmington,Maine,4
+903,Oconnor,Chewelah,Washington,1
+906,Skinner,Saint George,South Carolina,1
+908,Ware,Stacyville,Maine,0
+909,Molina,Spring Gap,Maryland,4
+916,Kirby,Patillas,Puerto Rico,4
+919,Huffman,Bamberg,South Carolina,4
+921,Bradford,Skippers,Virginia,4
+924,Charles,Lurgan,Pennsylvania,2
+926,Gilmore,Palmerton,Pennsylvania,1
+927,Dominguez,Rowland,Pennsylvania,2
+928,Oneal,Pine Level,North Carolina,0
+930,Bruce,Ropesville,Texas,1
+933,Lang,Weld,Maine,2
+934,Combs,Cheraw,South Carolina,1
+935,Kramer,Clarkton,North Carolina,1
+936,Heath,Windsor,Massachusetts,1
+938,Hancock,Beechmont,Kentucky,4
+939,Gallagher,Seagoville,Texas,0
+940,Gaines,Andalusia,Alabama,3
+942,Shaffer,North Thetford,Vermont,4
+943,Short,Ericson,Nebraska,0
+945,Wiggins,Dutton,Virginia,4
+946,Mathews,Long Valley,New Jersey,3
+947,Mcclain,Roxbury,Massachusetts,3
+949,Fischer,Banning,California,0
+951,Wall,Conroy,Iowa,0
+953,Small,Grover Beach,California,3
+954,Melton,Lansdale,Pennsylvania,4
+955,Hensley,Scottown,Ohio,1
+957,Bond,Meyers Chuck,Alaska,2
+960,Dyer,Ider,Alabama,0
+961,Cameron,Rainbow Lake,New York,4
+962,Grimes,Toughkenamon,Pennsylvania,2
+965,Contreras,Lafferty,Ohio,4
+969,Christian,Rolling Meadows,Illinois,3
+970,Wyatt,Lilbourn,Missouri,4
+972,Baxter,North Bonneville,Washington,2
+973,Snow,West New York,New Jersey,0
+974,Mosley,Springwater,New York,1
+976,Shepherd,Seiling,Oklahoma,2
+978,Larsen,Pioneertown,California,3
+979,Hoover,Edna,Kansas,3
+981,Beasley,Canada,Kentucky,3
+982,Glenn,Malo,Washington,0
+984,Petersen,Tiline,Kentucky,1
+986,Whitehead,Paupack,Pennsylvania,3
+988,Meyers,Pittsford,Vermont,4
+991,Keith,Rackerby,California,0
+992,Garrison,Doon,Iowa,4
+995,Vincent,Convoy,Ohio,2
+996,Shields,Deport,Texas,4
+998,Horn,Beatty,Nevada,0
+1001,Savage,Lafferty,Ohio,1
+1002,Olsen,Fort Bliss,Texas,2
+1003,Schroeder,Schuyler Lake,New York,2
+1009,Hartman,Squire,West Virginia,1
+1012,Woodard,Thomas,West Virginia,1
+1013,Mueller,Snyder,Nebraska,2
+1014,Kemp,Derry,New Hampshire,0
+1017,Deleon,Cidra,Puerto Rico,3
+1018,Booth,Black Oak,Arkansas,3
+1019,Patel,Entriken,Pennsylvania,4
+1028,Calhoun,Kapaa,Hawaii,1
+1030,Wiley,Carlsbad,Texas,4
+1031,Eaton,Shelbiana,Kentucky,2
+1033,Cline,Lublin,Wisconsin,1
+1035,Navarro,Bretz,West Virginia,2
+1038,Harrell,Morrice,Michigan,4
+1041,Lester,Lee Center,New York,2
+1043,Humphrey,Whitestone,New York,1
+1044,Parrish,French Creek,West Virginia,2
