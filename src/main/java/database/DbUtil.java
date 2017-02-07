@@ -25,8 +25,7 @@ public class DbUtil {
     static void createConnection(String dbName) {
         try {
             Class.forName("org.postgresql.Driver");
-            c = DriverManager.getConnection("jdbc:postgresql://localhost:5432/" + dbName,
-                    Cyp2SQL_v3_Apoc.postUN, Cyp2SQL_v3_Apoc.postPW);
+            c = DriverManager.getConnection("jdbc:postgresql://localhost:5432/" + dbName, Cyp2SQL_v3_Apoc.postUN, "");
             DB_OPEN = true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -213,7 +212,7 @@ public class DbUtil {
      *               output of Neo4J to a local file correctly.
      * @param dbName Database name to execute SQL against.
      * @throws SQLException Error in executing on the database.
-     * @throws IOException Error in serialisation of object.
+     * @throws IOException  Error in serialisation of object.
      */
     public static void insertMapping(String cypher, String sql, Object obj, String dbName)
             throws SQLException, IOException {
