@@ -7,7 +7,6 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="6c07d57f-61cf-46bd-a98b-dbc0449cd683" name="Default" comment="Added test database and new .JAR file of the tool for running on test machine.">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/c2s_v3_1.jar" afterPath="$PROJECT_DIR$/c2s_v3_1.jar" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="testANTLR.iws" />
@@ -104,8 +103,8 @@
       <file leaf-file-name="DbUtil.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/java/database/DbUtil.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="323">
-              <caret line="47" column="7" lean-forward="true" selection-start-line="47" selection-start-column="7" selection-end-line="47" selection-end-column="7" />
+            <state relative-caret-position="391">
+              <caret line="51" column="6" lean-forward="true" selection-start-line="51" selection-start-column="6" selection-end-line="51" selection-end-column="6" />
               <folding>
                 <marker date="1486501173381" expanded="true" signature="5529:5583" ph="SELECT sql, query_mapping" />
                 <marker date="1486501173381" expanded="true" signature="8417:8497" ph="INSERT INTO query_mapping... " />
@@ -1244,14 +1243,7 @@
       <workItem from="1486386182899" duration="1368000" />
       <workItem from="1486475926736" duration="2766000" />
       <workItem from="1486498580080" duration="11000" />
-      <workItem from="1486499089270" duration="2174000" />
-    </task>
-    <task id="LOCAL-00037" summary="Cleaned up code for version 1 - added properties file and more comments.">
-      <created>1479846155475</created>
-      <option name="number" value="00037" />
-      <option name="presentableId" value="LOCAL-00037" />
-      <option name="project" value="LOCAL" />
-      <updated>1479846155475</updated>
+      <workItem from="1486499089270" duration="2230000" />
     </task>
     <task id="LOCAL-00038" summary="Cleaned up code for version 1 - added properties file and more comments.">
       <created>1479851650798</created>
@@ -1589,7 +1581,14 @@
       <option name="project" value="LOCAL" />
       <updated>1486501218247</updated>
     </task>
-    <option name="localTasksCounter" value="86" />
+    <task id="LOCAL-00086" summary="Added test database and new .JAR file of the tool for running on test machine.">
+      <created>1486501280999</created>
+      <option name="number" value="00086" />
+      <option name="presentableId" value="LOCAL-00086" />
+      <option name="project" value="LOCAL" />
+      <updated>1486501280999</updated>
+    </task>
+    <option name="localTasksCounter" value="87" />
     <servers />
   </component>
   <component name="TestHistory">
@@ -1625,7 +1624,7 @@
     </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="799087000" />
+    <option name="totallyTimeSpent" value="799143000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="1358" y="-8" width="1696" height="1026" extended-state="6" />
@@ -2173,8 +2172,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/database/DbUtil.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="323">
-          <caret line="47" column="7" lean-forward="true" selection-start-line="47" selection-start-column="7" selection-end-line="47" selection-end-column="7" />
+        <state relative-caret-position="391">
+          <caret line="51" column="6" lean-forward="true" selection-start-line="51" selection-start-column="6" selection-end-line="51" selection-end-column="6" />
           <folding>
             <marker date="1486501173381" expanded="true" signature="5529:5583" ph="SELECT sql, query_mapping" />
             <marker date="1486501173381" expanded="true" signature="8417:8497" ph="INSERT INTO query_mapping... " />
