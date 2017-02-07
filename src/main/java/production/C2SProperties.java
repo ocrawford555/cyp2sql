@@ -1,5 +1,7 @@
 package production;
 
+import org.apache.commons.lang3.SystemUtils;
+
 import java.io.*;
 import java.util.Properties;
 
@@ -33,15 +35,15 @@ class C2SProperties {
     String[] getLocalProperties() {
         try {
             Properties prop = new Properties();
-            String propFileName = "configC2S.properties";
 
-            InputStream inputStream = getClass().getClassLoader().getResourceAsStream(propFileName);
-
-            if (inputStream != null) {
-                prop.load(inputStream);
+            String osPath;
+            if (SystemUtils.IS_OS_LINUX) {
+                osPath = "/home/ojc37/props/";
             } else {
-                throw new FileNotFoundException("property file '" + propFileName + "' not found in the classpath");
+                osPath = "C:/Users/ocraw/Desktop/";
             }
+            String propsFileName = "configC2S.properties";
+            prop.load(new FileInputStream(osPath + propsFileName));
 
             // get the property value and print it out
             cyp = prop.getProperty("cypherResultsLocation");
@@ -54,8 +56,6 @@ class C2SProperties {
             lastDB = prop.getProperty("lastDatabase");
 
             locationProps = prop.getProperty("propsLocation");
-
-            inputStream.close();
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -189,7 +189,7 @@ public class SchemaTranslate {
 
                 bytesRead += line.length();
                 int percent = (int) (bytesRead * 100 / totalBytes);
-                if (previousPercent < percent) {
+                if ((previousPercent + 5) < percent) {
                     System.out.println(percent + "% read.");
                     previousPercent = percent;
                 }
