@@ -1,5 +1,6 @@
 package database;
 
+import org.apache.commons.lang3.SystemUtils;
 import production.Cyp2SQL_v3_Apoc;
 
 import java.io.*;
@@ -116,50 +117,6 @@ public class DbUtil {
         DbUtil.closeConnection();
     }
 
-
-    /**
-     * As a possible optimisation for the tool, previously translated queries can be retrieved from the
-     * database, without any need to convert Cypher to SQL. The object array that is returned consists
-     * of the SQL query that is equivalent to the Cypher input, and the Java byte form of the intermediate
-     * return clause object. This needs to be persistently stored with the query, as this object is generated
-     * alongside the conversion between Cypher and SQL, and it is required for the Cypher driver to output
-     * the contents from Neo4J to a local text file correctly.
-     *
-     * @param cypher   Cypher input to search against and see if has already been translated before.
-     * @param database Name of the database to execute the query against.
-     * @return Object array containing either null if no translation if found, or a 2 elements Object[], with
-     * Object[0] containing the SQL mapping to the Cypher input, and Object[1] containing a String[] object
-     * associated with the translation.
-     * @throws SQLException           Error in the SQL query statement being executed on the database.
-     * @throws IOException            Issue in converting the bytes retrieved to a String[]
-     * @throws ClassNotFoundException Error with the conversion from bytes to String[]
-     */
-    public static Object[] getMapping(String cypher, String database) throws SQLException, IOException,
-            ClassNotFoundException {
-        if (!DB_OPEN) DbUtil.createConnection(database);
-        String query = "SELECT sql, object FROM query_mapping WHERE cypher = ?";
-        PreparedStatement stmt = c.prepareStatement(query);
-        stmt.setString(1, cypher);
-        ResultSet rs = stmt.executeQuery();
-
-        String sql = null;
-        byte[] bytes = null;
-
-        while (rs.next()) {
-            sql = rs.getString(1);
-            bytes = rs.getBytes(2);
-        }
-
-        ObjectInputStream objectIn;
-        String[] toReturn = null;
-        if (bytes != null) {
-            objectIn = new ObjectInputStream(new ByteArrayInputStream(bytes));
-            toReturn = (String[]) objectIn.readObject();
-        }
-
-        return new Object[]{sql, toReturn};
-    }
-
     /**
      * Obtain results from the database (along with additional metadata such as the columns
      * returned).
@@ -273,4 +230,59 @@ public class DbUtil {
         stmt.close();
     }
 
+    public static String getTestResults(String dbName) throws SQLException {
+        if (!DB_OPEN) DbUtil.createConnection(dbName);
+        String query = "SELECT cypher, sql, neot, pgt FROM query_mapping";
+        PreparedStatement stmt = c.prepareStatement(query);
+        ResultSet rs = stmt.executeQuery();
+
+        String osPath;
+        if (SystemUtils.IS_OS_LINUX) {
+            osPath = "/home/ojc37/props/testR.csv";
+        } else {
+            osPath = "C:/Users/ocraw/Desktop/testR.csv";
+        }
+
+        PrintWriter writer;
+        try {
+            writer = new PrintWriter(osPath, "UTF-8");
+            writer.println("cypher,sql,neot,pgt");
+
+            while (rs.next()) {
+                writer.println("\"" + rs.getString(1).replace("\"", "'") + "\",\""
+                        + rs.getString(2) + "\"," + rs.getDouble(3) + ","
+                        + rs.getDouble(4));
+            }
+
+            writer.close();
+        } catch (FileNotFoundException | UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+
+        String html = "<html><head><title>Test Results Summary!</title><style>table, th, td " +
+                "{border: 1px solid black; border-collapse: collapse;}</style></head>" +
+                "<body>";
+        html = html + "<table style=\"width:100%\"><tr><th>Cypher</th>" +
+                "<th>Neo4J Average Time</th><th>Neo4J STDDEV</th>" +
+                "<th>Postgres Average Time</th><th>Postgres STDDEV</th></tr>";
+
+        query = "SELECT cypher AS Query, avg(neoT) AS Neo4J_Avg_Exec, stddev(neoT) AS Neo4J_stddev, " +
+                "avg(pgt) AS Postgres_Avg_Exec, stddev(pgt) AS Postgres_stddev FROM query_mapping " +
+                "GROUP BY cypher ORDER BY avg(neoT) DESC;";
+        stmt = c.prepareStatement(query);
+        rs = stmt.executeQuery();
+
+        while (rs.next()) {
+            html = html + "<tr>";
+            html = html + "<td>" + rs.getString(1) + "</td>";
+            html = html + "<td>" + rs.getDouble(2) + "</td>";
+            html = html + "<td>" + rs.getDouble(3) + "</td>";
+            html = html + "<td>" + rs.getDouble(4) + "</td>";
+            html = html + "<td>" + rs.getDouble(5) + "</td>";
+            html = html + "</tr>";
+        }
+
+        html = html + "</table></body></html>";
+        return html;
+    }
 }

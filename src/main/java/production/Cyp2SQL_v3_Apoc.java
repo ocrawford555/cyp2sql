@@ -90,6 +90,14 @@ public class Cyp2SQL_v3_Apoc {
         neoUN = fileLocations[5];
         neoPW = fileLocations[6];
 
+        // send the results via email
+        try {
+            SendResultsEmail.sendEmail(args[2]);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        System.exit(1);
+
         if (args.length == 2 && args[0].equals("-tc")) {
             AddTClosure.addTClosure(args[1]);
         } else if (args.length != 3 && args.length != 4) {
@@ -270,10 +278,12 @@ public class Cyp2SQL_v3_Apoc {
             String line;
             String sql;
 
+            DbUtil.insertOrDelete("DELETE FROM query_mapping", dbName);
+            DbUtil.lastExecTimeInsert = 0;
+
             while ((line = br.readLine()) != null) {
                 // if line is commented out in the read queries file, then do not attempt to convert it.
                 if (!line.startsWith("//") && !line.isEmpty()) {
-                    //Object[] mapping = DbUtil.getMapping(line, dbName);
                     Object[] mapping = {null, null};
                     String[] returnItemsForCypher;
 
@@ -325,6 +335,9 @@ public class Cyp2SQL_v3_Apoc {
             }
             br.close();
             fis.close();
+
+            // send the results via email
+            SendResultsEmail.sendEmail(dbName);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -338,15 +351,6 @@ public class Cyp2SQL_v3_Apoc {
         lastDQ = dQMainPath;
         return SQLShortestPath.translate(dQMainPath).toString();
     }
-
-//    private static String convertCypherASP(String line) throws Exception {
-//        String path = line.substring(line.indexOf("(") + 1, line.indexOf("RETURN") - 2);
-//        String returnClause = line.substring(line.indexOf("RETURN"));
-//        String cypherPathQuery = "MATCH " + path + " " + returnClause;
-//        DecodedQuery dQMainPath = CypherTokenizer.decode(cypherPathQuery, false);
-//        lastDQ = dQMainPath;
-//        return SQLAllShortestPaths.translate(dQMainPath).toString();
-//    }
 
     /**
      * Print summary of the translation.
