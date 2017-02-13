@@ -90,14 +90,6 @@ public class Cyp2SQL_v3_Apoc {
         neoUN = fileLocations[5];
         neoPW = fileLocations[6];
 
-        // send the results via email
-        try {
-            SendResultsEmail.sendEmail(args[2]);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        System.exit(1);
-
         if (args.length == 2 && args[0].equals("-tc")) {
             AddTClosure.addTClosure(args[1]);
         } else if (args.length != 3 && args.length != 4) {
