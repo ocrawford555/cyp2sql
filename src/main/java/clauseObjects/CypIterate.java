@@ -1,6 +1,7 @@
 package clauseObjects;
 
 public class CypIterate {
+    private String sql;
     private String originalCypherInput;
     private String loopQuery;
     private String loopIndexTo;
@@ -11,6 +12,10 @@ public class CypIterate {
 
     public CypIterate(String cypher) {
         this.originalCypherInput = cypher;
+    }
+
+    public String getOriginalCypherInput(){
+        return this.originalCypherInput;
     }
 
     public void setLoopIndexTo(String loopIndexTo) {
@@ -46,5 +51,17 @@ public class CypIterate {
 
     public void setLoopQuery(String loopQuery) {
         this.loopQuery = loopQuery;
+    }
+
+    public String getSQL() {
+        return this.sql;
+    }
+
+    public void setSQL(String SQL) {
+        this.sql = SQL;
+    }
+
+    public String getLoopIndexTo() {
+        return loopIndexTo;
     }
 }

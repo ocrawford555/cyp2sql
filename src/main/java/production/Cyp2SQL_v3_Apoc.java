@@ -153,7 +153,7 @@ public class Cyp2SQL_v3_Apoc {
                         // first, reorder the queries file to randomise order in which queries are executed
                         randomiseQueriesFile(args[1]);
 
-                        for (int i = -3; i <= 10; i++) {
+                        for (int i = 5; i <= 5; i++) {
                             if (i < 1) System.out.println("Warming up - iterations left : " + (i * -1));
                             translateCypherToSQL(args[1].replace(".txt", "_temp.txt"), f_cypher, f_pg,
                                     cypher_results, pg_results, i, args[0]);
@@ -309,13 +309,15 @@ public class Cyp2SQL_v3_Apoc {
 
                         returnItemsForCypher = null;
 
-                        if (sql != null && !sql.startsWith("INSERT") && !sql.startsWith("DELETE")) {
+                        if (sql != null && !sql.startsWith("INSERT") && !sql.startsWith("DELETE")
+                                && !line.toLowerCase().contains("iterate")) {
                             returnItemsForCypher = lastDQ.getCypherAdditionalInfo().getReturnClause()
                                     .replace(" ", "").split(",");
                         }
                     }
 
                     if (sql != null) {
+                        System.out.println(sql);
                         executeSQL(sql, pg_results, printBool);
                     } else throw new Exception("Conversion of SQL failed");
 
@@ -323,7 +325,8 @@ public class Cyp2SQL_v3_Apoc {
                         CypherDriver.run(line, cypher_results, returnItemsForCypher, printBool);
 
                     try {
-                        if (numResultsNeo != numResultsPost) throw new Exception();
+                        if ((numResultsNeo != numResultsPost) && !line.toLowerCase().contains("iterate"))
+                            throw new Exception();
                     } catch (Exception e) {
                         System.err.println("\n**********Statements do not appear to " +
                                 "be logically correct - please check**********\n"
@@ -359,40 +362,7 @@ public class Cyp2SQL_v3_Apoc {
     private static String convertIterateQuery(String line, String typeTranslate) {
         line = line.toLowerCase();
         CypIterate cypIter = new CypIterate(line);
-        String matchClause = line.substring(8, line.indexOf("loop"));
-        String iterable = matchClause + "return *;";
-        cypIter.setLoopQuery(iterable);
-
-        line = line.split(" loop ")[1];
-        cypIter.setLoopIndexTo(line.split(" ")[0]);
-        line = line.split(" on ")[1];
-        cypIter.setLoopIndexFrom(line.split(" ")[0]);
-        line = line.split(" collect ")[1];
-        cypIter.setCollectIndex(line.split(" ")[0]);
-        line = line.split(" return ")[1];
-        cypIter.setReturnStatement(line);
-
-        System.out.println(cypIter.toString());
-
-        // generate the traditional translation to SQL for the loop query (store in string as used
-        // multiple times)
-        String loopSQL = convertCypherToSQL(cypIter.getLoopQuery(), typeTranslate).getSqlEquiv();
-
-        // need to modify loopSQL for the main SQL statement.
-        String mainInitStmt;
-        mainInitStmt = loopSQL.split("SELECT \\*")[0];
-        mainInitStmt = mainInitStmt + ", firstStep AS (";
-        String copyLoopSQL = loopSQL;
-
-
-        System.out.println(loopSQL);
-
-        // create the loop_work function with this string
-
-        // the iterate function should always be persistent on the database and shouldn't need modification.
-
-
-        return null;
+        return SQLIterate.translate(cypIter, typeTranslate);
     }
 
     private static String convertCypherShortPath(String line) throws Exception {
@@ -508,7 +478,7 @@ public class Cyp2SQL_v3_Apoc {
      * @param typeTranslate
      * @return SQL that maps to the Cypher input.
      */
-    private static DecodedQuery convertCypherToSQL(String cypher, String typeTranslate) {
+    public static DecodedQuery convertCypherToSQL(String cypher, String typeTranslate) {
         try {
             if (cypher.toLowerCase().contains(" union all ")) {
                 String[] queries = cypher.toLowerCase().split(" union all ");
