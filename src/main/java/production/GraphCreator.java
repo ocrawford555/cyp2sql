@@ -83,7 +83,7 @@ import java.util.Random;
  */
 public class GraphCreator {
     // set these before running the main method.
-    private static final int numVertices = 2000;
+    private static final int numVertices = 40000;
     // options are SPARSE, REGULAR, DENSE
     private static final String type = "DENSE";
 
@@ -105,10 +105,10 @@ public class GraphCreator {
     };
     private static int numEdges = 0;
     private static long edgesToAdd;
-    private static int[] degreeOfVertices;
-    private static String[] labelsOfNodes;
+    private static short[] degreeOfVertices;
+    private static byte[] labelsOfNodes;
 
-    private static int[][] adjMat;
+    private static boolean[][] adjMat;
 
     public static void main(String args[]) {
         try {
@@ -153,7 +153,7 @@ public class GraphCreator {
 
         // add the ids of the nodes for each label type to the correct .csv file.
         for (int i = 0; i < labelsOfNodes.length; i++) {
-            switch (labelsOfNodes[i]) {
+            switch (labels[labelsOfNodes[i]]) {
                 case "website":
                     web.append(i).append("\n");
                     break;
@@ -204,6 +204,10 @@ public class GraphCreator {
         for (int b = 0; b < edgesToAdd; b++) {
             // add first numVertices edges at random anywhere in the graph.
 
+            if (b % 5000 == 0) {
+                System.out.println(b + " edges added.");
+            }
+
             if (numEdges < numVertices) {
                 int indexFrom = 1;
                 int indexTo = 1;
@@ -229,7 +233,7 @@ public class GraphCreator {
                 while (!addedEdge && degreeOfVertices[indexFrom] != numVertices - 1) {
                     int indexTo = r.nextInt(numVertices);
 
-                    if (adjMat[indexFrom][indexTo] != 1 && indexFrom != indexTo) {
+                    if (!adjMat[indexFrom][indexTo] && indexFrom != indexTo) {
                         addedEdge = true;
                         addEdge(indexFrom + 1, indexTo + 1);
                     }
@@ -265,9 +269,9 @@ public class GraphCreator {
         System.out.println(edgesToAdd);
 
         // setup the adjacency matrix and keep track of the degree of each node.
-        degreeOfVertices = new int[numVertices];
-        labelsOfNodes = new String[numVertices];
-        adjMat = new int[numVertices][numVertices];
+        degreeOfVertices = new short[numVertices];
+        labelsOfNodes = new byte[numVertices];
+        adjMat = new boolean[numVertices][numVertices];
 
         boolean labelAdded;
 
@@ -277,22 +281,22 @@ public class GraphCreator {
 
             // go round loop until the node is assigned a valid label
             while (!labelAdded) {
-                int labelAllocation = r.nextInt(labels.length);
+                byte labelAllocation = (byte) r.nextInt(labels.length);
                 if (allocations[labelAllocation] > 0) {
                     allocations[labelAllocation]--;
-                    labelsOfNodes[a] = labels[labelAllocation];
+                    labelsOfNodes[a] = labelAllocation;
                     labelAdded = true;
                 }
             }
 
             // initialise this array
             degreeOfVertices[a] = 0;
+        }
 
-            // NOTE: edges are undirected, direction is decided randomly later on.
-            for (int i = 1; i <= numVertices; i++) {
-                for (int j = 1; j <= numVertices; j++) {
-                    adjMat[i - 1][j - 1] = 0;
-                }
+        // NOTE: edges are undirected, direction is decided randomly later on.
+        for (int i = 1; i <= numVertices; i++) {
+            for (int j = 1; j <= numVertices; j++) {
+                adjMat[i - 1][j - 1] = false;
             }
         }
     }
@@ -317,10 +321,10 @@ public class GraphCreator {
 
         for (int from = 0; from < adjMat.length; from++) {
             for (int to = 0; to < adjMat.length; to++) {
-                if (adjMat[from][to] == 1) {
+                if (adjMat[from][to]) {
                     if (Math.random() < 0.5) {
-                        String labelFrom = labelsOfNodes[from];
-                        String labelTo = labelsOfNodes[to];
+                        String labelFrom = labels[labelsOfNodes[from]];
+                        String labelTo = labels[labelsOfNodes[to]];
                         String typeRel = workoutrel(labelFrom, labelTo);
 
                         if (typeRel != null) {
@@ -342,8 +346,8 @@ public class GraphCreator {
                                     break;
                             }
 
-                            adjMat[from][to] = 0;
-                            adjMat[to][from] = 0;
+                            adjMat[from][to] = false;
+                            adjMat[to][from] = false;
                         }
                     }
                 }
@@ -430,14 +434,14 @@ public class GraphCreator {
                     from = to;
                     to = temp;
                 }
-                if (adjMat[from][to] == 1) {
-                    String labelFrom = labelsOfNodes[from];
-                    String labelTo = labelsOfNodes[to];
+                if (adjMat[from][to]) {
+                    String labelFrom = labels[labelsOfNodes[from]];
+                    String labelTo = labels[labelsOfNodes[to]];
                     String typeRel = workoutrel(labelFrom, labelTo);
                     if (typeRel != null && typeRel.equals(rel)) {
                         sb = fillCSV(sb, from, to, typeRel);
-                        adjMat[from][to] = 0;
-                        adjMat[to][from] = 0;
+                        adjMat[from][to] = false;
+                        adjMat[to][from] = false;
                     }
                 }
             }
@@ -512,10 +516,10 @@ public class GraphCreator {
         to--;
 
         // edge already there or indexes the same (i.e a loop)
-        if ((adjMat[from][to] == 1) || from == to) return false;
+        if ((adjMat[from][to]) || from == to) return false;
 
-        adjMat[from][to] = 1;
-        adjMat[to][from] = 1;
+        adjMat[from][to] = true;
+        adjMat[to][from] = true;
         degreeOfVertices[to]++;
         degreeOfVertices[from]++;
         numEdges++;

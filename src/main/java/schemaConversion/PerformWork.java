@@ -251,6 +251,8 @@ class PerformWork implements Runnable {
             } else {
                 String testValue = value.getAsString();
                 try {
+                    // another OPUS hack
+                    if (key.equals("mono_time")) throw new NumberFormatException();
                     Integer.parseInt(testValue);
                     SchemaTranslate.labelMappings.put(nodeLabel, "id INT, " + key + " INT");
                 } catch (NumberFormatException nfe) {

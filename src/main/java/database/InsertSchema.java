@@ -217,6 +217,7 @@ public class InsertSchema {
 
         sb.append("CREATE TABLE nodes(");
         for (String x : SchemaTranslate.nodeRelLabels) {
+            if (x.startsWith("mono_time")) x = "mono_time BIGINT";
             sb.append(x).append(", ");
         }
         sb.setLength(sb.length() - 2);
@@ -237,7 +238,10 @@ public class InsertSchema {
 
         sb.append("INSERT INTO nodes (");
 
+        System.out.println(SchemaTranslate.nodeRelLabels);
+
         for (String y : SchemaTranslate.nodeRelLabels) {
+            if (y.startsWith("mono_time")) y = "mono_time BIGINT";
             sb.append(y.split(" ")[0]).append(", ");
             fieldsForMetaFile.add(y.split(" ")[0]);
         }
@@ -362,11 +366,13 @@ public class InsertSchema {
      */
     private static String getInsertString(String z, JsonObject o) {
         String temp;
+        //OPUS hack
+        if (z.startsWith("mono_time")) z = "mono_time BIGINT";
         try {
             if (z.endsWith("BIGINT")) {
                 long value = o.get(z.split(" ")[0]).getAsLong();
                 temp = value + ", ";
-            } else if (z.endsWith("INT")) {
+            } else if (z.endsWith("INT") && !z.contains("BIGINT")) {
                 int value = o.get(z.split(" ")[0]).getAsInt();
                 temp = value + ", ";
             } else if (z.endsWith("[]")) {
@@ -378,6 +384,11 @@ public class InsertSchema {
                 String value = o.get(z.split(" ")[0]).getAsString();
                 temp = "'" + value + "', ";
             }
+        } catch (NumberFormatException nfe) {
+            System.err.println(z);
+            System.err.println(o.toString());
+            temp = "null, ";
+            System.exit(1);
         } catch (NullPointerException npe) {
             temp = "null, ";
         }

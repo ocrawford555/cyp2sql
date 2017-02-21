@@ -1,6 +1,7 @@
 package production;
 
 import clauseObjects.CypForEach;
+import clauseObjects.CypIterate;
 import clauseObjects.DecodedQuery;
 import database.AddTClosure;
 import database.CypherDriver;
@@ -140,16 +141,30 @@ public class Cyp2SQL_v3_Apoc {
                     // https://neo4j.com/developer/kb/warm-the-cache-to-improve-performance-from-cold-start/
                     CypherDriver.warmUp();
 
+                    try {
+                        DbUtil.insertOrDelete("DELETE FROM query_mapping", dbName);
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                    DbUtil.lastExecTimeInsert = 0;
+
                     if (!printBool && !upInsDel) {
                         // translate Cypher queries to SQL.
                         // first, reorder the queries file to randomise order in which queries are executed
                         randomiseQueriesFile(args[1]);
 
-                        for (int i = -10; i <= 10; i++) {
+                        for (int i = -3; i <= 10; i++) {
                             if (i < 1) System.out.println("Warming up - iterations left : " + (i * -1));
                             translateCypherToSQL(args[1].replace(".txt", "_temp.txt"), f_cypher, f_pg,
                                     cypher_results, pg_results, i, args[0]);
                         }
+
+                        // send the results via email
+//                        try {
+//                            SendResultsEmail.sendEmail(dbName);
+//                        } catch (SQLException e) {
+//                            e.printStackTrace();
+//                        }
 
                         // delete temporary queries file
                         File f = new File(args[1].replace(".txt", "_temp.txt"));
@@ -270,9 +285,6 @@ public class Cyp2SQL_v3_Apoc {
             String line;
             String sql;
 
-            DbUtil.insertOrDelete("DELETE FROM query_mapping", dbName);
-            DbUtil.lastExecTimeInsert = 0;
-
             while ((line = br.readLine()) != null) {
                 // if line is commented out in the read queries file, then do not attempt to convert it.
                 if (!line.startsWith("//") && !line.isEmpty()) {
@@ -289,6 +301,8 @@ public class Cyp2SQL_v3_Apoc {
                             sql = convertCypherWith(line, typeTranslate);
                         } else if (line.toLowerCase().contains("shortestpath")) {
                             sql = convertCypherShortPath(line);
+                        } else if (line.toLowerCase().contains("iterate")) {
+                            sql = convertIterateQuery(line, typeTranslate);
                         } else {
                             sql = convertCypherToSQL(line, typeTranslate).getSqlEquiv();
                         }
@@ -305,7 +319,8 @@ public class Cyp2SQL_v3_Apoc {
                         executeSQL(sql, pg_results, printBool);
                     } else throw new Exception("Conversion of SQL failed");
 
-                    CypherDriver.run(line, cypher_results, returnItemsForCypher, printBool);
+                    if (!line.toLowerCase().contains("iterate"))
+                        CypherDriver.run(line, cypher_results, returnItemsForCypher, printBool);
 
                     try {
                         if (numResultsNeo != numResultsPost) throw new Exception();
@@ -327,12 +342,57 @@ public class Cyp2SQL_v3_Apoc {
             }
             br.close();
             fis.close();
-
-            // send the results via email
-            SendResultsEmail.sendEmail(dbName);
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Class to deal with special new query type which is not currently in Cypher.
+     * Details in documentation and dissertation (this is an extension to the main tool).
+     * More information to come.
+     *
+     * @param line (Cypher like) input.
+     *             [NOTE THESE QUERIES CANNOT RUN ON CYPHER, THEY DO NOT EXIST IN THE GRAMMAR!]
+     * @return SQL translation
+     */
+    private static String convertIterateQuery(String line, String typeTranslate) {
+        line = line.toLowerCase();
+        CypIterate cypIter = new CypIterate(line);
+        String matchClause = line.substring(8, line.indexOf("loop"));
+        String iterable = matchClause + "return *;";
+        cypIter.setLoopQuery(iterable);
+
+        line = line.split(" loop ")[1];
+        cypIter.setLoopIndexTo(line.split(" ")[0]);
+        line = line.split(" on ")[1];
+        cypIter.setLoopIndexFrom(line.split(" ")[0]);
+        line = line.split(" collect ")[1];
+        cypIter.setCollectIndex(line.split(" ")[0]);
+        line = line.split(" return ")[1];
+        cypIter.setReturnStatement(line);
+
+        System.out.println(cypIter.toString());
+
+        // generate the traditional translation to SQL for the loop query (store in string as used
+        // multiple times)
+        String loopSQL = convertCypherToSQL(cypIter.getLoopQuery(), typeTranslate).getSqlEquiv();
+
+        // need to modify loopSQL for the main SQL statement.
+        String mainInitStmt;
+        mainInitStmt = loopSQL.split("SELECT \\*")[0];
+        mainInitStmt = mainInitStmt + ", firstStep AS (";
+        String copyLoopSQL = loopSQL;
+
+
+        System.out.println(loopSQL);
+
+        // create the loop_work function with this string
+
+        // the iterate function should always be persistent on the database and shouldn't need modification.
+
+
+        return null;
     }
 
     private static String convertCypherShortPath(String line) throws Exception {

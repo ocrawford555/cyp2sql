@@ -40,7 +40,7 @@ class SendResultsEmail {
             MimeMessage message = new MimeMessage(session);
             message.setFrom(new InternetAddress(email));
             message.setRecipients(Message.RecipientType.TO, InternetAddress.parse("ojc37@cam.ac.uk"));
-            message.setSubject("Test Results Cyp2SQL");
+            message.setSubject("Test Results Cyp2SQL -- " + dbName);
 
             Multipart multipart = new MimeMultipart();
 
