@@ -36,13 +36,15 @@ class C2SProperties {
         try {
             Properties prop = new Properties();
 
+            // change where the props file is depending on the OS installation.
             String osPath;
+            String propsFileName = "configC2S.properties";
+
             if (SystemUtils.IS_OS_LINUX) {
                 osPath = "/home/ojc37/props/";
             } else {
                 osPath = "C:/Users/ocraw/Desktop/";
             }
-            String propsFileName = "configC2S.properties";
             prop.load(new FileInputStream(osPath + propsFileName));
 
             // get the property value and print it out
@@ -54,7 +56,6 @@ class C2SProperties {
             nun = prop.getProperty("neo4JUser");
             npw = prop.getProperty("neoPW");
             lastDB = prop.getProperty("lastDatabase");
-
             locationProps = prop.getProperty("propsLocation");
         } catch (Exception e) {
             e.printStackTrace();

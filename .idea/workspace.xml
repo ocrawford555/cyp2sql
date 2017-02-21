@@ -7,9 +7,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d8946299-d358-4b1a-8efd-d8bcadacfc0c" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/query_translation/SQLIterate.java" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/c2s_v3_1.jar" afterPath="" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/clauseObjects/CypIterate.java" afterPath="$PROJECT_DIR$/src/main/java/clauseObjects/CypIterate.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/README.md" afterPath="$PROJECT_DIR$/README.md" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/database/DbUtil.java" afterPath="$PROJECT_DIR$/src/main/java/database/DbUtil.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/database/InsertSchema.java" afterPath="$PROJECT_DIR$/src/main/java/database/InsertSchema.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/production/C2SProperties.java" afterPath="$PROJECT_DIR$/src/main/java/production/C2SProperties.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/production/Cyp2SQL_v3_Apoc.java" afterPath="$PROJECT_DIR$/src/main/java/production/Cyp2SQL_v3_Apoc.java" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
@@ -30,8 +33,56 @@
       <file leaf-file-name="Cyp2SQL_v3_Apoc.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/java/production/Cyp2SQL_v3_Apoc.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="323">
-              <caret line="330" column="71" lean-forward="true" selection-start-line="330" selection-start-column="71" selection-end-line="330" selection-end-column="71" />
+            <state relative-caret-position="221">
+              <caret line="13" column="17" lean-forward="true" selection-start-line="13" selection-start-column="17" selection-end-line="13" selection-end-column="17" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="README.md" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/README.md">
+          <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
+            <state split_layout="SPLIT">
+              <first_editor relative-caret-position="187">
+                <caret line="11" column="20" lean-forward="true" selection-start-line="11" selection-start-column="20" selection-end-line="11" selection-end-column="20" />
+                <folding />
+              </first_editor>
+              <second_editor />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="DbUtil.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/database/DbUtil.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="339">
+              <caret line="289" column="83" lean-forward="false" selection-start-line="289" selection-start-column="83" selection-end-line="289" selection-end-column="83" />
+              <folding>
+                <marker date="1487697680521" expanded="true" signature="6286:6366" ph="INSERT INTO query_mapping... " />
+                <marker date="1487697680521" expanded="true" signature="8680:8728" ph="SELECT cyphe... query_mapping" />
+                <marker date="1487697680521" expanded="true" signature="10030:10275" ph="select cyphe... query_mapping" />
+                <marker date="1487697680521" expanded="true" signature="10030:10276" ph="SELECT cyphe... query_mapping" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="C2SProperties.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/production/C2SProperties.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="34">
+              <caret line="57" column="54" lean-forward="false" selection-start-line="57" selection-start-column="54" selection-end-line="57" selection-end-column="54" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="InsertSchema.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/database/InsertSchema.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="612">
+              <caret line="83" column="33" lean-forward="true" selection-start-line="83" selection-start-column="33" selection-end-line="83" selection-end-column="33" />
               <folding />
             </state>
           </provider>
@@ -59,31 +110,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="SQLUnion.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/query_translation/SQLUnion.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="136">
-              <caret line="8" column="13" lean-forward="false" selection-start-line="8" selection-start-column="13" selection-end-line="8" selection-end-column="13" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="SQLShortestPath.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/query_translation/SQLShortestPath.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="68">
-              <caret line="6" column="13" lean-forward="false" selection-start-line="6" selection-start-column="13" selection-end-line="6" selection-end-column="13" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="SendResultsEmail.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/production/SendResultsEmail.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="272">
-              <caret line="42" column="66" lean-forward="false" selection-start-line="42" selection-start-column="66" selection-end-line="42" selection-end-column="66" />
+            <state relative-caret-position="153">
+              <caret line="22" column="39" lean-forward="true" selection-start-line="22" selection-start-column="39" selection-end-line="22" selection-end-column="39" />
               <folding />
             </state>
           </provider>
@@ -136,26 +167,6 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="configC2S.properties" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/resources/configC2S.properties">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="85">
-              <caret line="5" column="11" lean-forward="false" selection-start-line="5" selection-start-column="11" selection-end-line="5" selection-end-column="11" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="InsertSchema.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/database/InsertSchema.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="153">
-              <caret line="68" column="29" lean-forward="false" selection-start-line="68" selection-start-column="29" selection-end-line="68" selection-end-column="29" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
     </leaf>
   </component>
   <component name="FileTemplateManagerImpl">
@@ -185,17 +196,19 @@
         <option value="$PROJECT_DIR$/pom.xml" />
         <option value="$PROJECT_DIR$/src/main/java/production/TestEmail.java" />
         <option value="$PROJECT_DIR$/src/main/java/testing.java" />
-        <option value="$PROJECT_DIR$/src/main/java/database/DbUtil.java" />
         <option value="$PROJECT_DIR$/src/main/java/schemaConversion/SchemaTranslate.java" />
-        <option value="$PROJECT_DIR$/src/main/java/database/InsertSchema.java" />
         <option value="$PROJECT_DIR$/src/main/java/schemaConversion/PerformWork.java" />
         <option value="$PROJECT_DIR$/src/main/java/production/GraphCreator.java" />
         <option value="$PROJECT_DIR$/src/main/resources/configC2S.properties" />
         <option value="$PROJECT_DIR$/src/main/java/production/SendResultsEmail.java" />
-        <option value="$PROJECT_DIR$/src/main/java/production/Cyp2SQL_v3_Apoc.java" />
         <option value="$PROJECT_DIR$/src/main/java/query_translation/MultipleRel.java" />
         <option value="$PROJECT_DIR$/src/main/java/clauseObjects/CypIterate.java" />
         <option value="$PROJECT_DIR$/src/main/java/query_translation/SQLIterate.java" />
+        <option value="$PROJECT_DIR$/src/main/java/production/C2SProperties.java" />
+        <option value="$PROJECT_DIR$/src/main/java/database/DbUtil.java" />
+        <option value="$PROJECT_DIR$/src/main/java/database/InsertSchema.java" />
+        <option value="$PROJECT_DIR$/README.md" />
+        <option value="$PROJECT_DIR$/src/main/java/production/Cyp2SQL_v3_Apoc.java" />
       </list>
     </option>
   </component>
@@ -945,7 +958,7 @@
       <workItem from="1487505247699" duration="25000" />
       <workItem from="1487505297631" duration="6576000" />
       <workItem from="1487601578650" duration="6947000" />
-      <workItem from="1487673407769" duration="12616000" />
+      <workItem from="1487673407769" duration="13805000" />
     </task>
     <task id="LOCAL-00001" summary="Changed way properties are read in.">
       <created>1486511321487</created>
@@ -975,11 +988,18 @@
       <option name="project" value="LOCAL" />
       <updated>1487683479768</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="First attempt at extension, further testing/modification needed.">
+      <created>1487696756275</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1487696756275</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="46907000" />
+    <option name="totallyTimeSpent" value="48096000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="1358" y="-8" width="1936" height="1176" extended-state="6" />
@@ -1027,7 +1047,8 @@
     <MESSAGE value="Changed way properties are read in." />
     <MESSAGE value="Added automatic mailer to send test results through email in HTML and .csv format." />
     <MESSAGE value="Beginning extension 1 - updated some code to make run on Linux properly." />
-    <option name="LAST_COMMIT_MESSAGE" value="Beginning extension 1 - updated some code to make run on Linux properly." />
+    <MESSAGE value="First attempt at extension, further testing/modification needed." />
+    <option name="LAST_COMMIT_MESSAGE" value="First attempt at extension, further testing/modification needed." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1040,14 +1061,6 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/main/java/schemaConversion/SchemaTranslate.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1972">
-          <caret line="121" column="37" lean-forward="false" selection-start-line="121" selection-start-column="37" selection-end-line="121" selection-end-column="37" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/schemaConversion/PerformWork.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
@@ -1089,11 +1102,10 @@
         <state relative-caret-position="3638">
           <caret line="219" column="23" lean-forward="false" selection-start-line="219" selection-start-column="23" selection-end-line="219" selection-end-column="23" />
           <folding>
-            <element signature="imports" expanded="false" />
-            <marker date="1487000001157" expanded="true" signature="6286:6366" ph="INSERT INTO query_mapping... " />
-            <marker date="1487000001157" expanded="true" signature="8680:8728" ph="SELECT cyphe... query_mapping" />
-            <marker date="1487000001157" expanded="true" signature="10030:10275" ph="select cyphe... query_mapping" />
-            <marker date="1487000001157" expanded="true" signature="10030:10276" ph="SELECT cyphe... query_mapping" />
+            <marker date="1487697680521" expanded="true" signature="6286:6366" ph="INSERT INTO query_mapping... " />
+            <marker date="1487697680521" expanded="true" signature="8680:8728" ph="SELECT cyphe... query_mapping" />
+            <marker date="1487697680521" expanded="true" signature="10030:10275" ph="select cyphe... query_mapping" />
+            <marker date="1487697680521" expanded="true" signature="10030:10276" ph="SELECT cyphe... query_mapping" />
           </folding>
         </state>
       </provider>
@@ -1171,11 +1183,10 @@
         <state relative-caret-position="187">
           <caret line="11" column="13" lean-forward="false" selection-start-line="11" selection-start-column="13" selection-end-line="11" selection-end-column="13" />
           <folding>
-            <element signature="imports" expanded="false" />
-            <marker date="1487000001157" expanded="true" signature="6286:6366" ph="INSERT INTO query_mapping... " />
-            <marker date="1487000001157" expanded="true" signature="8680:8728" ph="SELECT cyphe... query_mapping" />
-            <marker date="1487000001157" expanded="true" signature="10030:10275" ph="select cyphe... query_mapping" />
-            <marker date="1487000001157" expanded="true" signature="10030:10276" ph="SELECT cyphe... query_mapping" />
+            <marker date="1487697680521" expanded="true" signature="6286:6366" ph="INSERT INTO query_mapping... " />
+            <marker date="1487697680521" expanded="true" signature="8680:8728" ph="SELECT cyphe... query_mapping" />
+            <marker date="1487697680521" expanded="true" signature="10030:10275" ph="select cyphe... query_mapping" />
+            <marker date="1487697680521" expanded="true" signature="10030:10276" ph="SELECT cyphe... query_mapping" />
           </folding>
         </state>
       </provider>
@@ -1201,11 +1212,10 @@
         <state relative-caret-position="187">
           <caret line="11" column="13" lean-forward="false" selection-start-line="11" selection-start-column="13" selection-end-line="11" selection-end-column="13" />
           <folding>
-            <element signature="imports" expanded="false" />
-            <marker date="1487000001157" expanded="true" signature="6286:6366" ph="INSERT INTO query_mapping... " />
-            <marker date="1487000001157" expanded="true" signature="8680:8728" ph="SELECT cyphe... query_mapping" />
-            <marker date="1487000001157" expanded="true" signature="10030:10275" ph="select cyphe... query_mapping" />
-            <marker date="1487000001157" expanded="true" signature="10030:10276" ph="SELECT cyphe... query_mapping" />
+            <marker date="1487697680521" expanded="true" signature="6286:6366" ph="INSERT INTO query_mapping... " />
+            <marker date="1487697680521" expanded="true" signature="8680:8728" ph="SELECT cyphe... query_mapping" />
+            <marker date="1487697680521" expanded="true" signature="10030:10275" ph="select cyphe... query_mapping" />
+            <marker date="1487697680521" expanded="true" signature="10030:10276" ph="SELECT cyphe... query_mapping" />
           </folding>
         </state>
       </provider>
@@ -1223,11 +1233,10 @@
         <state relative-caret-position="187">
           <caret line="11" column="13" lean-forward="false" selection-start-line="11" selection-start-column="13" selection-end-line="11" selection-end-column="13" />
           <folding>
-            <element signature="imports" expanded="false" />
-            <marker date="1487000001157" expanded="true" signature="6286:6366" ph="INSERT INTO query_mapping... " />
-            <marker date="1487000001157" expanded="true" signature="8680:8728" ph="SELECT cyphe... query_mapping" />
-            <marker date="1487000001157" expanded="true" signature="10030:10275" ph="select cyphe... query_mapping" />
-            <marker date="1487000001157" expanded="true" signature="10030:10276" ph="SELECT cyphe... query_mapping" />
+            <marker date="1487697680521" expanded="true" signature="6286:6366" ph="INSERT INTO query_mapping... " />
+            <marker date="1487697680521" expanded="true" signature="8680:8728" ph="SELECT cyphe... query_mapping" />
+            <marker date="1487697680521" expanded="true" signature="10030:10275" ph="select cyphe... query_mapping" />
+            <marker date="1487697680521" expanded="true" signature="10030:10276" ph="SELECT cyphe... query_mapping" />
           </folding>
         </state>
       </provider>
@@ -1245,11 +1254,10 @@
         <state relative-caret-position="187">
           <caret line="11" column="13" lean-forward="false" selection-start-line="11" selection-start-column="13" selection-end-line="11" selection-end-column="13" />
           <folding>
-            <element signature="imports" expanded="false" />
-            <marker date="1487000001157" expanded="true" signature="6286:6366" ph="INSERT INTO query_mapping... " />
-            <marker date="1487000001157" expanded="true" signature="8680:8728" ph="SELECT cyphe... query_mapping" />
-            <marker date="1487000001157" expanded="true" signature="10030:10275" ph="select cyphe... query_mapping" />
-            <marker date="1487000001157" expanded="true" signature="10030:10276" ph="SELECT cyphe... query_mapping" />
+            <marker date="1487697680521" expanded="true" signature="6286:6366" ph="INSERT INTO query_mapping... " />
+            <marker date="1487697680521" expanded="true" signature="8680:8728" ph="SELECT cyphe... query_mapping" />
+            <marker date="1487697680521" expanded="true" signature="10030:10275" ph="select cyphe... query_mapping" />
+            <marker date="1487697680521" expanded="true" signature="10030:10276" ph="SELECT cyphe... query_mapping" />
           </folding>
         </state>
       </provider>
@@ -1278,14 +1286,6 @@
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/testing.java" />
-    <entry file="file://$PROJECT_DIR$/src/main/java/production/C2SProperties.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="680">
-          <caret line="43" column="13" lean-forward="false" selection-start-line="38" selection-start-column="12" selection-end-line="43" selection-end-column="13" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/schemaConversion/SchemaTranslate.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1972">
@@ -1489,40 +1489,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/database/DbUtil.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1343">
-          <caret line="84" column="35" lean-forward="false" selection-start-line="84" selection-start-column="35" selection-end-line="84" selection-end-column="35" />
-          <folding>
-            <element signature="imports" expanded="false" />
-            <marker date="1487000001157" expanded="true" signature="6286:6366" ph="INSERT INTO query_mapping... " />
-            <marker date="1487000001157" expanded="true" signature="8680:8728" ph="SELECT cyphe... query_mapping" />
-            <marker date="1487000001157" expanded="true" signature="10030:10275" ph="select cyphe... query_mapping" />
-            <marker date="1487000001157" expanded="true" signature="10030:10276" ph="SELECT cyphe... query_mapping" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/resources/configC2S.properties">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="85">
           <caret line="5" column="11" lean-forward="false" selection-start-line="5" selection-start-column="11" selection-end-line="5" selection-end-column="11" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/database/InsertSchema.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="153">
-          <caret line="68" column="29" lean-forward="false" selection-start-line="68" selection-start-column="29" selection-end-line="68" selection-end-column="29" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/production/SendResultsEmail.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="272">
-          <caret line="42" column="66" lean-forward="false" selection-start-line="42" selection-start-column="66" selection-end-line="42" selection-end-column="66" />
           <folding />
         </state>
       </provider>
@@ -1604,10 +1574,58 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/production/C2SProperties.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="34">
+          <caret line="57" column="54" lean-forward="false" selection-start-line="57" selection-start-column="54" selection-end-line="57" selection-end-column="54" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/database/DbUtil.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="339">
+          <caret line="289" column="83" lean-forward="false" selection-start-line="289" selection-start-column="83" selection-end-line="289" selection-end-column="83" />
+          <folding>
+            <marker date="1487697680521" expanded="true" signature="6286:6366" ph="INSERT INTO query_mapping... " />
+            <marker date="1487697680521" expanded="true" signature="8680:8728" ph="SELECT cyphe... query_mapping" />
+            <marker date="1487697680521" expanded="true" signature="10030:10275" ph="select cyphe... query_mapping" />
+            <marker date="1487697680521" expanded="true" signature="10030:10276" ph="SELECT cyphe... query_mapping" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/production/SendResultsEmail.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="153">
+          <caret line="22" column="39" lean-forward="true" selection-start-line="22" selection-start-column="39" selection-end-line="22" selection-end-column="39" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/database/InsertSchema.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="612">
+          <caret line="83" column="33" lean-forward="true" selection-start-line="83" selection-start-column="33" selection-end-line="83" selection-end-column="33" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/README.md">
+      <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
+        <state split_layout="SPLIT">
+          <first_editor relative-caret-position="187">
+            <caret line="11" column="20" lean-forward="true" selection-start-line="11" selection-start-column="20" selection-end-line="11" selection-end-column="20" />
+            <folding />
+          </first_editor>
+          <second_editor />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/production/Cyp2SQL_v3_Apoc.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="323">
-          <caret line="330" column="71" lean-forward="true" selection-start-line="330" selection-start-column="71" selection-end-line="330" selection-end-column="71" />
+        <state relative-caret-position="221">
+          <caret line="13" column="17" lean-forward="true" selection-start-line="13" selection-start-column="17" selection-end-line="13" selection-end-column="17" />
           <folding />
         </state>
       </provider>

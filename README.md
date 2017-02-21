@@ -1,8 +1,8 @@
 # Cypher to SQL Translator Tool - _Apoc_
 
->_version 3.0_
+>_version 3.2_
 
-_Apoc_ v3.0 is a tool that will perform automatic translation of both 
+_Apoc_ v3.2 is a tool that will perform automatic translation of both 
 graph schemas and graph queries in Neo4J and Cypher respectively, 
 to a relational schema and relational query language (SQL).
 This is an individual project for the Part II Tripos of 

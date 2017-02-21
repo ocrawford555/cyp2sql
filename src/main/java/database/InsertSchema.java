@@ -64,6 +64,19 @@ public class InsertSchema {
                 "EXECUTE 'UPDATE ' || l || ' SET ' || field || '=' || quote_literal(newV) || ' WHERE id = ' || x; " +
                 "END LOOP; END LOOP; END IF; END; $$ LANGUAGE plpgsql;";
 
+        String cypher_iterate = "CREATE OR REPLACE FUNCTION cypher_iterate(int[]) RETURNS int[] AS $$ " +
+                "DECLARE r int[]; t int[]; z int[]; lastResults int[]; count int; " +
+                "BEGIN t := array_unique($1); r := $1; lastResults := t; " +
+                "raise notice 'Size of input array: %', array_length(r,1); " +
+                "raise notice 'Unique elements to iterate with: %', array_length(t,1); " +
+                "--raise notice 'All elements are: %', r; " +
+                "--raise notice 'Unique elements are: %', t; " +
+                "--count := 0; loop EXIT WHEN array_length(t,1) is null or lastResults = z; lastResults := z; " +
+                "for z in select loop_work(t) LOOP raise notice 'Size of z: %', array_length(z,1); " +
+                "if (z <> lastResults) then r := array_cat(r, z); end if; " +
+                "raise notice 'Size of r: %', array_length(r,1); t := array_unique(z); --count := count + 1; " +
+                "END LOOP; end loop; RETURN r; END; $$ LANGUAGE plpgsql;";
+
         try {
             DbUtil.createInsert(createAdditonalNodeTables);
             DbUtil.createInsert(createAdditionalEdgesTables);
@@ -75,6 +88,7 @@ public class InsertSchema {
             DbUtil.createInsert(createAltRep);
             DbUtil.createInsert(createAltRep2);
             DbUtil.createInsert(forEachFunction);
+            DbUtil.createInsert(cypher_iterate);
         } catch (SQLException e) {
             e.printStackTrace();
         }

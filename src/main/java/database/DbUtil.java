@@ -285,4 +285,18 @@ public class DbUtil {
         html = html + "</table></body></html>";
         return html;
     }
+
+    /**
+     * Clear the contents of the current query_mapping relation for a new test run.
+     *
+     * @param dbName
+     */
+    public static void clearTestContents(String dbName) {
+        try {
+            DbUtil.insertOrDelete("DELETE FROM query_mapping", dbName);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        DbUtil.lastExecTimeInsert = 0;
+    }
 }

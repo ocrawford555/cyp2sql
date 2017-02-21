@@ -3,7 +3,6 @@ package production;
 import clauseObjects.CypForEach;
 import clauseObjects.CypIterate;
 import clauseObjects.DecodedQuery;
-import database.AddTClosure;
 import database.CypherDriver;
 import database.DbUtil;
 import database.InsertSchema;
@@ -17,7 +16,7 @@ import java.sql.SQLException;
 import java.util.*;
 
 /**
- * This is version 3 of the translation tool.
+ * This is version 3.2 of the translation tool.
  * This version aims to add additional extensions and features to v2, whilst
  * also improving the performance of the tool as much as possible, having more
  * thorough documentation, and of course, bug fixes.
@@ -32,7 +31,7 @@ import java.util.*;
  * dissertation.
  * <p>
  * Created by ojc37.
- * Deadline : 19th February 2017 (show demo to supervisor and/or DoS).
+ * Deadline : 26th February 2017 (show demo to supervisor and/or DoS).
  */
 public class Cyp2SQL_v3_Apoc {
     // for optimisations based on the return clause of Cypher
@@ -66,7 +65,7 @@ public class Cyp2SQL_v3_Apoc {
     private static boolean printBool = false;
 
     // variable set at the command line to indicate that query or queries being run are manipulating records in the db.
-    private static boolean upInsDel = false;
+    private static boolean updateInsDel = false;
 
     /**
      * Main method when application is launched.
@@ -80,32 +79,34 @@ public class Cyp2SQL_v3_Apoc {
     public static void main(String args[]) {
         // obtain properties for the program from the properties file.
         C2SProperties props = new C2SProperties();
-        String[] fileLocations = props.getLocalProperties();
+        String[] configProps = props.getLocalProperties();
 
         // set the properties
-        String cypher_results = fileLocations[0];
-        String pg_results = fileLocations[1];
-        workspaceArea = fileLocations[2];
-        postUN = fileLocations[3];
-        postPW = fileLocations[4];
-        neoUN = fileLocations[5];
-        neoPW = fileLocations[6];
+        String cypher_results = configProps[0];
+        String pg_results = configProps[1];
+        workspaceArea = configProps[2];
+        postUN = configProps[3];
+        postPW = configProps[4];
+        neoUN = configProps[5];
+        neoPW = configProps[6];
 
         if (args.length == 2 && args[0].equals("-tc")) {
-            AddTClosure.addTClosure(args[1]);
+            System.out.println("Facility to run the transitive closure currently disabled as can have dramatic" +
+                    "space and time computation issues.");
+            System.exit(1);
+            //AddTClosure.addTClosure(args[1]);
         } else if (args.length != 3 && args.length != 4) {
             // error with the command line arguments
             System.err.println("Incorrect usage of Cyp2SQL v2 : " +
-                    "<-schema|-translate|-s|-t> <schemaFile|queriesFile> <databaseName> <-p|-c>");
+                    "<-schema|-translate|-s|-t|-t2> <schemaFile|queriesFile> <databaseName> <-p> <-c>");
             System.exit(1);
         } else {
             File f_cypher = new File(cypher_results);
             File f_pg = new File(pg_results);
-
             dbName = args[2];
 
             // used to fix with SSLEngine issues with Neo4J
-            // TODO: not currently working with the UNIX installation
+            // not needed for the UNIX installation?
 //            if (!dbName.equals(fileLocations[7])) {
 //                CypherDriver.resetSSLNeo4J();
 //                props.setDatabaseProperty(dbName);
@@ -120,7 +121,7 @@ public class Cyp2SQL_v3_Apoc {
                 System.out.println("WARNING: manipulating records in the database, are you sure? (Y/N)");
                 Scanner in = new Scanner(System.in);
                 String resp = in.nextLine();
-                upInsDel = resp.toUpperCase().equals("Y");
+                updateInsDel = resp.toUpperCase().equals("Y");
             }
 
             System.out.println("PRINT TO FILE : " + ((printBool) ? "enabled" : "disabled"));
@@ -141,42 +142,38 @@ public class Cyp2SQL_v3_Apoc {
                     // https://neo4j.com/developer/kb/warm-the-cache-to-improve-performance-from-cold-start/
                     CypherDriver.warmUp();
 
-                    try {
-                        DbUtil.insertOrDelete("DELETE FROM query_mapping", dbName);
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
-                    DbUtil.lastExecTimeInsert = 0;
+                    // clear the database test results in preparation for new test data.
+                    DbUtil.clearTestContents(dbName);
 
-                    if (!printBool && !upInsDel) {
+                    if (!printBool && !updateInsDel) {
                         // translate Cypher queries to SQL.
                         // first, reorder the queries file to randomise order in which queries are executed
                         randomiseQueriesFile(args[1]);
 
-                        for (int i = 5; i <= 5; i++) {
+                        // perform 3 dry runs, then record the times of 5 executions
+                        for (int i = -2; i <= 5; i++) {
                             if (i < 1) System.out.println("Warming up - iterations left : " + (i * -1));
                             translateCypherToSQL(args[1].replace(".txt", "_temp.txt"), f_cypher, f_pg,
                                     cypher_results, pg_results, i, args[0]);
                         }
 
                         // send the results via email
-//                        try {
-//                            SendResultsEmail.sendEmail(dbName);
-//                        } catch (SQLException e) {
-//                            e.printStackTrace();
-//                        }
+                        try {
+                            SendResultsEmail.sendEmail(dbName);
+                        } catch (SQLException e) {
+                            e.printStackTrace();
+                        }
 
                         // delete temporary queries file
                         File f = new File(args[1].replace(".txt", "_temp.txt"));
                         f.delete();
                     } else translateCypherToSQL(args[1], f_cypher, f_pg, cypher_results,
                             pg_results, 1, args[0]);
-
                     break;
                 default:
                     // error with the command line arguments
                     System.err.println("Incorrect usage of Cyp2SQL v2 : " +
-                            "<-schema|-translate|-s|-t> <schemaFile|queriesFile> <databaseName> <-p>");
+                            "<-schema|-translate|-s|-t|-t2> <schemaFile|queriesFile> <databaseName> <-p> <-c>");
                     System.exit(1);
             }
         }
@@ -317,7 +314,6 @@ public class Cyp2SQL_v3_Apoc {
                     }
 
                     if (sql != null) {
-                        System.out.println(sql);
                         executeSQL(sql, pg_results, printBool);
                     } else throw new Exception("Conversion of SQL failed");
 
