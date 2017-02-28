@@ -14,12 +14,8 @@ public class CypIterate {
         this.originalCypherInput = cypher;
     }
 
-    public String getOriginalCypherInput(){
+    public String getOriginalCypherInput() {
         return this.originalCypherInput;
-    }
-
-    public void setLoopIndexTo(String loopIndexTo) {
-        this.loopIndexTo = loopIndexTo;
     }
 
     public void setLoopIndexFrom(String loopIndexFrom) {
@@ -30,8 +26,12 @@ public class CypIterate {
         this.collectIndex = collectIndex;
     }
 
+    public String getReturnStatement() {
+        return this.returnStatement;
+    }
+
     public void setReturnStatement(String returnStatement) {
-        this.returnStatement = returnStatement;
+        this.returnStatement = "MATCH (" + this.collectIndex + ") RETURN " + returnStatement;
     }
 
     @Override
@@ -63,5 +63,9 @@ public class CypIterate {
 
     public String getLoopIndexTo() {
         return loopIndexTo;
+    }
+
+    public void setLoopIndexTo(String loopIndexTo) {
+        this.loopIndexTo = loopIndexTo;
     }
 }

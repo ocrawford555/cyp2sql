@@ -1,7 +1,7 @@
 package schemaConversion;
 
 import com.google.gson.JsonParser;
-import production.Cyp2SQL_v3_Apoc;
+import production.Reagan_Main_V4;
 
 import java.io.*;
 import java.util.*;
@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
  * that can be executed on a relational database. This includes relations for all the nodes
  * and relationships, as well as more specific ones for each label type and type of
  * relationship. Additional metafiles are created to help the translator and output module
- * of Apoc.
+ * of Reagan.
  * <p>
  * The class makes use of parallel processing on the original dump file to optimise speed up.
  * The original dump file from Neo4J needs to be parsed beforehand, as it contains unnecessary
@@ -28,8 +28,8 @@ public class SchemaTranslate {
     // storing separate information on the types of relationships
     public static List<String> relTypes = Collections.synchronizedList(new ArrayList<>());
     // workspace area for both nodes and edges
-    public static String nodesFile = Cyp2SQL_v3_Apoc.workspaceArea + "/nodes.txt";
-    public static String edgesFile = Cyp2SQL_v3_Apoc.workspaceArea + "/edges.txt";
+    public static String nodesFile = Reagan_Main_V4.workspaceArea + "/nodes.txt";
+    public static String edgesFile = Reagan_Main_V4.workspaceArea + "/edges.txt";
     // JSON Parser for creating JSON objects from the text file.
     // passed to all of the threads
     static JsonParser parser = new JsonParser();

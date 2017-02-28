@@ -1,7 +1,7 @@
 package database;
 
 import org.apache.commons.lang3.SystemUtils;
-import production.Cyp2SQL_v3_Apoc;
+import production.Reagan_Main_V4;
 
 import java.io.*;
 import java.sql.*;
@@ -27,7 +27,7 @@ public class DbUtil {
         try {
             Class.forName("org.postgresql.Driver");
             c = DriverManager.getConnection("jdbc:postgresql://localhost:5432/" + dbName,
-                    Cyp2SQL_v3_Apoc.postUN, Cyp2SQL_v3_Apoc.postPW);
+                    Reagan_Main_V4.postUN, Reagan_Main_V4.postPW);
             DB_OPEN = true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -113,7 +113,7 @@ public class DbUtil {
             }
         }
 
-        Cyp2SQL_v3_Apoc.numResultsPost = numRecords;
+        Reagan_Main_V4.numResultsPost = numRecords;
         DbUtil.closeConnection();
     }
 
@@ -230,7 +230,7 @@ public class DbUtil {
         stmt.close();
     }
 
-    public static String getTestResults(String dbName) throws SQLException {
+    public static String getTestResults(String dbName, String typeTranslate) throws SQLException {
         if (!DB_OPEN) DbUtil.createConnection(dbName);
         String query = "SELECT cypher, sql, neot, pgt FROM query_mapping";
         PreparedStatement stmt = c.prepareStatement(query);
@@ -259,9 +259,12 @@ public class DbUtil {
             e.printStackTrace();
         }
 
+        String translationMechanism = (typeTranslate.equals("-t")) ?
+                "standard" : (typeTranslate.equals("-tc")) ? "with transitive closure" : "unknown/broken.";
+
         String html = "<html><head><title>Test Results Summary!</title><style>table, th, td " +
                 "{border: 1px solid black; border-collapse: collapse;}</style></head>" +
-                "<body>";
+                "<body>Type of translation : " + translationMechanism + "</br>";
         html = html + "<table style=\"width:100%\"><tr><th>Cypher</th>" +
                 "<th>Neo4J Average Time</th><th>Neo4J STDDEV</th>" +
                 "<th>Postgres Average Time</th><th>Postgres STDDEV</th></tr>";

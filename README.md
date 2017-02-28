@@ -1,8 +1,8 @@
-# Cypher to SQL Translator Tool - _Apoc_
+# Cypher to SQL Translator Tool - _Reagan_
 
->_version 3.2_
+>_version 4.0_
 
-_Apoc_ v3.2 is a tool that will perform automatic translation of both 
+_Reagan_ v4.0 is a tool that will perform automatic translation of both 
 graph schemas and graph queries in Neo4J and Cypher respectively, 
 to a relational schema and relational query language (SQL).
 This is an individual project for the Part II Tripos of 
@@ -76,23 +76,28 @@ The properties file (configC2S.properties) must first be set with the correct pr
 Run the .jar with the following parameters, depending on whether or not the schema needs to be translated first.
 
 ```bash
-java -jar <location of .jar file> <-schema|-translate|-s|-t|-t2> <schemaFile|queriesFile> <databaseName> <-p>
+java -jar reaganV4_0.jar <-schema|-translate|-s|-t|-tc> <schemaFile|queriesFile> <databaseName> <-e|-p|-c>
 ```
 
 Thus, if wishing to first convert the schema:
 ```bash
-java -jar apoc.jar -schema myDump.txt coolDatabase
-java -jar apoc.jar -s myDump.txt coolDatabase
+java -jar Reagan.jar -schema myDump.txt coolDatabase
+java -jar Reagan.jar -s myDump.txt coolDatabase
 ```
 
 If successful, queries can now be translated:
 ```bash
-java -jar apoc.jar -translate myQueries.txt coolDatabase
+java -jar Reagan.jar -translate myQueries.txt coolDatabase
 ```
 
 If you want the results of the queries to be outputted to a local file for inspection of the results, then use the -p flag:
 ```bash
-java -jar apoc.jar -translate myQueries.txt coolDatabase -p
+java -jar Reagan.jar -translate myQueries.txt coolDatabase -p
+```
+
+To have the results emailed back:
+```bash
+java -jar Reagan.jar -translate myQueries.txt coolDatabase -e
 ```
 
 The "myQueries.txt" should have each Cypher query on ONE LINE - adding a comment marker "//" to the start of the line will skip that query when the application is launched:
@@ -106,8 +111,7 @@ MATCH (n)-->(m) RETURN m;
 * Aliases may be used, but they cannot be the same as the field they are being
 an alias for.
 * Do not use the -p flag when the quantity of data being returned is large.
-It will not only be very slow, and take up excess space, but will generally
-not be very good for the machine.
+It will not only be very slow, but will generally not be very good for the machine.
 * This tool has bugs! Be patient with it, stick to the queries listed above.
 
 

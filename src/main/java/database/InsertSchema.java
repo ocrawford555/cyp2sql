@@ -3,7 +3,7 @@ package database;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import production.Cyp2SQL_v3_Apoc;
+import production.Reagan_Main_V4;
 import schemaConversion.SchemaTranslate;
 
 import java.io.*;
@@ -44,12 +44,6 @@ public class InsertSchema {
         String createMappingQuery = "create table query_mapping (cypher TEXT, sql TEXT, object BYTEA, " +
                 "neoT DOUBLE PRECISION, pgT DOUBLE PRECISION);";
 
-        String createTClosure = "CREATE MATERIALIZED VIEW tclosure AS(WITH RECURSIVE search_graph(idl, idr, depth, " +
-                "path, cycle) " +
-                "AS (SELECT e.idl, e.idr, 1, ARRAY[e.idl], false FROM edges e UNION ALL SELECT sg.idl, e.idr, " +
-                "sg.depth + 1, path || e.idl, e.idl = ANY(sg.path) FROM edges e, search_graph sg WHERE e.idl = " +
-                "sg.idr AND NOT cycle) SELECT * FROM search_graph where (not cycle OR not idr = ANY(path)));";
-
         String createAltRep = "CREATE MATERIALIZED VIEW adjList_from AS (select idl as LeftNode, " +
                 "array_agg(idr ORDER BY idr asc) AS RightNode FROM edges e JOIN nodes n on e.idl = n.id GROUP BY idl);";
 
@@ -64,18 +58,18 @@ public class InsertSchema {
                 "EXECUTE 'UPDATE ' || l || ' SET ' || field || '=' || quote_literal(newV) || ' WHERE id = ' || x; " +
                 "END LOOP; END LOOP; END IF; END; $$ LANGUAGE plpgsql;";
 
-        String cypher_iterate = "CREATE OR REPLACE FUNCTION cypher_iterate(int[]) RETURNS int[] AS $$ " +
-                "DECLARE r int[]; t int[]; z int[]; lastResults int[]; count int; " +
-                "BEGIN t := array_unique($1); r := $1; lastResults := t; " +
-                "raise notice 'Size of input array: %', array_length(r,1); " +
-                "raise notice 'Unique elements to iterate with: %', array_length(t,1); " +
-                "--raise notice 'All elements are: %', r; " +
-                "--raise notice 'Unique elements are: %', t; " +
-                "--count := 0; loop EXIT WHEN array_length(t,1) is null or lastResults = z; lastResults := z; " +
-                "for z in select loop_work(t) LOOP raise notice 'Size of z: %', array_length(z,1); " +
-                "if (z <> lastResults) then r := array_cat(r, z); end if; " +
-                "raise notice 'Size of r: %', array_length(r,1); t := array_unique(z); --count := count + 1; " +
-                "END LOOP; end loop; RETURN r; END; $$ LANGUAGE plpgsql;";
+//        String cypher_iterate = "CREATE OR REPLACE FUNCTION cypher_iterate(int[]) RETURNS int[] AS $$ " +
+//                "DECLARE r int[]; t int[]; z int[]; lastResults int[]; count int; " +
+//                "BEGIN t := array_unique($1); r := $1; lastResults := t; " +
+//                "raise notice 'Size of input array: %', array_length(r,1); " +
+//                "raise notice 'Unique elements to iterate with: %', array_length(t,1); " +
+//                "--raise notice 'All elements are: %', r; " +
+//                "--raise notice 'Unique elements are: %', t; " +
+//                "--count := 0; loop EXIT WHEN array_length(t,1) is null or lastResults = z; lastResults := z; " +
+//                "for z in select loop_work(t) LOOP raise notice 'Size of z: %', array_length(z,1); " +
+//                "if (z <> lastResults) then r := array_cat(r, z); end if; " +
+//                "raise notice 'Size of r: %', array_length(r,1); t := array_unique(z); --count := count + 1; " +
+//                "END LOOP; end loop; RETURN r; END; $$ LANGUAGE plpgsql;";
 
         try {
             DbUtil.createInsert(createAdditonalNodeTables);
@@ -83,12 +77,10 @@ public class InsertSchema {
             DbUtil.createInsert(sqlInsertNodes);
             DbUtil.createInsert(sqlInsertEdges);
             DbUtil.createInsert(createMappingQuery);
-            // tclosure can take up excessive disk space and time - do not run unless sure is ok!
-            //DbUtil.createInsert(createTClosure);
             DbUtil.createInsert(createAltRep);
             DbUtil.createInsert(createAltRep2);
             DbUtil.createInsert(forEachFunction);
-            DbUtil.createInsert(cypher_iterate);
+            //DbUtil.createInsert(cypher_iterate);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -100,7 +92,7 @@ public class InsertSchema {
     private static void addFieldsToMetaFile() {
         FileOutputStream fos;
         try {
-            fos = new FileOutputStream(Cyp2SQL_v3_Apoc.workspaceArea + "/meta.txt");
+            fos = new FileOutputStream(Reagan_Main_V4.workspaceArea + "/meta.txt");
 
             //Construct BufferedReader from InputStreamReader
             BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos));
@@ -111,7 +103,7 @@ public class InsertSchema {
             bw.close();
             fos.close();
 
-            fos = new FileOutputStream(Cyp2SQL_v3_Apoc.workspaceArea + "/meta_rels.txt");
+            fos = new FileOutputStream(Reagan_Main_V4.workspaceArea + "/meta_rels.txt");
 
             //Construct BufferedReader from InputStreamReader
             bw = new BufferedWriter(new OutputStreamWriter(fos));
@@ -138,8 +130,8 @@ public class InsertSchema {
         FileOutputStream fos2;
 
         try {
-            fos = new FileOutputStream(Cyp2SQL_v3_Apoc.workspaceArea + "/meta_tables.txt");
-            fos2 = new FileOutputStream(Cyp2SQL_v3_Apoc.workspaceArea + "/meta_labels.txt");
+            fos = new FileOutputStream(Reagan_Main_V4.workspaceArea + "/meta_tables.txt");
+            fos2 = new FileOutputStream(Reagan_Main_V4.workspaceArea + "/meta_labels.txt");
 
             BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos));
             BufferedWriter bw2 = new BufferedWriter(new OutputStreamWriter(fos2));

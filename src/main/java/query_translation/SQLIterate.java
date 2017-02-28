@@ -1,7 +1,7 @@
 package query_translation;
 
 import clauseObjects.CypIterate;
-import production.Cyp2SQL_v3_Apoc;
+import production.Reagan_Main_V4;
 
 public class SQLIterate {
     public static String translate(CypIterate cypIter, String typeTranslate) {
@@ -24,13 +24,17 @@ public class SQLIterate {
 
         // generate the traditional translation to SQL for the loop query (store in string as used
         // multiple times)
-        String loopSQL = Cyp2SQL_v3_Apoc.convertCypherToSQL(cypIter.getLoopQuery(), typeTranslate).getSqlEquiv();
+        String loopSQL = Reagan_Main_V4.convertCypherToSQL(cypIter.getLoopQuery(), typeTranslate).getSqlEquiv();
+        String returnSQL = Reagan_Main_V4.convertCypherToSQL(cypIter.getReturnStatement(), typeTranslate)
+                .getSqlEquiv();
+        returnSQL = returnSQL.substring(0, returnSQL.length() - 1);
 
         // need to modify loopSQL for the main SQL statement.
         String[] mainParts = loopSQL.split("SELECT n01\\.\\*");
         String mainInitStmt = mainParts[0].trim() + ", firstStep AS (SELECT (array_agg(n01.id)) AS list_ids ";
-        mainInitStmt = mainInitStmt + mainParts[1].substring(0, mainParts[1].length() - 1) + ") ";
-        mainInitStmt = mainInitStmt + "SELECT (cypher_iterate(firstStep.list_ids)) from firstStep;";
+        mainInitStmt = mainInitStmt + mainParts[1].substring(0, mainParts[1].length() - 1) + "),  ";
+        mainInitStmt = mainInitStmt + "collectStep AS (SELECT unnest((cypher_iterate(firstStep.list_ids))) AS zz from firstStep) ";
+        mainInitStmt = mainInitStmt + returnSQL + " INNER JOIN collectStep c ON n01.id = c.zz;";
 
         //System.out.println(loopSQL);
         //System.out.println(mainInitStmt);

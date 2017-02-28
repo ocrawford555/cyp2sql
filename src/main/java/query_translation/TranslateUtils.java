@@ -3,7 +3,7 @@ package query_translation;
 import clauseObjects.*;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import production.Cyp2SQL_v3_Apoc;
+import production.Reagan_Main_V4;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -28,7 +28,7 @@ class TranslateUtils {
             String value;
             if (entry.getValue().isJsonArray()) {
                 value = "ARRAY" + entry.getValue().getAsJsonArray().toString();
-            } else if (entry.getKey().equals("name") && Cyp2SQL_v3_Apoc.dbName.startsWith("opus")) {
+            } else if (entry.getKey().equals("name") && Reagan_Main_V4.dbName.startsWith("opus")) {
                 value = "ARRAY[" + entry.getValue().toString() + "]";
             } else value = entry.getValue().getAsString();
             sql = TranslateUtils.addWhereClause(sql, value);
@@ -170,7 +170,7 @@ class TranslateUtils {
         int changed = 0;
 
         try {
-            fis = new FileInputStream(Cyp2SQL_v3_Apoc.workspaceArea + "/meta_tables.txt");
+            fis = new FileInputStream(Reagan_Main_V4.workspaceArea + "/meta_tables.txt");
             BufferedReader br = new BufferedReader(new InputStreamReader(fis));
             String line;
             while ((line = br.readLine()) != null) {
@@ -193,11 +193,11 @@ class TranslateUtils {
         String table = "nodes";
 
         for (CypReturn cR : rc.getItems()) {
-            if (!Cyp2SQL_v3_Apoc.mapLabels.containsKey(cR.getField())) {
+            if (!Reagan_Main_V4.mapLabels.containsKey(cR.getField())) {
                 possibleOpti = false;
                 break;
             } else {
-                String newTable = Cyp2SQL_v3_Apoc.mapLabels.get(cR.getField());
+                String newTable = Reagan_Main_V4.mapLabels.get(cR.getField());
                 if (!table.equals(newTable) && !table.equals("nodes")) {
                     possibleOpti = false;
                     break;

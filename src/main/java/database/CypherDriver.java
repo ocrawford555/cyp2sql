@@ -2,7 +2,7 @@ package database;
 
 import org.neo4j.driver.v1.*;
 import org.neo4j.driver.v1.exceptions.ClientException;
-import production.Cyp2SQL_v3_Apoc;
+import production.Reagan_Main_V4;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -29,8 +29,12 @@ public class CypherDriver {
     public static void run(String query, String cypher_results, String[] returnItems, boolean printOutput) {
         // database essentials
         Driver driver = GraphDatabase.driver("bolt://localhost",
-                AuthTokens.basic(Cyp2SQL_v3_Apoc.neoUN, Cyp2SQL_v3_Apoc.neoPW));
+                AuthTokens.basic(Reagan_Main_V4.neoUN, Reagan_Main_V4.neoPW));
         Session session = driver.session();
+
+        // print to file if the result being returned is a count, so that the tool can
+        // validate that the translation was valid
+        printOutput = printOutput || query.toLowerCase().contains("count");
 
         // timing unit
         long startNano = System.nanoTime();
@@ -48,7 +52,6 @@ public class CypherDriver {
             try {
                 PrintWriter writer = null;
                 if (printOutput) writer = new PrintWriter(cypher_results, "UTF-8");
-
                 while (result.hasNext()) {
                     Record record = result.next();
                     if (printOutput) {
@@ -77,7 +80,7 @@ public class CypherDriver {
                                         int countResult = record.get(t).asInt();
                                         writer.println("count" + " : " + countResult);
                                     } catch (ClientException ce) {
-
+                                        System.err.println("Error thrown in CypherDriver." + ce.toString());
                                     }
                                 } else {
                                     // currently only deals with returning nodes
@@ -111,7 +114,7 @@ public class CypherDriver {
                     writer.close();
                 }
 
-                Cyp2SQL_v3_Apoc.numResultsNeo = countRecords;
+                Reagan_Main_V4.numResultsNeo = countRecords;
             } catch (FileNotFoundException | UnsupportedEncodingException e) {
                 e.printStackTrace();
             }
@@ -131,7 +134,7 @@ public class CypherDriver {
     private static List<String> getAllFieldsNodes() {
         List<String> toReturn = new ArrayList<>();
         try {
-            FileInputStream fis = new FileInputStream(Cyp2SQL_v3_Apoc.workspaceArea + "/meta.txt");
+            FileInputStream fis = new FileInputStream(Reagan_Main_V4.workspaceArea + "/meta.txt");
             BufferedReader br = new BufferedReader(new InputStreamReader(fis));
             String line;
             while ((line = br.readLine()) != null) {
@@ -146,47 +149,9 @@ public class CypherDriver {
         return toReturn;
     }
 
-    /**
-     * Erase contents of this file to reset the SSL settings for Neo4J.
-     */
-    public static void resetSSLNeo4J() {
-        String file = "C:/Users/ocraw/.neo4j/known_hosts";
-        ArrayList<String> contents = new ArrayList<>();
-        try {
-            FileInputStream fis = new FileInputStream(file);
-            BufferedReader br = new BufferedReader(new InputStreamReader(fis));
-            String line;
-            while ((line = br.readLine()) != null) {
-                contents.add(line);
-            }
-            br.close();
-            fis.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        FileOutputStream fos;
-        try {
-            fos = new FileOutputStream(file);
-
-            //Construct BufferedReader from InputStreamReader
-            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos));
-            for (String s : contents) {
-                if (s.startsWith("#")) {
-                    bw.write(s);
-                    bw.newLine();
-                }
-            }
-            bw.close();
-            fos.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
     public static void warmUp() {
         Driver driver = GraphDatabase.driver("bolt://localhost",
-                AuthTokens.basic(Cyp2SQL_v3_Apoc.neoUN, Cyp2SQL_v3_Apoc.neoPW));
+                AuthTokens.basic(Reagan_Main_V4.neoUN, Reagan_Main_V4.neoPW));
         Session session = driver.session();
         String warm_up_query = " MATCH (n) OPTIONAL MATCH (n)-[r]->() RETURN count(n.prop) + count(r.prop);";
         session.run(warm_up_query).consume();

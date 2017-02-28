@@ -666,7 +666,7 @@ class CypherTranslator {
             }
             return new CypReturn(clause.get(1), clause.get(3),
                     false, false, caseString.toString(), matchC);
-        } else throw new Exception("RETURN CLAUSE MALFORMED");
+        } else throw new Exception("RETURN CLAUSE MALFORMED" + clause);
     }
 
     private static OrderClause orderDecode(List<String> orderClause) throws Exception {

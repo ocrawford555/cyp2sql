@@ -1,7 +1,7 @@
 package query_translation;
 
 import clauseObjects.*;
-import production.Cyp2SQL_v3_Apoc;
+import production.Reagan_Main_V4;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -37,8 +37,8 @@ public class SQLTranslate {
         if (decodedQuery.getMc().getRels().isEmpty()) {
             sql = NoRels.translate(sql, decodedQuery);
         } else if (decodedQuery.getMc().isVarRel() && decodedQuery.getMc().getRels().size() == 1) {
-            if (typeTranslate.equals("-t")) {
-                sql = SingleVarRel.translate(sql, decodedQuery, false);
+            if (typeTranslate.equals("-tc")) {
+                sql = SingleVarRel.translate(sql, decodedQuery);
             } else {
                 sql = SingleVarAdjList.translate(sql, decodedQuery);
             }
@@ -199,7 +199,7 @@ public class SQLTranslate {
 
         sql.append(whereString).append(") OR idr in (SELECT id FROM nodes WHERE ").append(whereString).append("); ");
 
-        for (String s : Cyp2SQL_v3_Apoc.relsList) {
+        for (String s : Reagan_Main_V4.relsList) {
             sql.append(" DELETE FROM e$").append(s).append(" WHERE idl in (SELECT id FROM nodes WHERE ");
             sql.append(whereString).append("); ");
         }
@@ -259,7 +259,7 @@ public class SQLTranslate {
             if (cR.getField() != null && !cR.getCount()) {
                 sql.append("n0").append(nodeTableCount).append(".").append(cR.getField()).append(", ");
             } else if (!cR.getCount()) {
-                FileInputStream fis = new FileInputStream(Cyp2SQL_v3_Apoc.workspaceArea + "/meta.txt");
+                FileInputStream fis = new FileInputStream(Reagan_Main_V4.workspaceArea + "/meta.txt");
                 BufferedReader br = new BufferedReader(new InputStreamReader(fis));
                 String line;
                 while ((line = br.readLine()) != null) {

@@ -23,7 +23,7 @@ class SingleVarRelExtended {
             sql.append(SingleVarRel.getZeroStep(cN1, decodedQuery.getRc()));
         }
 
-        sql = SingleVarRel.getStepView(sql, false, amountLow, 5);
+        sql = SingleVarRel.getStepView(sql, amountLow, 5);
 
         sql.append("CREATE TEMP VIEW cr AS (");
         sql = SingleVarRel.getFinalSelect(sql, decodedQuery.getRc(),

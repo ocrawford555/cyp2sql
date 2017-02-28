@@ -16,8 +16,8 @@ import java.sql.SQLException;
 import java.util.Properties;
 
 class SendResultsEmail {
-    static void sendEmail(String dbName) throws SQLException {
-        String testResultContents = DbUtil.getTestResults(dbName);
+    static void sendEmail(String dbName, String typeTranslate) throws SQLException {
+        String testResultContents = DbUtil.getTestResults(dbName, typeTranslate);
         String email = "testneo4jcambridge@gmail.com";
         final String username = email;
         final String pw = "neo4j###73";
@@ -72,6 +72,48 @@ class SendResultsEmail {
         } catch (MessagingException e) {
             System.err.println("Failed to send...");
             throw new RuntimeException(e);
+        }
+    }
+
+    static void sendFailEmail(String dbName, String sql) {
+        String email = "testneo4jcambridge@gmail.com";
+        final String username = email;
+        final String pw = "neo4j###73";
+
+        Properties props = new Properties();
+        props.put("mail.smtp.starttls.enable", "true");
+        props.put("mail.smtp.auth", "true");
+        props.put("mail.smtp.host", "smtp.gmail.com");
+        props.put("mail.smtp.port", "587");
+
+        Session session = Session.getInstance(props,
+                new javax.mail.Authenticator() {
+                    protected PasswordAuthentication getPasswordAuthentication() {
+                        return new PasswordAuthentication(username, pw);
+                    }
+                });
+
+        try {
+            MimeMessage message = new MimeMessage(session);
+            message.setFrom(new InternetAddress(email));
+            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse("ojc37@cam.ac.uk"));
+            message.setSubject("Translation Failed Cyp2SQL -- " + dbName);
+
+            Multipart multipart = new MimeMultipart();
+
+            MimeBodyPart textBodyPart = new MimeBodyPart();
+            textBodyPart.setText("<html><body>The following query failed for some reason : </br> '" +
+                    sql + "' </br> </body> </html>", "utf-8", "html");
+
+            multipart.addBodyPart(textBodyPart);  // add the text part
+
+            message.setContent(multipart);
+
+            System.out.println("Sending fail message...");
+            Transport.send(message);
+            System.out.println("Sent!");
+        } catch (MessagingException e) {
+            System.err.println("Failed to send...");
         }
     }
 }
