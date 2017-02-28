@@ -57,7 +57,14 @@ public class CypherDriver {
                     if (printOutput) {
                         for (String t : returnItems) {
                             try {
-                                if (t.contains(".")) {
+                                if (t.contains("count")) {
+                                    try {
+                                        int countResult = record.get(t).asInt();
+                                        writer.println("count" + " : " + countResult);
+                                    } catch (ClientException ce) {
+                                        System.err.println("Error thrown in CypherDriver." + ce.toString());
+                                    }
+                                } else if (t.contains(".")) {
                                     String bits[] = t.split("\\.");
 
                                     // fixes problem when an alias is used.
@@ -74,13 +81,6 @@ public class CypherDriver {
                                         // failed to cast int to string, so write as int.
                                         int resultInt = record.get(t).asInt();
                                         writer.println(bits[1].toLowerCase() + " : " + resultInt);
-                                    }
-                                } else if (t.contains("count")) {
-                                    try {
-                                        int countResult = record.get(t).asInt();
-                                        writer.println("count" + " : " + countResult);
-                                    } catch (ClientException ce) {
-                                        System.err.println("Error thrown in CypherDriver." + ce.toString());
                                     }
                                 } else {
                                     // currently only deals with returning nodes
@@ -147,6 +147,46 @@ public class CypherDriver {
             e.printStackTrace();
         }
         return toReturn;
+    }
+
+    /**
+     * Erase contents of this file to reset the SSL settings for Neo4J.
+     */
+    public static void resetSSLNeo4J() {
+        System.out.println("Resetting Neo4J SSL properties...");
+        String file = "C:/Users/ocraw/.neo4j/known_hosts";
+        ArrayList<String> contents = new ArrayList<>();
+        try {
+            FileInputStream fis = new FileInputStream(file);
+            BufferedReader br = new BufferedReader(new InputStreamReader(fis));
+            String line;
+            while ((line = br.readLine()) != null) {
+                contents.add(line);
+            }
+            br.close();
+            fis.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        FileOutputStream fos;
+        try {
+            fos = new FileOutputStream(file);
+
+            //Construct BufferedReader from InputStreamReader
+            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos));
+            for (String s : contents) {
+                if (s.startsWith("#")) {
+                    bw.write(s);
+                    bw.newLine();
+                }
+            }
+            bw.close();
+            fos.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        System.out.println("Reset complete.");
     }
 
     public static void warmUp() {

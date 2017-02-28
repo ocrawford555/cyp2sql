@@ -7,6 +7,7 @@ import database.CypherDriver;
 import database.DbUtil;
 import database.InsertSchema;
 import org.apache.commons.io.FileUtils;
+import org.neo4j.driver.v1.exceptions.ClientException;
 import query_translation.*;
 import schemaConversion.SchemaTranslate;
 import translator.CypherTokenizer;
@@ -128,9 +129,19 @@ public class Reagan_Main_V4 {
                 case "-tc":
                     getLabelMapping();
 
+
                     // warm up the Cypher caches if the server has just been turned on.
                     // https://neo4j.com/developer/kb/warm-the-cache-to-improve-performance-from-cold-start/
-                    CypherDriver.warmUp();
+                    // also, if there is an SSL issue when changing databases, attempt to fix it by running
+                    // some fix up code.
+                    try {
+                        CypherDriver.warmUp();
+                    } catch (ClientException ce) {
+                        if (ce.getMessage().contains("SSLEngine problem")) {
+                            CypherDriver.resetSSLNeo4J();
+                            CypherDriver.warmUp();
+                        }
+                    }
 
                     // clear the database test results in preparation for new test data.
                     DbUtil.clearTestContents(dbName);
@@ -275,8 +286,6 @@ public class Reagan_Main_V4 {
 
             while ((line = br.readLine()) != null) {
                 // if line is commented out in the read queries file, then do not attempt to convert it.
-                line = line.toLowerCase();
-
                 if (!line.startsWith("//") && !line.isEmpty() && !denyList.contains(line)) {
                     Object[] mapping = {null, null};
                     String[] returnItemsForCypher;
@@ -285,13 +294,13 @@ public class Reagan_Main_V4 {
                         sql = (String) mapping[0];
                         returnItemsForCypher = (String[]) mapping[1];
                     } else {
-                        if (line.contains(" foreach ")) {
+                        if (line.toLowerCase().contains(" foreach ")) {
                             sql = convertCypherForEach(line, typeTranslate);
-                        } else if (line.contains(" with ")) {
+                        } else if (line.toLowerCase().contains(" with ")) {
                             sql = convertCypherWith(line, typeTranslate);
-                        } else if (line.contains("shortestpath")) {
+                        } else if (line.toLowerCase().contains("shortestpath")) {
                             sql = convertCypherShortPath(line);
-                        } else if (line.contains("iterate")) {
+                        } else if (line.toLowerCase().contains("iterate")) {
                             sql = convertIterateQuery(line, typeTranslate);
                         } else {
                             sql = convertCypherToSQL(line, typeTranslate).getSqlEquiv();
@@ -308,7 +317,8 @@ public class Reagan_Main_V4 {
 
                     boolean sqlExecSuccess;
                     if (sql != null) {
-                        sqlExecSuccess = executeSQL(sql, pg_results, (printBool || line.contains("count")));
+                        sqlExecSuccess = executeSQL(sql, pg_results,
+                                (printBool || line.toLowerCase().contains("count")));
                     } else throw new Exception("Conversion of SQL failed");
 
                     if (!sqlExecSuccess) denyList.add(line);

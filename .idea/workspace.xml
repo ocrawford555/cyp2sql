@@ -7,27 +7,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d8946299-d358-4b1a-8efd-d8bcadacfc0c" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/reaganV4_0.jar" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/database/AddTClosure.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/production/TimingCPU.java" afterPath="" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/src/main/java/production/Cyp2SQL_v3_Apoc.java" afterPath="$PROJECT_DIR$/src/main/java/production/Reagan_Main_V4.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/README.md" afterPath="$PROJECT_DIR$/README.md" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/clauseObjects/CypIterate.java" afterPath="$PROJECT_DIR$/src/main/java/clauseObjects/CypIterate.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/database/CypherDriver.java" afterPath="$PROJECT_DIR$/src/main/java/database/CypherDriver.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/database/DbUtil.java" afterPath="$PROJECT_DIR$/src/main/java/database/DbUtil.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/database/InsertSchema.java" afterPath="$PROJECT_DIR$/src/main/java/database/InsertSchema.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/production/C2SProperties.java" afterPath="$PROJECT_DIR$/src/main/java/production/C2SProperties.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/production/SendResultsEmail.java" afterPath="$PROJECT_DIR$/src/main/java/production/SendResultsEmail.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/query_translation/NoRels.java" afterPath="$PROJECT_DIR$/src/main/java/query_translation/NoRels.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/query_translation/SQLIterate.java" afterPath="$PROJECT_DIR$/src/main/java/query_translation/SQLIterate.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/query_translation/SQLTranslate.java" afterPath="$PROJECT_DIR$/src/main/java/query_translation/SQLTranslate.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/query_translation/SingleVarRel.java" afterPath="$PROJECT_DIR$/src/main/java/query_translation/SingleVarRel.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/query_translation/SingleVarRelExtended.java" afterPath="$PROJECT_DIR$/src/main/java/query_translation/SingleVarRelExtended.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/query_translation/TranslateUtils.java" afterPath="$PROJECT_DIR$/src/main/java/query_translation/TranslateUtils.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/schemaConversion/SchemaTranslate.java" afterPath="$PROJECT_DIR$/src/main/java/schemaConversion/SchemaTranslate.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/translator/CypherTranslator.java" afterPath="$PROJECT_DIR$/src/main/java/translator/CypherTranslator.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/resources/META-INF/MANIFEST.MF" afterPath="$PROJECT_DIR$/src/main/resources/META-INF/MANIFEST.MF" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/production/Reagan_Main_V4.java" afterPath="$PROJECT_DIR$/src/main/java/production/Reagan_Main_V4.java" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <ignored path="$PROJECT_DIR$/target/" />
@@ -52,11 +34,11 @@
   <component name="ExecutionTargetManager" SELECTED_TARGET="default_target" />
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="Reagan_Main_V4.java" pinned="false" current-in-tab="false">
+      <file leaf-file-name="Reagan_Main_V4.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/java/production/Reagan_Main_V4.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-1485">
-              <caret line="152" column="53" lean-forward="false" selection-start-line="152" selection-start-column="53" selection-end-line="152" selection-end-column="53" />
+            <state relative-caret-position="629">
+              <caret line="121" column="31" lean-forward="true" selection-start-line="121" selection-start-column="31" selection-end-line="121" selection-end-column="31" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -103,14 +85,14 @@
       <file leaf-file-name="SendResultsEmail.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/production/SendResultsEmail.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="102">
-              <caret line="19" column="54" lean-forward="true" selection-start-line="19" selection-start-column="54" selection-end-line="19" selection-end-column="54" />
+            <state relative-caret-position="493">
+              <caret line="44" column="46" lean-forward="false" selection-start-line="44" selection-start-column="45" selection-end-line="44" selection-end-column="46" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="SingleVarRel.java" pinned="false" current-in-tab="true">
+      <file leaf-file-name="SingleVarRel.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/query_translation/SingleVarRel.java">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="272">
@@ -156,8 +138,8 @@
       <file leaf-file-name="CypherDriver.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/database/CypherDriver.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1462">
-              <caret line="103" column="35" lean-forward="false" selection-start-line="103" selection-start-column="35" selection-end-line="103" selection-end-column="35" />
+            <state relative-caret-position="223">
+              <caret line="68" column="0" lean-forward="true" selection-start-line="68" selection-start-column="0" selection-end-line="68" selection-end-column="0" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -216,15 +198,15 @@
         <option value="$PROJECT_DIR$/src/main/resources/META-INF/MANIFEST.MF" />
         <option value="$PROJECT_DIR$/src/main/java/production/C2SProperties.java" />
         <option value="$PROJECT_DIR$/src/main/java/database/InsertSchema.java" />
-        <option value="$PROJECT_DIR$/src/main/java/database/CypherDriver.java" />
         <option value="$PROJECT_DIR$/src/main/java/query_translation/SQLTranslate.java" />
-        <option value="$PROJECT_DIR$/src/main/java/production/Reagan_Main_V4.java" />
         <option value="$PROJECT_DIR$/src/main/java/production/SendResultsEmail.java" />
         <option value="$PROJECT_DIR$/src/main/java/database/DbUtil.java" />
         <option value="$PROJECT_DIR$/src/main/java/query_translation/SingleVarRelExtended.java" />
         <option value="$PROJECT_DIR$/src/main/java/schemaConversion/SchemaTranslate.java" />
         <option value="$PROJECT_DIR$/README.md" />
         <option value="$PROJECT_DIR$/src/main/java/query_translation/SingleVarRel.java" />
+        <option value="$PROJECT_DIR$/src/main/java/database/CypherDriver.java" />
+        <option value="$PROJECT_DIR$/src/main/java/production/Reagan_Main_V4.java" />
       </list>
     </option>
   </component>
@@ -495,7 +477,7 @@
       <recent name="C:\Users\ocraw\IdeaProjects\cyp2sql" />
     </key>
   </component>
-  <component name="RunManager" selected="Application.Cyp2SQL_v3_Apoc">
+  <component name="RunManager" selected="Application.Reagan_Main_V4">
     <configuration default="false" name="testing" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
       <option name="MAIN_CLASS_NAME" value="testing" />
@@ -511,16 +493,16 @@
       <envs />
       <method />
     </configuration>
-    <configuration default="false" name="Cyp2SQL_v3_Apoc" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+    <configuration default="false" name="Reagan_Main_V4" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea">
         <pattern>
           <option name="PATTERN" value="production.*" />
           <option name="ENABLED" value="true" />
         </pattern>
       </extension>
-      <option name="MAIN_CLASS_NAME" value="production.Cyp2SQL_v3_Apoc" />
+      <option name="MAIN_CLASS_NAME" value="production.Reagan_Main_V4" />
       <option name="VM_PARAMETERS" value="" />
-      <option name="PROGRAM_PARAMETERS" value="-t2 &quot;$USER_HOME$/Documents/Year 3 Cambridge/Project/ExtensionQ.txt&quot; c2s_sp_2000" />
+      <option name="PROGRAM_PARAMETERS" value=" -tc &quot;$USER_HOME$/Documents/Year 3 Cambridge/Project/ExtensionQ.txt&quot; opusTest1000" />
       <option name="WORKING_DIRECTORY" value="file://$PROJECT_DIR$" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
       <option name="ALTERNATIVE_JRE_PATH" />
@@ -946,12 +928,12 @@
     </configuration>
     <list size="3">
       <item index="0" class="java.lang.String" itemvalue="Application.testing" />
-      <item index="1" class="java.lang.String" itemvalue="Application.Cyp2SQL_v3_Apoc" />
+      <item index="1" class="java.lang.String" itemvalue="Application.Reagan_Main_V4" />
       <item index="2" class="java.lang.String" itemvalue="Application.GraphCreator" />
     </list>
     <recent_temporary>
       <list size="3">
-        <item index="0" class="java.lang.String" itemvalue="Application.Cyp2SQL_v3_Apoc" />
+        <item index="0" class="java.lang.String" itemvalue="Application.Reagan_Main_V4" />
         <item index="1" class="java.lang.String" itemvalue="Application.GraphCreator" />
         <item index="2" class="java.lang.String" itemvalue="Application.testing" />
       </list>
@@ -986,7 +968,7 @@
       <workItem from="1487844675874" duration="3738000" />
       <workItem from="1488119078084" duration="5468000" />
       <workItem from="1488146273959" duration="738000" />
-      <workItem from="1488238065745" duration="3901000" />
+      <workItem from="1488238065745" duration="6333000" />
     </task>
     <task id="LOCAL-00001" summary="Changed way properties are read in.">
       <created>1486511321487</created>
@@ -1030,11 +1012,18 @@
       <option name="project" value="LOCAL" />
       <updated>1487697958681</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="Changed code to version 4, fixed some bugs and is generally better.">
+      <created>1488242043911</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1488242043911</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="74249000" />
+    <option name="totallyTimeSpent" value="76681000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="1358" y="-8" width="1696" height="1026" extended-state="6" />
@@ -1058,10 +1047,10 @@
       <window_info id="Palette&#9;" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Image Layers" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Analysis" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.49369085" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32969433" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.49344978" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.1904762" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.16666667" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32969433" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Theme Preview" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="true" content_ui="tabs" />
@@ -1084,7 +1073,8 @@
     <MESSAGE value="Beginning extension 1 - updated some code to make run on Linux properly." />
     <MESSAGE value="First attempt at extension, further testing/modification needed." />
     <MESSAGE value="Refactored main entry code and some of the database code. Still working on extension." />
-    <option name="LAST_COMMIT_MESSAGE" value="Refactored main entry code and some of the database code. Still working on extension." />
+    <MESSAGE value="Changed code to version 4, fixed some bugs and is generally better." />
+    <option name="LAST_COMMIT_MESSAGE" value="Changed code to version 4, fixed some bugs and is generally better." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1521,28 +1511,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/database/CypherDriver.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1462">
-          <caret line="103" column="35" lean-forward="false" selection-start-line="103" selection-start-column="35" selection-end-line="103" selection-end-column="35" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/query_translation/SQLTranslate.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="483">
           <caret line="40" column="42" lean-forward="false" selection-start-line="40" selection-start-column="42" selection-end-line="40" selection-end-column="42" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/production/SendResultsEmail.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="102">
-          <caret line="19" column="54" lean-forward="true" selection-start-line="19" selection-start-column="54" selection-end-line="19" selection-end-column="54" />
           <folding />
         </state>
       </provider>
@@ -1557,16 +1529,6 @@
             <marker date="1488241432334" expanded="true" signature="8698:8746" ph="SELECT cyphe... query_mapping" />
             <marker date="1488241432334" expanded="true" signature="10281:10526" ph="select cyphe... query_mapping" />
             <marker date="1488241432334" expanded="true" signature="10281:10527" ph="SELECT cyphe... query_mapping" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/production/Reagan_Main_V4.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-1485">
-          <caret line="152" column="53" lean-forward="false" selection-start-line="152" selection-start-column="53" selection-end-line="152" selection-end-column="53" />
-          <folding>
-            <element signature="imports" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -1603,6 +1565,34 @@
         <state relative-caret-position="272">
           <caret line="21" column="27" lean-forward="true" selection-start-line="21" selection-start-column="27" selection-end-line="21" selection-end-column="27" />
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/production/SendResultsEmail.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="493">
+          <caret line="44" column="46" lean-forward="false" selection-start-line="44" selection-start-column="45" selection-end-line="44" selection-end-column="46" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/database/CypherDriver.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="223">
+          <caret line="68" column="0" lean-forward="true" selection-start-line="68" selection-start-column="0" selection-end-line="68" selection-end-column="0" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/production/Reagan_Main_V4.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="629">
+          <caret line="121" column="31" lean-forward="true" selection-start-line="121" selection-start-column="31" selection-end-line="121" selection-end-column="31" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
