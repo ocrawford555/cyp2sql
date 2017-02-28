@@ -129,7 +129,6 @@ public class Reagan_Main_V4 {
                 case "-tc":
                     getLabelMapping();
 
-
                     // warm up the Cypher caches if the server has just been turned on.
                     // https://neo4j.com/developer/kb/warm-the-cache-to-improve-performance-from-cold-start/
                     // also, if there is an SSL issue when changing databases, attempt to fix it by running

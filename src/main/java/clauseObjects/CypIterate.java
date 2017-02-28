@@ -18,6 +18,10 @@ public class CypIterate {
         return this.originalCypherInput;
     }
 
+    public String getLoopIndexFrom() {
+        return this.loopIndexFrom;
+    }
+
     public void setLoopIndexFrom(String loopIndexFrom) {
         this.loopIndexFrom = loopIndexFrom;
     }

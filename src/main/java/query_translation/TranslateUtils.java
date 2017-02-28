@@ -133,7 +133,8 @@ class TranslateUtils {
 
         if (v.startsWith("ARRAY")) {
             sql.append(v.replace("\"", "'")).append(" ");
-        } else sql.append("'").append(v.replace("'", "")).append("' ");
+        } else if (v.equals("ANY($1)")) sql.append(v).append(" ");
+        else sql.append("'").append(v.replace("'", "")).append("' ");
 
         return sql;
     }

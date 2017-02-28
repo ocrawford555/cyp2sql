@@ -58,18 +58,40 @@ public class InsertSchema {
                 "EXECUTE 'UPDATE ' || l || ' SET ' || field || '=' || quote_literal(newV) || ' WHERE id = ' || x; " +
                 "END LOOP; END LOOP; END IF; END; $$ LANGUAGE plpgsql;";
 
-//        String cypher_iterate = "CREATE OR REPLACE FUNCTION cypher_iterate(int[]) RETURNS int[] AS $$ " +
-//                "DECLARE r int[]; t int[]; z int[]; lastResults int[]; count int; " +
-//                "BEGIN t := array_unique($1); r := $1; lastResults := t; " +
-//                "raise notice 'Size of input array: %', array_length(r,1); " +
-//                "raise notice 'Unique elements to iterate with: %', array_length(t,1); " +
-//                "--raise notice 'All elements are: %', r; " +
-//                "--raise notice 'Unique elements are: %', t; " +
-//                "--count := 0; loop EXIT WHEN array_length(t,1) is null or lastResults = z; lastResults := z; " +
-//                "for z in select loop_work(t) LOOP raise notice 'Size of z: %', array_length(z,1); " +
-//                "if (z <> lastResults) then r := array_cat(r, z); end if; " +
-//                "raise notice 'Size of r: %', array_length(r,1); t := array_unique(z); --count := count + 1; " +
-//                "END LOOP; end loop; RETURN r; END; $$ LANGUAGE plpgsql;";
+        String cypher_iterate = "CREATE OR REPLACE FUNCTION cypher_iterate(int[]) RETURNS int[] AS $$ \n" +
+                "    DECLARE\n" +
+                "\t\tr int[];\n" +
+                "\t\tt int[];\n" +
+                "\t\tz int[];\n" +
+                "\t\tlastResults int[];\n" +
+                "\t\tcount int;\n" +
+                "\tBEGIN\n" +
+                "\t\tt := array_unique($1);\n" +
+                "\t\tr := $1;\n" +
+                "\t\tlastResults := t;\n" +
+                "\t\traise notice 'Size of input array: %', array_length(r,1);\n" +
+                "\t\traise notice 'Unique elements to iterate with: %', array_length(t,1);\n" +
+                "\t\t--raise notice 'All elements are: %', r;\n" +
+                "\t\t--raise notice 'Unique elements are: %', t;\n" +
+                "\t\t--count := 0;\n" +
+                "\t\tloop EXIT WHEN array_length(t,1) is null or lastResults = z;\n" +
+                "\t\t\tlastResults := z;\n" +
+                "\t\t\tfor z in select loop_work(t) LOOP\n" +
+                "\t\t\t\traise notice 'Size of z: %', array_length(z,1);\n" +
+                "\t\t\t\tif (z <> lastResults) then r := array_cat(r, z); end if;\n" +
+                "\t\t\t\traise notice 'Size of r: %', array_length(r,1);\n" +
+                "\t\t\t\tt := array_unique(z);\n" +
+                "\t\t\t\t--count := count + 1;\n" +
+                "\t\t\tEND LOOP;\n" +
+                "\t\tend loop;\n" +
+                "\t\tRETURN r;\n" +
+                "\tEND; \n" +
+                "$$ LANGUAGE plpgsql;";
+
+        String unique_array_function = "create or replace function public.array_unique(arr anyarray)\n" +
+                "returns anyarray as $body$\n" +
+                "    select array( select distinct unnest($1) )\n" +
+                "$body$ language 'sql';";
 
         try {
             DbUtil.createInsert(createAdditonalNodeTables);
@@ -80,7 +102,8 @@ public class InsertSchema {
             DbUtil.createInsert(createAltRep);
             DbUtil.createInsert(createAltRep2);
             DbUtil.createInsert(forEachFunction);
-            //DbUtil.createInsert(cypher_iterate);
+            DbUtil.createInsert(cypher_iterate);
+            DbUtil.createInsert(unique_array_function);
         } catch (SQLException e) {
             e.printStackTrace();
         }
