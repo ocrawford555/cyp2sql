@@ -57,7 +57,7 @@ class SendResultsEmail {
             MimeBodyPart attachmentBodyPart = new MimeBodyPart();
             DataSource source = new FileDataSource(file); // ex : "C:\\test.pdf"
             attachmentBodyPart.setDataHandler(new DataHandler(source));
-            attachmentBodyPart.setFileName("full_results.csv"); // ex : "test.pdf"
+            attachmentBodyPart.setFileName(dbName + "_full_results.csv");
 
             multipart.addBodyPart(textBodyPart);  // add the text part
             multipart.addBodyPart(attachmentBodyPart); // add the attachment part

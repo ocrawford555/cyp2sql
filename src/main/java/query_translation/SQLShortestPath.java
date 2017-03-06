@@ -14,7 +14,6 @@ public class SQLShortestPath {
 
         MatchClause matchC = dQMainPath.getMc();
         String direction = "none";
-        int amountLow = 0;
         int amountHigh = 0;
 
         // work out direction of query and upper and lower bound on number of edges
@@ -23,7 +22,6 @@ public class SQLShortestPath {
             if (cR.getDirection().contains("var")) {
                 String dirAndAmount[] = cR.getDirection().split("#");
                 direction = dirAndAmount[1];
-                amountLow = Integer.parseInt(dirAndAmount[0].split("-")[0].substring(3));
                 amountHigh = Integer.parseInt(dirAndAmount[0].split("-")[1]);
             }
         }

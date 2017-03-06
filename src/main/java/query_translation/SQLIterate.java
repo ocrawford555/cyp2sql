@@ -68,7 +68,7 @@ public class SQLIterate {
 
 
 //        int placeToAddCondition = loopSQL.indexOf("))");
-//        if (pla   ceToAddCondition == -1) {
+//        if (placeToAddCondition == -1) {
 //            placeToAddCondition = loopSQL.indexOf("')");
 //            loopWorkStr = mainParts[0].substring(0, placeToAddCondition);
 //            loopWorkStr += "' AND (n1.id = ANY($1)))";

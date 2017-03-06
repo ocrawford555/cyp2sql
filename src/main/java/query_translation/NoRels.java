@@ -40,16 +40,18 @@ class NoRels {
                         if (r.getCollect()) sql.append("array_agg(");
                         if (r.getCount()) sql.append("count(");
                         if (prop != null) {
-                            sql.append("n01").append(".").append(prop)
-                                    .append(TranslateUtils.useAlias(r.getNodeID(), r.getField(), alias)).append(", ");
+                            sql.append("n01").append(".").append(prop);
+                            if (r.getCollect() || r.getCount()) sql.append(") ");
+                            sql.append(TranslateUtils.useAlias(r.getNodeID(), r.getField(), alias)).append(", ");
                         } else {
-                            sql.append("n01.*")
-                                    .append(TranslateUtils.useAlias(r.getNodeID(), r.getField(), alias)).append(", ");
+                            sql.append("n01.*");
+                            if (r.getCollect() || r.getCount()) sql.append(") ");
+                            sql.append(TranslateUtils.useAlias(r.getNodeID(), r.getField(), alias)).append(", ");
                         }
-                        if (r.getCollect() || r.getCount()) {
-                            sql.setLength(sql.length() - 2);
-                            sql.append("), ");
-                        }
+//                        if (r.getCollect() || r.getCount()) {
+//                            sql.setLength(sql.length() - 2);
+//                            sql.append("), ");
+//                        }
                         break;
                     }
                 }

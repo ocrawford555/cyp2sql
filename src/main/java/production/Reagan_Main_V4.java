@@ -168,8 +168,13 @@ public class Reagan_Main_V4 {
                         // delete temporary queries file
                         File f = new File(args[1].replace(".txt", "_temp.txt"));
                         f.delete();
-                    } else translateCypherToSQL(args[1], f_cypher, f_pg, cypher_results,
-                            pg_results, 1, args[0]);
+                    } else {
+                        // perform 3 dry runs, then record the times of 5 executions
+                        for (int i = -2; i <= 5; i++) {
+                            if (i < 1) System.out.println("Warming up - iterations left : " + (i * -1));
+                            translateCypherToSQL(args[1], f_cypher, f_pg, cypher_results, pg_results, i, args[0]);
+                        }
+                    }
                     break;
                 default:
                     // error with the command line arguments
@@ -297,6 +302,8 @@ public class Reagan_Main_V4 {
                             sql = convertCypherForEach(line, typeTranslate);
                         } else if (line.toLowerCase().contains(" with ")) {
                             sql = convertCypherWith(line, typeTranslate);
+                        } else if (line.toLowerCase().contains("allshortestpaths")) {
+                            sql = convertCypherASP(line);
                         } else if (line.toLowerCase().contains("shortestpath")) {
                             sql = convertCypherShortPath(line);
                         } else if (line.toLowerCase().contains("iterate")) {
@@ -327,18 +334,19 @@ public class Reagan_Main_V4 {
 
 
                     // validate the results
-                    if ((numResultsNeo != numResultsPost) && !line.toLowerCase().contains("iterate")
-                            && sqlExecSuccess) {
-                        translationFail(line, sql, f_cypher, f_pg);
-                    } else if (line.contains("count")) {
-                        boolean countSame = FileUtils.contentEquals(f_cypher, f_pg);
-                        if (!countSame) {
+                    if (sqlExecSuccess) {
+                        if ((numResultsNeo != numResultsPost) && !line.toLowerCase().contains("iterate")
+                                && !line.toLowerCase().startsWith("create") && !line.toLowerCase().contains("detach delete")
+                                && !line.toLowerCase().contains("foreach")) {
                             translationFail(line, sql, f_cypher, f_pg);
+                        } else if (line.toLowerCase().contains("count") && !line.toLowerCase().contains("with")) {
+                            boolean countSame = FileUtils.contentEquals(f_cypher, f_pg);
+                            if (!countSame) {
+                                translationFail(line, sql, f_cypher, f_pg);
+                            }
                         }
-                    }
 
-                    if (repeatCount > 0) {
-                        if (sqlExecSuccess) {
+                        if (repeatCount > 0) {
                             // record the performance of Cypher and SQL on Neo4J and Postgres respectively.
                             printSummary(line, sql, f_cypher, f_pg);
                             DbUtil.insertMapping(line, sql, returnItemsForCypher, dbName);
@@ -379,12 +387,29 @@ public class Reagan_Main_V4 {
     }
 
     private static String convertCypherShortPath(String line) throws Exception {
+        line = line.toLowerCase();
+        int returnIndex = line.indexOf("return");
+        int whereIndex = line.indexOf("where");
+        String whereClause = null;
+        if (whereIndex != -1) {
+            whereClause = line.substring(whereIndex, returnIndex - 1);
+        }
+        int indexToUse = (whereIndex == -1) ? returnIndex : whereIndex;
+        String path = line.substring(line.indexOf("(") + 1, indexToUse - 2);
+        String returnClause = line.substring(line.indexOf("return"));
+        String cypherPathQuery = "MATCH " + path + ((whereIndex != -1) ? whereClause : "") + " " + returnClause;
+        DecodedQuery dQMainPath = CypherTokenizer.decode(cypherPathQuery, false);
+        lastDQ = dQMainPath;
+        return SQLShortestPath.translate(dQMainPath).toString();
+    }
+
+    private static String convertCypherASP(String line) throws Exception {
         String path = line.substring(line.indexOf("(") + 1, line.indexOf("RETURN") - 2);
         String returnClause = line.substring(line.indexOf("RETURN"));
         String cypherPathQuery = "MATCH " + path + " " + returnClause;
         DecodedQuery dQMainPath = CypherTokenizer.decode(cypherPathQuery, false);
         lastDQ = dQMainPath;
-        return SQLShortestPath.translate(dQMainPath).toString();
+        return SQLAllShortestPaths.translate(dQMainPath).toString();
     }
 
     /**

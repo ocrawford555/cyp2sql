@@ -93,6 +93,10 @@ public class InsertSchema {
                 "    select array( select distinct unnest($1) )\n" +
                 "$body$ language 'sql';";
 
+        // required to allow the tool to add new nodes to the database without issue
+        String auto_seq = "CREATE SEQUENCE nodes_id_seq;\n" +
+                "ALTER TABLE nodes ALTER id SET DEFAULT NEXTVAL('nodes_id_seq');";
+
         try {
             DbUtil.createInsert(createAdditonalNodeTables);
             DbUtil.createInsert(createAdditionalEdgesTables);
@@ -104,6 +108,7 @@ public class InsertSchema {
             DbUtil.createInsert(forEachFunction);
             DbUtil.createInsert(cypher_iterate);
             DbUtil.createInsert(unique_array_function);
+            DbUtil.createInsert(auto_seq);
         } catch (SQLException e) {
             e.printStackTrace();
         }

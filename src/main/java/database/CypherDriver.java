@@ -62,7 +62,7 @@ public class CypherDriver {
                                         int countResult = record.get(t).asInt();
                                         writer.println("count" + " : " + countResult);
                                     } catch (ClientException ce) {
-                                        System.err.println("Error thrown in CypherDriver." + ce.toString());
+                                        //System.err.println("Error thrown in CypherDriver." + ce.toString());
                                     }
                                 } else if (t.contains(".")) {
                                     String bits[] = t.split("\\.");

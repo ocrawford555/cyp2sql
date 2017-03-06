@@ -391,13 +391,16 @@ class MultipleRel {
 
         if ((numRels == 1)) {
             if (matchC.getRels().get(0).getDirection().equals("none")) {
-                if (!returnC.getItems().get(0).getCount()) {
-                    int posInCl = returnC.getItems().get(0).getPosInClause();
-                    if (posInCl == 1) return sql.append(" n01.id = a.a1");
-                    else return sql.append("n01.id = a.a2");
-                } else {
-                    sql.setLength(sql.length() - 7);
-                }
+                int posInCl = returnC.getItems().get(0).getPosInClause();
+                if (posInCl == 1) return sql.append(" n01.id = a.a1");
+                else return sql.append("n01.id = a.a2");
+//                if (!returnC.getItems().get(0).getCount()) {
+//                    int posInCl = returnC.getItems().get(0).getPosInClause();
+//                    if (posInCl == 1) return sql.append(" n01.id = a.a1");
+//                    else return sql.append("n01.id = a.a2");
+//                } else {
+//                    sql.setLength(sql.length() - 7);
+//                }
             }
         }
 
