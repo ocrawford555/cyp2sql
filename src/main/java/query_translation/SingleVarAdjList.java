@@ -6,6 +6,8 @@ import java.util.Map;
 
 class SingleVarAdjList {
     private static char[] alphabet = "abcdefghijklmnopqrstuvwxyz".toCharArray();
+    // for lengths greater than 26
+    private static char[] extendID = "123456789".toCharArray();
 
     static StringBuilder translate(StringBuilder sql, DecodedQuery decodedQuery) {
         MatchClause matchC = decodedQuery.getMc();
@@ -32,14 +34,14 @@ class SingleVarAdjList {
         sql.append("WITH ");
 
         for (int i = 0; i <= amountHigh; i++) {
-            sql.append(alphabet[i]).append(" AS (SELECT ");
+            sql.append(alphabet[i % 26]).append(extendID[i / 26]).append(" AS (SELECT ");
 
             if (i == amountHigh) {
                 sql.append("xx FROM ");
                 int j = i;
                 while (j > (amountLow - 1)) {
                     j--;
-                    sql.append(alphabet[j]).append(" UNION ALL SELECT xx FROM ");
+                    sql.append(alphabet[j % 26]).append(extendID[j / 26]).append(" UNION ALL SELECT xx FROM ");
                 }
                 sql.setLength(sql.length() - 26);
                 sql.append(")");
@@ -49,13 +51,13 @@ class SingleVarAdjList {
                 if (i == 0) {
                     // use node data
                     String relToUse = TranslateUtils.getLabelType(cN1.getType());
-                    sql.append(relToUse).append(" y ON leftnode = y.id");
+                    sql.append(relToUse).append(" zz ON leftnode = zz.id");
                     if (cN1.getProps() != null) {
                         sql.append(" WHERE ");
-                        TranslateUtils.getWholeWhereClause(sql, cN1, whereC, "y");
+                        TranslateUtils.getWholeWhereClause(sql, cN1, whereC, "zz");
                     }
                 } else {
-                    sql.append(alphabet[i - 1]).append(" ON leftnode = xx");
+                    sql.append(alphabet[(i - 1) % 26]).append(extendID[(i - 1) / 26]).append(" ON leftnode = xx");
                 }
 
                 sql.append("), ");
@@ -95,7 +97,8 @@ class SingleVarAdjList {
         String table = TranslateUtils.getTable(returnC);
         sql.append("FROM ").append(table).append(" n01 ");
 
-        sql.append(" INNER JOIN ").append(alphabet[amountHigh]).append(" ON xx = id");
+        sql.append(" INNER JOIN ").append(alphabet[amountHigh % 26])
+                .append(extendID[amountHigh / 26]).append(" ON xx = id");
 
         boolean hasWhere = false;
 

@@ -10,64 +10,25 @@ Computer Science at the University of Cambridge.
 
 ## Modules
 ### Schema Converter
-- Takes as input a dump from Neo4J shell.
-- This can be part-automated by running the following command: neo4jplay.bat -c dump  > testD.txt (then type "dump" into the console, followed by enter). When the file "testD.txt" stops growing, the command prompt can be exited.
-- neo4jplay.bat = `@echo off java -classpath "C:\Program Files\Neo4j CE 3.0.6\bin\neo4j-desktop-3.0.6.jar" org.neo4j.shell.StartClient`
+- Takes as input a dump from the Neo4J shell of an existing graph database.
+- Dump needs to be obtained manually by the user.
 - The current schema translator converts the dump to two relations at a minimum: nodes and edges. The translator will attempt to optimise, if possible, by creating smaller relations with fewer NULLs. A separate metadata file is also created containing all the possible labels of the node store.
  
 ### Cypher parsing unit
 - Built using ANTLRv4 tool.
 - Grammar: https://s3.amazonaws.com/artifacts.opencypher.org/Cypher.g4
 - Produces a token list which can be parsed more in the Cyp2SQL tool.
-- Future improvements: performance analysis, nicer code in Java.
 
 ### Query translator unit
 - Maps the Cypher query input to an internal representation in Java.
 - This is then used to build up the SQL piece by piece.
-- Types of queries that can be modelled currently shown below.
-- Future improvements: refactor to cleaner looking code, allow for different representations to be translated against.
 
 ### Output Module
 - Fills in two text files - one is the results from Neo4J based on the Cypher input; the other is the results from Postgres based on the SQL generated from the Cypher input.
 - Program outputs true/false depending on whether or not the files match.
 - NOTE: this is not wholly accurate due to the following issues: encoding differences, differences in ways that sorting occurs, treatment of NULL.
 - Thus, the files also contain an indicator at the bottom of the file as to how many records were returned. This is a quick way of checking that the translator was successful.
-- Future improvements: bug fixes.
-
- 
-## Examples of queries that can be translated
-|Queries|
-|-------|
-|MATCH (b) WHERE b.title = "Chicken Run" OR b.title = "Stuart Little" OR b.name = "Ben Stiller" and b.studio = "Aardman Animations" RETURN b|
-|MATCH (b) WHERE b.genre = "Action" AND b.version = 250 OR b.version = 240 AND b.runtime > 140 RETURN b|
-|MATCH (n:Person:User) RETURN n.password|
-|MATCH (n:Movie {studio:"Fine Line Features"}) RETURN n|
-|MATCH (n:Movie {studio:"Fine Line Features"}) RETURN count(n)|
-|MATCH (n:Movie {studio:"Fine Line Features"}) RETURN collect(n)|
-|MATCH (n:Person:Actor) WHERE n.name = "Natalie Portman" RETURN n.biography AS Bio|
-|MATCH (n:Movie) RETURN DISTINCT n.genre ORDER BY n.genre ASC|
-|MATCH (n:Person:Actor:Director) RETURN n.name UNION ALL MATCH (n:User) RETURN n.name|
-|MATCH (u:User) WHERE u.login <> "a999" RETURN u.password ORDER BY u.password DESC SKIP 5 LIMIT 20|
-|MATCH (a)-[*2..3]->(b) RETURN b|
-|MATCH (a:User)-[*1..3]->(b:Movie) RETURN a.name, b.title|
-|MATCH (a)-[*2..3]->(b) RETURN b.title, a.name|
-|MATCH (a)-[*1..3]->(b) WHERE b.title = "Chicken Run" RETURN collect(a.name) AS AllNames|
-|MATCH (a)-[*1..3]->(b) WHERE a.version < 200 AND b.title = "Chicken Run" OR b.title = "Stuart Little" RETURN a|
-|MATCH (a)<-[*1..4]-(b) WHERE a.genre <> "Action" AND b.name = "Jason Statham" RETURN a|
-|MATCH (aa:Actor)-[:ACTS_IN]->(bb:Movie)<-[:DIRECTED]-(cc:Director) WHERE bb.title = "The Matrix" OR bb.title = "Titanic" RETURN DISTINCT aa.name ORDER BY aa.name|
-|MATCH (a:Actor)-[:ACTS_IN]->(m:Movie) RETURN a.name, count(m) AS movie_count LIMIT 10|
-|MATCH (a:Actor)-[:ACTS_IN]->(m:Movie) WITH a, count(m) AS movie_count WHERE movie_count > 48 RETURN a.name, movie_count ORDER BY movie_count DESC|
-|MATCH (n:Actor:Director)-[:ACTS_IN]->(m:Movie {genre:"Horror"}) RETURN n.name UNION MATCH (n:Actor:Director)-[:ACTS_IN]->(m:Movie {genre:"Drama"}) RETURN n.name UNION MATCH (n:Actor:Director)-[:ACTS_IN]->(m:Movie {genre:"Horror"}) RETURN n.name|
-|MATCH (n:Actor:Director)-[:DIRECTED]->(m:Movie {genre:"Action"}) return m.title As TitleFilm, m.imdbId As IMDBRef|
-|MATCH (a:Actor)-[r:ACTS_IN]->(b:Movie) WHERE b.title = "Love Actually" RETURN r.name AS Role|
-|CREATE (n:Person:Actor:Director {name:"Oliver Crawford"})-[:ACTS_IN]->(fe:Movie {title:"Amazing Days", genre:"Comedy"})|
-|MATCH (a:Person)-[:ACTS_IN]->(b:Movie {title:"Amazing Days"}) RETURN a.name AS NewActorDirector|
-|MATCH (n:Person:Actor:Director {name:"Oliver Crawford"}) DETACH DELETE n|
-|MATCH (n:Movie {title:"Amazing Days"}) DETACH DELETE n|
-|MATCH (m:Movie {genre:"Poor comedy..."})<-[:ACTS_IN]-(:Actor {name:"Jennifer Aniston"}) WITH collect(m) AS ms FOREACH (x in ms | set x.genre = "Comedy")|
-|MATCH (u:User {name:"Olliver"}) WITH collect(u) AS ms FOREACH (x in ms | set x.name = "Oliver")|
-|MATCH (u:User {name:"Olliver"}) WITH collect(u) AS ms FOREACH (x in ms | set x.name = "Oliver")|
-|MATCH (eng {language:"en"}) WITH collect(eng) AS ms FOREACH (x in ms | set x.language = "English")|
+- The times of execution of both databases is also displayed by the tool.
 
 
 ## Instructions for Running
@@ -79,20 +40,20 @@ Run the .jar with the following parameters, depending on whether or not the sche
 java -jar reaganV4_0.jar <-schema|-translate|-s|-t|-tc> <schemaFile|queriesFile> <databaseName> <-e|-p|-c>
 ```
 
-Thus, if wishing to first convert the schema:
+First, convert the graph schema to Postgres:
 ```bash
-java -jar Reagan.jar -schema myDump.txt coolDatabase
-java -jar Reagan.jar -s myDump.txt coolDatabase
+java -jar reaganV4_0.jar -schema myDump.txt coolDatabase
+java -jar reaganV4_0.jar -s myDump.txt coolDatabase
 ```
 
 If successful, queries can now be translated:
 ```bash
-java -jar Reagan.jar -translate myQueries.txt coolDatabase
+java -jar reaganV4_0.jar -translate myQueries.txt coolDatabase
 ```
 
 If you want the results of the queries to be outputted to a local file for inspection of the results, then use the -p flag:
 ```bash
-java -jar Reagan.jar -translate myQueries.txt coolDatabase -p
+java -jar Reagan.jar -t myQueries.txt coolDatabase -p
 ```
 
 To have the results emailed back:
@@ -100,11 +61,22 @@ To have the results emailed back:
 java -jar Reagan.jar -translate myQueries.txt coolDatabase -e
 ```
 
+To run the tool using the transitive closure approach:
+```bash
+java -jar Reagan.jar -tc myQueries.txt coolDatabase
+```
+
+If running a query which will edit the database, use the -c flag (excluding this will run the query multiple times, leading to erroneous consequences):
+```bash
+java -jar Reagan.jar -t changeDatabaseQueries.txt coolDatabase -c
+```
+
 The "myQueries.txt" should have each Cypher query on ONE LINE - adding a comment marker "//" to the start of the line will skip that query when the application is launched:
 ```bash
 MATCH (n) RETURN n;
-\\ will not run THIS line
-MATCH (n)-->(m) RETURN m;
+MATCH (a:LabelA)-[:SOMETHING]->(b) RETURN COUNT(b);
+// will not run THIS line, or the one below
+// MATCH (n)-->(m) RETURN m;
 ```
 
 ###Notes

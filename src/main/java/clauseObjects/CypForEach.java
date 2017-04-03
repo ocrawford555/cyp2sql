@@ -16,8 +16,10 @@ public class CypForEach {
      * @param forEachClause FOREACH part of a Cypher query.
      */
     public CypForEach(String forEachClause) {
-        String part = forEachClause.split(" \\| ")[1];
-        String[] kv = part.split(" = ");
+        String forEachPart = forEachClause.split(" \\| ")[1];
+        String[] kv = forEachPart.split(" = ");
+
+        // extract the key value pair.
         kv[0] = kv[0].split("\\.")[1];
         kv[1] = kv[1].substring(1, kv[1].length() - 3);
         Map<String, String> upMap = new HashMap<>();

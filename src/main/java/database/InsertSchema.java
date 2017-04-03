@@ -73,15 +73,15 @@ public class InsertSchema {
                 "\t\traise notice 'Unique elements to iterate with: %', array_length(t,1);\n" +
                 "\t\t--raise notice 'All elements are: %', r;\n" +
                 "\t\t--raise notice 'Unique elements are: %', t;\n" +
-                "\t\t--count := 0;\n" +
+                "\t\tcount := 0;\n" +
                 "\t\tloop EXIT WHEN array_length(t,1) is null or lastResults = z;\n" +
                 "\t\t\tlastResults := z;\n" +
                 "\t\t\tfor z in select loop_work(t) LOOP\n" +
                 "\t\t\t\traise notice 'Size of z: %', array_length(z,1);\n" +
-                "\t\t\t\tif (z <> lastResults) then r := array_cat(r, z); end if;\n" +
+                "\t\t\t\tif (z <> lastResults or count = 0) then r := array_cat(r, z); end if;\n" +
                 "\t\t\t\traise notice 'Size of r: %', array_length(r,1);\n" +
                 "\t\t\t\tt := array_unique(z);\n" +
-                "\t\t\t\t--count := count + 1;\n" +
+                "\t\t\t\tcount := count + 1;\n" +
                 "\t\t\tEND LOOP;\n" +
                 "\t\tend loop;\n" +
                 "\t\tRETURN r;\n" +
@@ -117,6 +117,11 @@ public class InsertSchema {
         DbUtil.closeConnection();
     }
 
+    /**
+     * All of the fields and relationships gathered during the Schema translation are stored in
+     * meta files (to be used when outputting the results of the queries from both Postgres and
+     * Neo4j).
+     */
     private static void addFieldsToMetaFile() {
         FileOutputStream fos;
         try {
@@ -172,7 +177,10 @@ public class InsertSchema {
                 bw2.write("*" + tableLabel + "*");
                 bw2.newLine();
                 for (String y : SchemaTranslate.labelMappings.get(label).replace(" TEXT[]", "")
-                        .replace(" BIGINT", "").replace(" INT", "").replace(" TEXT", "").split(", ")) {
+                        .replace(" BIGINT", "")
+                        .replace(" INT", "")
+                        .replace(" TEXT", "")
+                        .split(", ")) {
                     bw2.write(y);
                     bw2.newLine();
                 }
@@ -224,7 +232,11 @@ public class InsertSchema {
         sb.append("INSERT INTO ").append(tableLabel).append("(");
 
         for (String prop : SchemaTranslate.labelMappings.get(label).split(", ")) {
-            sb.append(prop.replace(" TEXT[]", "").replace(" BIGINT", "").replace(" TEXT", "").replace(" INT", ""))
+            sb.append(prop
+                    .replace(" TEXT[]", "")
+                    .replace(" BIGINT", "")
+                    .replace(" TEXT", "")
+                    .replace(" INT", ""))
                     .append(", ");
         }
 
@@ -394,33 +406,33 @@ public class InsertSchema {
     /**
      * Get correct insert string based on whether data is INT or TEXT.
      *
-     * @param z
-     * @param o
+     * @param inputField
+     * @param obj
      * @return
      */
-    private static String getInsertString(String z, JsonObject o) {
+    private static String getInsertString(String inputField, JsonObject obj) {
         String temp;
+
         //OPUS hack
-        if (z.startsWith("mono_time")) z = "mono_time BIGINT";
+        if (inputField.startsWith("mono_time")) inputField = "mono_time BIGINT";
+
         try {
-            if (z.endsWith("BIGINT")) {
-                long value = o.get(z.split(" ")[0]).getAsLong();
+            if (inputField.endsWith("BIGINT")) {
+                long value = obj.get(inputField.split(" ")[0]).getAsLong();
                 temp = value + ", ";
-            } else if (z.endsWith("INT") && !z.contains("BIGINT")) {
-                int value = o.get(z.split(" ")[0]).getAsInt();
+            } else if (inputField.endsWith("INT") && !inputField.contains("BIGINT")) {
+                int value = obj.get(inputField.split(" ")[0]).getAsInt();
                 temp = value + ", ";
-            } else if (z.endsWith("[]")) {
+            } else if (inputField.endsWith("[]")) {
                 // is text with list property
-                JsonArray value = o.get(z.split(" ")[0]).getAsJsonArray();
+                JsonArray value = obj.get(inputField.split(" ")[0]).getAsJsonArray();
                 temp = "ARRAY" + value.toString().replace("\"", "'") + ", ";
             } else {
                 // is just text
-                String value = o.get(z.split(" ")[0]).getAsString();
+                String value = obj.get(inputField.split(" ")[0]).getAsString();
                 temp = "'" + value + "', ";
             }
         } catch (NumberFormatException nfe) {
-            System.err.println(z);
-            System.err.println(o.toString());
             temp = "null, ";
             System.exit(1);
         } catch (NullPointerException npe) {

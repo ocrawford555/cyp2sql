@@ -3,45 +3,44 @@ package clauseObjects;
 import translator.CypherWalker;
 
 /**
- * This contains all of the intermediate representation of the Cypher query
+ * This class definition bundles together all of the intermediate representations
+ * built up by the tool, as well as storing the SQL translation for completeness.
  */
 public class DecodedQuery {
-    private MatchClause mc;
-    private ReturnClause rc;
-    private OrderClause oc;
-    private WhereClause wc;
+    private MatchClause matchC;
+    private ReturnClause returnC;
+    private OrderClause orderC;
+    private WhereClause whereC;
     private int skipAmount;
     private int limitAmount;
     private CypherWalker cypherAdditionalInfo;
     private String sqlEquiv;
-    private boolean needGroupBy;
 
     public DecodedQuery(MatchClause m, ReturnClause r, OrderClause o,
                         WhereClause wc, int skip, int limit, CypherWalker c) {
-        this.mc = m;
-        this.rc = r;
-        this.oc = o;
-        this.wc = wc;
+        this.matchC = m;
+        this.returnC = r;
+        this.orderC = o;
+        this.whereC = wc;
         this.skipAmount = skip;
         this.limitAmount = limit;
         this.cypherAdditionalInfo = c;
-        this.needGroupBy = false;
     }
 
     public MatchClause getMc() {
-        return mc;
+        return matchC;
     }
 
     public ReturnClause getRc() {
-        return rc;
+        return returnC;
     }
 
     public OrderClause getOc() {
-        return oc;
+        return orderC;
     }
 
     public WhereClause getWc() {
-        return wc;
+        return whereC;
     }
 
     public int getSkipAmount() {
@@ -62,13 +61,5 @@ public class DecodedQuery {
 
     public void setSqlEquiv(String sqlEquiv) {
         this.sqlEquiv = sqlEquiv;
-    }
-
-    public boolean doWeNeedGroupBy() {
-        return needGroupBy;
-    }
-
-    public void setGroupBy(boolean needGroupBy) {
-        this.needGroupBy = needGroupBy;
     }
 }

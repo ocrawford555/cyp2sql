@@ -10,7 +10,6 @@ public class SQLIterate {
     public static String translate(CypIterate cypIter, String typeTranslate) {
         String line = cypIter.getOriginalCypherInput();
         String matchClause = line.substring(8, line.indexOf("loop"));
-        String iterable = matchClause + "return ";
 
         line = line.split(" loop ")[1];
         cypIter.setLoopIndexTo(line.split(" ")[0]);
@@ -21,14 +20,19 @@ public class SQLIterate {
         line = line.split(" return ")[1];
         cypIter.setReturnStatement(line);
 
-        iterable = iterable + cypIter.getLoopIndexTo() + ";";
-        cypIter.setLoopQuery(iterable);
-        System.out.println(cypIter.toString());
+        String firstStep = matchClause + "return " + cypIter.getLoopIndexTo() + ";";
+        cypIter.setFirstQuery(firstStep);
+
+        // get correct loop query
+        int posOfLoopFrom = firstStep.indexOf(cypIter.getLoopIndexFrom());
+        String lQuery = "MATCH " + firstStep.substring(posOfLoopFrom - 1, firstStep.length());
+        cypIter.setLoopQuery(lQuery);
 
         // generate the traditional translation to SQL for the loop query (store in string as used
         // multiple times)
-        DecodedQuery loopDQ = Reagan_Main_V4.convertCypherToSQL(cypIter.getLoopQuery(), typeTranslate);
+        DecodedQuery loopDQ = Reagan_Main_V4.convertCypherToSQL(cypIter.getFirstQuery(), typeTranslate);
         String loopSQL = loopDQ.getSqlEquiv();
+
         String returnSQL = Reagan_Main_V4.convertCypherToSQL(cypIter.getReturnStatement(), typeTranslate).getSqlEquiv();
         returnSQL = returnSQL.substring(0, returnSQL.length() - 1);
 
@@ -40,50 +44,31 @@ public class SQLIterate {
                 "AS zz from firstStep) ";
         mainInitStmt = mainInitStmt + returnSQL + " INNER JOIN collectStep c ON n01.id = c.zz;";
 
-        System.out.println(loopSQL);
-        //System.out.println(mainInitStmt);
-
         // create the loop_work function with this string
         String loopWorkStr;
 
+        loopDQ = Reagan_Main_V4.convertCypherToSQL(cypIter.getLoopQuery(), typeTranslate);
         int posLoopFrom = calculatePos(cypIter.getLoopIndexFrom(), loopDQ);
-        System.out.println(posLoopFrom);
         JsonObject obj = loopDQ.getMc().getNodes().get(posLoopFrom - 1).getProps();
-        if (obj == null)
+        if (obj == null) {
             obj = new JsonObject();
-        System.out.println(obj.toString());
+        }
         obj.addProperty("id", "ANY($1)");
-        System.out.println(obj.toString());
         loopDQ.getMc().getNodes().get(posLoopFrom - 1).setProps(obj);
+
         try {
             loopDQ.setSqlEquiv(SQLTranslate.translateRead(loopDQ, typeTranslate));
         } catch (Exception e) {
             e.printStackTrace();
         }
-        loopSQL = loopDQ.getSqlEquiv();
-        mainParts = loopSQL.split("SELECT n01\\.\\*");
+
+        mainParts = loopDQ.getSqlEquiv().split("SELECT n01\\.\\*");
         loopWorkStr = mainParts[0];
         loopWorkStr += " SELECT array_agg(n01.id)";
         loopWorkStr += mainParts[1].substring(0, mainParts[1].length() - 1);
 
-
-//        int placeToAddCondition = loopSQL.indexOf("))");
-//        if (placeToAddCondition == -1) {
-//            placeToAddCondition = loopSQL.indexOf("')");
-//            loopWorkStr = mainParts[0].substring(0, placeToAddCondition);
-//            loopWorkStr += "' AND (n1.id = ANY($1)))";
-//        } else {
-//            loopWorkStr = mainParts[0].substring(0, placeToAddCondition);
-//            loopWorkStr += ") AND (n1.id = ANY($1)))";
-//        }
-//        loopWorkStr += mainParts[0].substring(placeToAddCondition + 2);
-//        loopWorkStr += " SELECT array_agg(n01.id)";
-//        loopWorkStr += mainParts[1].substring(0, mainParts[1].length() - 1);
-
-        String functionLoop = "CREATE OR REPLACE FUNCTION loop_work(int[]) RETURNS int[] AS $$ " +
-                loopWorkStr +
+        String functionLoop = "CREATE OR REPLACE FUNCTION loop_work(int[]) RETURNS int[] AS $$ " + loopWorkStr +
                 " $$ LANGUAGE SQL;";
-        System.out.println(functionLoop);
 
         cypIter.setSQL(functionLoop + " " + mainInitStmt);
 

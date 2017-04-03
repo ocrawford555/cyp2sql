@@ -51,11 +51,13 @@ public class SchemaTranslate {
         // perform initial preprocess of the file to remove content such as new file markers
         // and other aspects that will break the schema converter.
         // return number of lines if no issue, else -1
+        long startTimePP = System.nanoTime();
         int count = performPreProcessFile(file);
+        long finTimePP = System.nanoTime();
         if (count == -1) return;
 
-        // number of concurrent threads to work on dump file. Currently 4. Test.
-        final int segments = 4;
+        // number of concurrent threads to work on dump file. Currently 8. Test.
+        final int segments = 8;
         final int amountPerSeg = (int) Math.ceil(count / segments);
         ArrayList<String>[] group = new ArrayList[segments];
 
@@ -64,6 +66,7 @@ public class SchemaTranslate {
         }
 
         try {
+            long startTimeSP = System.nanoTime();
             // open correctly preparsed file
             FileInputStream fis = new FileInputStream(file.replace(".txt", "_new.txt"));
 
@@ -130,6 +133,11 @@ public class SchemaTranslate {
             hs.addAll(relTypes);
             relTypes.clear();
             relTypes.addAll(hs);
+            long finTimeSP = System.nanoTime();
+            System.out.println("Time to initially preprocess file : "
+                    + (finTimePP - startTimePP) / 1000000.0 + "ms.");
+            System.out.println("Time to parse and process dump file : "
+                    + (finTimeSP - startTimeSP) / 1000000.0 + "ms.");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -189,7 +197,7 @@ public class SchemaTranslate {
 
                 bytesRead += line.length();
                 int percent = (int) (bytesRead * 100 / totalBytes);
-                if ((previousPercent + 5) < percent) {
+                if ((previousPercent + 10) < percent) {
                     System.out.println(percent + "% read.");
                     previousPercent = percent;
                 }

@@ -266,8 +266,6 @@ public class GraphCreator {
                 throw new Exception("Incorrect parameter passed to setup");
         }
 
-        System.out.println(edgesToAdd);
-
         // setup the adjacency matrix and keep track of the degree of each node.
         degreeOfVertices = new short[numVertices];
         labelsOfNodes = new byte[numVertices];

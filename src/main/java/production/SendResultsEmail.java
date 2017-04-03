@@ -15,7 +15,19 @@ import java.io.File;
 import java.sql.SQLException;
 import java.util.Properties;
 
+/**
+ * Class for sending email with test results to user.
+ */
 class SendResultsEmail {
+    /**
+     * Method for sending email with test results. Contains HTML summary in the email itself, and
+     * an attachment with the full results in .csv format. All emails currently sent to
+     * ojc37@cam.ac.uk.
+     *
+     * @param dbName        Database name test results related too.
+     * @param typeTranslate The type of translation the test results were performed under.
+     * @throws SQLException Obtaining the test results can throw an SQL error.
+     */
     static void sendEmail(String dbName, String typeTranslate) throws SQLException {
         String testResultContents = DbUtil.getTestResults(dbName, typeTranslate);
         String email = "testneo4jcambridge@gmail.com";
@@ -36,7 +48,6 @@ class SendResultsEmail {
                 });
 
         try {
-
             MimeMessage message = new MimeMessage(session);
             message.setFrom(new InternetAddress(email));
             message.setRecipients(Message.RecipientType.TO, InternetAddress.parse("ojc37@cam.ac.uk"));
@@ -47,6 +58,7 @@ class SendResultsEmail {
             MimeBodyPart textBodyPart = new MimeBodyPart();
             textBodyPart.setText(testResultContents, "utf-8", "html");
 
+            // file to attach
             String file;
             if (SystemUtils.IS_OS_LINUX) {
                 file = "/home/ojc37/props/testR.csv";
@@ -75,6 +87,13 @@ class SendResultsEmail {
         }
     }
 
+    /**
+     * In the case (hopefully unlikely) of a SQL execution failure, send the failed SQL back to the
+     * user, so that it can be fixed.
+     *
+     * @param dbName Database the testing is being performed on.
+     * @param sql    The failed SQL.
+     */
     static void sendFailEmail(String dbName, String sql) {
         String email = "testneo4jcambridge@gmail.com";
         final String username = email;

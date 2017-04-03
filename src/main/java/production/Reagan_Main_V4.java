@@ -386,6 +386,13 @@ public class Reagan_Main_V4 {
         return SQLIterate.translate(cypIter, typeTranslate);
     }
 
+    /**
+     * Translation method for Cypher's shortestPath syntax.
+     *
+     * @param line (containing allShortestPaths) to be translated.
+     * @return SQL equivalent of the 'line' input.
+     * @throws Exception
+     */
     private static String convertCypherShortPath(String line) throws Exception {
         line = line.toLowerCase();
         int returnIndex = line.indexOf("return");
@@ -403,6 +410,13 @@ public class Reagan_Main_V4 {
         return SQLShortestPath.translate(dQMainPath).toString();
     }
 
+    /**
+     * Translation method for Cypher's allShortestPaths syntax.
+     *
+     * @param line Cypher (containing allShortestPaths) to be translated.
+     * @return SQL equivalent of the 'line' input.
+     * @throws Exception
+     */
     private static String convertCypherASP(String line) throws Exception {
         String path = line.substring(line.indexOf("(") + 1, line.indexOf("RETURN") - 2);
         String returnClause = line.substring(line.indexOf("RETURN"));
@@ -437,8 +451,9 @@ public class Reagan_Main_V4 {
      * Converting correctly Cypher queries with the keyword FOREACH.
      *
      * @param line          Cypher input.
-     * @param typeTranslate Choose type of translation method for the tool to use. -t is standard, -t2
-     *                      uses different methods (view README for more information).
+     * @param typeTranslate The type of translation being performed, specified at the command line.
+     *                      -t --> normal translation.
+     *                      -tc --> use the transitive closure relational representation.
      * @return SQL equivalent of input.
      */
     private static String convertCypherForEach(String line, String typeTranslate) {
@@ -463,7 +478,9 @@ public class Reagan_Main_V4 {
      * Converting correctly Cypher queries with the keyword WITH.
      *
      * @param line          Cypher input.
-     * @param typeTranslate
+     * @param typeTranslate The type of translation being performed, specified at the command line.
+     *                      -t --> normal translation.
+     *                      -tc --> use the transitive closure relational representation.
      * @return SQL equivalent.
      */
     private static String convertCypherWith(String line, String typeTranslate) {
@@ -517,7 +534,9 @@ public class Reagan_Main_V4 {
      * Convert Cypher queries to SQL
      *
      * @param cypher        Original Cypher query to translate.
-     * @param typeTranslate
+     * @param typeTranslate The type of translation being performed, specified at the command line.
+     *                      -t --> normal translation.
+     *                      -tc --> use the transitive closure relational representation.
      * @return SQL that maps to the Cypher input.
      */
     public static DecodedQuery convertCypherToSQL(String cypher, String typeTranslate) {

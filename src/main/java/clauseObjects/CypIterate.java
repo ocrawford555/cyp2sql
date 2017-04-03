@@ -1,8 +1,14 @@
 package clauseObjects;
 
+/**
+ * Class for holding intermediate information about the Cypher extension.
+ * -- Part II Project specific code. --
+ */
+
 public class CypIterate {
     private String sql;
     private String originalCypherInput;
+    private String firstQuery;
     private String loopQuery;
     private String loopIndexTo;
     private String loopIndexFrom;
@@ -42,6 +48,7 @@ public class CypIterate {
     public String toString() {
         String ret = "";
         ret += "ORIGINAL INPUT : " + originalCypherInput + "\n";
+        ret += "FIRST QUERY : " + firstQuery + "\n";
         ret += "LOOP QUERY : " + loopQuery + "\n";
         ret += "INDEX FROM : " + loopIndexFrom + " -- INDEX TO : " + loopIndexTo + "\n";
         ret += "COLLECTING ON : " + collectIndex + "\n";
@@ -71,5 +78,13 @@ public class CypIterate {
 
     public void setLoopIndexTo(String loopIndexTo) {
         this.loopIndexTo = loopIndexTo;
+    }
+
+    public String getFirstQuery() {
+        return firstQuery;
+    }
+
+    public void setFirstQuery(String firstQuery) {
+        this.firstQuery = firstQuery;
     }
 }

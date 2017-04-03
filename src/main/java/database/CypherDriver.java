@@ -57,7 +57,7 @@ public class CypherDriver {
                     if (printOutput) {
                         for (String t : returnItems) {
                             try {
-                                if (t.contains("count")) {
+                                if (t.toLowerCase().contains("count")) {
                                     try {
                                         int countResult = record.get(t).asInt();
                                         writer.println("count" + " : " + countResult);
@@ -189,11 +189,15 @@ public class CypherDriver {
         System.out.println("Reset complete.");
     }
 
+    /**
+     * Warm up the Neo4J database by running the query:
+     * MATCH (n) OPTIONAL MATCH (n)-[r]->() RETURN count(n.prop) + count(r.prop);
+     */
     public static void warmUp() {
         Driver driver = GraphDatabase.driver("bolt://localhost",
                 AuthTokens.basic(Reagan_Main_V4.neoUN, Reagan_Main_V4.neoPW));
         Session session = driver.session();
-        String warm_up_query = " MATCH (n) OPTIONAL MATCH (n)-[r]->() RETURN count(n.prop) + count(r.prop);";
+        String warm_up_query = "MATCH (n) OPTIONAL MATCH (n)-[r]->() RETURN count(n.prop) + count(r.prop);";
         session.run(warm_up_query).consume();
         session.close();
         driver.close();

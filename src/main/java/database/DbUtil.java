@@ -8,7 +8,7 @@ import java.sql.*;
 import java.util.ArrayList;
 
 /**
- * Database driver for Postgres. Runs SQL, and parses result into appropriate text file.
+ * Database driver for Postgres.
  */
 public class DbUtil {
     public static long lastExecTimeRead = 0;
@@ -230,6 +230,19 @@ public class DbUtil {
         stmt.close();
     }
 
+    /**
+     * Method for obtaining the test results of the tool, such that they can be emailed onwards.
+     * This method creates a temporary file within user space to store the .csv output of the
+     * executed SQL:
+     * SELECT cypher, sql, neot, pgt FROM query_mapping
+     * This file is deleted once it has been sent via email.
+     *
+     * @param dbName        Database name test results are stored on (same db as translation also stored on).
+     * @param typeTranslate If equal to -t, then normal translation. If -tc, then the transitive closure method
+     *                      has been used.
+     * @return String in HTML format to email.
+     * @throws SQLException
+     */
     public static String getTestResults(String dbName, String typeTranslate) throws SQLException {
         if (!DB_OPEN) DbUtil.createConnection(dbName);
         String query = "SELECT cypher, sql, neot, pgt FROM query_mapping";
