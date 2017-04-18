@@ -69,7 +69,6 @@ public class CypherTokenizer {
                 tokenList.add(s);
             }
         }
-
         return tokenList;
     }
 }

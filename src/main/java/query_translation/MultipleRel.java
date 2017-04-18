@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Map;
 
 /**
- * Translation of Cypher queries with a structure of (a)-[]-(b)-...-(c).
+ * Translation of Cypher queries with a Match clause structure of (a)-[]-(b)-...-(c).
  */
 class MultipleRel {
     // alphabet allows for a consistent and logical naming approach to the intermediate parts

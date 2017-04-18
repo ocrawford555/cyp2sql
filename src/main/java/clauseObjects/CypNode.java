@@ -43,8 +43,8 @@ public class CypNode {
 
     @Override
     public String toString() {
-        return "(ID:" + this.id + ",LABELS:" + this.labels + ",PROPS:"
-                + this.props + ",POS:" + this.posInClause + ")";
+        return "(ID: " + this.id + ", LABELS: " + this.labels + ", PROPS: "
+                + this.props + ", POS: " + this.posInClause + ")";
     }
 
     public int getPosInClause() {

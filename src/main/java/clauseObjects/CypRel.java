@@ -42,8 +42,8 @@ public class CypRel {
 
     @Override
     public String toString() {
-        return "(ID:" + this.id + ",TYPE:" + this.type + ",DIR:" +
-                this.direction + ",PROPS:" + this.props + ",POS:" +
+        return "(ID: " + this.id + ", TYPE: " + this.type + ", DIR: " +
+                this.direction + ", PROPS: " + this.props + ", POS: " +
                 this.posInClause + ")";
     }
 

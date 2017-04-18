@@ -179,8 +179,6 @@ public class SQLTranslate {
         if (sql.toString().endsWith(" AND ")) sql.setLength(sql.length() - 5);
 
         sql.append(";");
-
-        System.out.println(sql.toString());
         return sql.toString();
     }
 

@@ -39,4 +39,14 @@ public class WhereClause {
     public void setWhereMappings(Map<String, String> map) {
         this.whereMappings = map;
     }
+
+    @Override
+    public String toString() {
+        StringBuilder strb = new StringBuilder();
+        strb.append("WHERE CLAUSE COMPONENTS:\n");
+        for (String s : components) {
+            strb.append(s).append("\n");
+        }
+        return strb.toString();
+    }
 }

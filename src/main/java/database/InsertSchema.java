@@ -281,10 +281,7 @@ public class InsertSchema {
      */
     private static StringBuilder insertTableDataNodes(StringBuilder sb) {
         StringBuilder sbLabels = new StringBuilder();
-
         sb.append("INSERT INTO nodes (");
-
-        System.out.println(SchemaTranslate.nodeRelLabels);
 
         for (String y : SchemaTranslate.nodeRelLabels) {
             if (y.startsWith("mono_time")) y = "mono_time BIGINT";

@@ -15,4 +15,16 @@ public class ReturnClause {
     public void setItems(List<CypReturn> items) {
         this.items = items;
     }
+
+    @Override
+    public String toString() {
+        StringBuilder strb = new StringBuilder();
+        strb.append("ITEMS IN RETURN CLAUSE:\n");
+        for (CypReturn cr : this.items) {
+            strb.append(cr.toString()).append("\n");
+        }
+        strb.setLength(strb.length() - 1);
+        strb.append("\n");
+        return strb.toString();
+    }
 }

@@ -169,11 +169,7 @@ public class Reagan_Main_V4 {
                         File f = new File(args[1].replace(".txt", "_temp.txt"));
                         f.delete();
                     } else {
-                        // perform 3 dry runs, then record the times of 5 executions
-                        for (int i = -2; i <= 5; i++) {
-                            if (i < 1) System.out.println("Warming up - iterations left : " + (i * -1));
-                            translateCypherToSQL(args[1], f_cypher, f_pg, cypher_results, pg_results, i, args[0]);
-                        }
+                        translateCypherToSQL(args[1], f_cypher, f_pg, cypher_results, pg_results, 1, args[0]);
                     }
                     break;
                 default:

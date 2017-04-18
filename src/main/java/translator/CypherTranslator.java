@@ -70,12 +70,17 @@ class CypherTranslator {
                 }
             }
 
+            // print general query information
+            cypherQ.printInformation();
+
             MatchClause matchC = matchDecode(matchClause);
             ReturnClause returnC = returnDecode(returnClause, matchC, cypherQ);
 
             // if ORDER BY is present in the query
             OrderClause orderC = null;
-            if (orderClause != null) orderC = orderDecode(orderClause);
+            if (orderClause != null) {
+                orderC = orderDecode(orderClause);
+            }
 
             int skipAmount = (posOfSkip != -1) ? cypherQ.getSkipAmount() : -1;
             int limitAmount = (posOfLimit != -1) ? cypherQ.getLimitAmount() : -1;
@@ -145,15 +150,6 @@ class CypherTranslator {
 
         // extract any relationships from the match clause
         m.setRels(extractRels(matchClause, m));
-
-//        for (CypNode c : m.getNodes()) {
-//            System.out.println(c.toString());
-//        }
-//
-//        for (CypRel c : m.getRels()) {
-//            System.out.println(c.toString());
-//        }
-
         return m;
     }
 
@@ -291,7 +287,7 @@ class CypherTranslator {
 
                 if (clause.get(posOfHyphen + 2).equals("*")) {
                     String varD = "none";
-                    m.setVarRel(true);
+                    m.setVarRel();
 
                     int posOfLHypher = clause.indexOf("-");
                     if (clause.get(posOfLHypher - 1).equals("<")) varD = "left";
@@ -631,11 +627,6 @@ class CypherTranslator {
         }
 
         r.setItems(items);
-
-//        for (CypReturn c : r.getItems()) {
-//            System.out.println(c.toString());
-//        }
-
         return r;
     }
 
@@ -689,11 +680,6 @@ class CypherTranslator {
         }
 
         o.setItems(items);
-
-//        for (CypOrder c : o.getItems()) {
-//            System.out.println(c.toString());
-//        }
-
         return o;
     }
 

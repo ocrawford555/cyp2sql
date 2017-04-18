@@ -24,7 +24,7 @@ public class CypOrder {
 
     @Override
     public String toString() {
-        return "(ID:" + this.nodeID + ",FIELD:" + this.field +
-                ",TYPE:" + this.ascOrDesc + ")";
+        return "(ID: " + this.nodeID + ", FIELD: " + this.field +
+                ", ORDER_TYPE: " + this.ascOrDesc + ")";
     }
 }

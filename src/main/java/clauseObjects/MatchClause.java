@@ -47,7 +47,22 @@ public class MatchClause {
         return varRel;
     }
 
-    public void setVarRel(boolean hasVarRel) {
-        this.varRel = hasVarRel;
+    public void setVarRel() {
+        this.varRel = true;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder strb = new StringBuilder();
+        strb.append("NODES IN MATCH CLAUSE:\n");
+        for (CypNode cn : this.nodes) {
+            strb.append(cn.toString()).append("\n");
+        }
+        strb.append("RELS IN MATCH CLAUSE:\n");
+        for (CypRel cr : this.rels) {
+            strb.append(cr.toString()).append("\n");
+        }
+        strb.append("DOES MATCH CLAUSE HAVE VARIABLE LENGTH PATH: ").append(this.isVarRel()).append("\n");
+        return strb.toString();
     }
 }
