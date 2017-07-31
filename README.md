@@ -2,6 +2,8 @@
 
 >_version 4.0_
 
+>Please note that this tool is currently being redeveloped! The current state of the tool is not stable - major changes will be published by September 2017. 
+
 _Reagan_ v4.0 is a tool that will perform automatic translation of both 
 graph schemas and graph queries in Neo4J and Cypher respectively, 
 to a relational schema and relational query language (SQL).
