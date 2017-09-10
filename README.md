@@ -2,8 +2,10 @@
 
 >_version 4.0_
 
->Please note that this tool is currently being redeveloped! The current state of the tool is not stable - major changes will be published by September 2017. 
+>Please note that this tool has been redevloped and now exists in a new repository, as a result of some additional research! Please visit https://github.com/DTG-FRESCO/cyp2sql. 
 
+<details>
+ <summary>Existing README.md for this repo.</summary>
 _Reagan_ v4.0 is a tool that will perform automatic translation of both 
 graph schemas and graph queries in Neo4J and Cypher respectively, 
 to a relational schema and relational query language (SQL).
@@ -91,7 +93,7 @@ It will not only be very slow, but will generally not be very good for the machi
 
 ## Visual representation of the toolchain.
 ![Overview of toolchain](https://github.com/ocrawford555/cyp2sql/blob/master/Overview.png)
-
+</details>
 
 
 
